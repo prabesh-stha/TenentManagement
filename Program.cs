@@ -1,7 +1,20 @@
+using Microsoft.AspNetCore.Authentication;
+using TenentManagement.Services.Bcrypt;
+using TenentManagement.Services.Database;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddSingleton<DatabaseConnection>();
+
+
+builder.Services.AddScoped<AuthenticationService>();
+
+
+//BCrypt service for password hashing
+builder.Services.AddScoped<BCryptService>();
 
 var app = builder.Build();
 
