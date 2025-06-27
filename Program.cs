@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using TenentManagement.Services.Bcrypt;
 using TenentManagement.Services.Database;
+using TenentManagement.Services.Mail;
+using AuthenticationService = TenentManagement.Services.Authentication.AuthenticationService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,8 +16,36 @@ builder.Services.AddSingleton<DatabaseConnection>();
 builder.Services.AddScoped<AuthenticationService>();
 
 
+builder.Services.AddScoped<MailService>();
+
+
 //BCrypt service for password hashing
 builder.Services.AddScoped<BCryptService>();
+
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Authentication/Login";
+        options.LogoutPath = "/Authentication/Logout";
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // Session expires in 30 minutes
+        options.SlidingExpiration = true;
+        options.Cookie.HttpOnly = true;
+        options.Cookie.IsEssential = true;
+        options.Cookie.MaxAge = options.ExpireTimeSpan;
+    });
+
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.Cookie.Name = "tenent_management.Session";
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
@@ -28,8 +59,11 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseSession();
 
 app.UseRouting();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

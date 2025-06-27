@@ -37,7 +37,6 @@ namespace TenentManagement.Models.Authentication
         public string LastName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Phone number is required")]
-        [RegularExpression(@"^\d{10}$", ErrorMessage = "Phone number must be exactly 10 digits.")]
         public string PhoneNumber { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
     }

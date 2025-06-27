@@ -39,7 +39,7 @@ namespace TenentManagement.Services.Authentication
             var result = connection.QueryFirstOrDefault<AuthResponse>(
                 "SP_AUTHENTICATION",
                 parameters,
-                commandType: System.Data.CommandType.StoredProcedure
+                commandType: CommandType.StoredProcedure
             );
             connection.Close();
             if (result == null)
@@ -63,7 +63,7 @@ namespace TenentManagement.Services.Authentication
             var result = connection.QueryFirstOrDefault<AuthenticationModel>(
                 "SP_AUTHENTICATION",
                 parameters,
-                commandType: System.Data.CommandType.StoredProcedure
+                commandType: CommandType.StoredProcedure
             );
             if (result == null || result.Password == null)
             {
@@ -93,7 +93,7 @@ namespace TenentManagement.Services.Authentication
             int row = connection.Execute("SP_AUTHENTICATION", parameters, commandType: CommandType.StoredProcedure);
             connection.Close();
 
-            if (row >= 0)
+            if (row <= 0)
             {
                 return null;
             }
@@ -116,6 +116,7 @@ namespace TenentManagement.Services.Authentication
             var parameters = new DynamicParameters();
             parameters.Add("@FLAG", 'G'); // flag G for validating token in stored procedure
             parameters.Add("@TOKEN", token);
+          
             var result = connection.QueryFirstOrDefault<EmailVerificationModel>(
                 "SP_AUTHENTICATION",
                 parameters,
@@ -130,18 +131,19 @@ namespace TenentManagement.Services.Authentication
         }
 
         //Update email verification status
-        public string UpdateEmailVerificationStatus(string token)
+        public string UpdateEmailVerificationStatus(string token, string email)
         {
             using var connection = _databaseConnection.GetConnection();
             connection.Open();
             var parameters = new DynamicParameters();
             parameters.Add("@FLAG", 'V'); // flag V for updating email verification status in stored procedure
             parameters.Add("@TOKEN", token);
+            parameters.Add("@EMAIL", email);
             int row = connection.Execute("SP_AUTHENTICATION", parameters, commandType: CommandType.StoredProcedure);
             connection.Close();
             if (row > 0)
             {
-                return "Email verified successfully.";
+                return "success";
             }
             else
             {
