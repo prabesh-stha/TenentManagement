@@ -41,6 +41,18 @@
             &copy; 2025 - TenentManagement - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+    <div id="toast-container"
+         class="toast-container position-fixed top-0 end-0 p-3"
+         data-message="@((TempData["Message"] ?? ViewData["Message"] ?? "").ToString())"
+         data-type="@((TempData["MessageType"] ?? ViewData["MessageType"] ?? "").ToString())">
+        <div id="toastMessage" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Notification</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toast-body"></div>
+        </div>
+    </div>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
