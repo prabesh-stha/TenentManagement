@@ -2,8 +2,8 @@
 {
     public class AuthResponse
     {
-        public string Status { get; set; } = string.Empty;
+        public string STATUS { get; set; } = string.Empty;
 
-        public string Message { get; set; } = string.Empty;
+        public string MSG { get; set; } = string.Empty;
     }
 }

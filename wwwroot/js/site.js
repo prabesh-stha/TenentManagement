@@ -107,31 +107,31 @@
 
         // Phone Number Formatting
         function initializePhoneInput() {
-            const phoneInput = document.querySelector('input[type="tel"]');
-            if (phoneInput) {
+            const phoneInputs = document.querySelectorAll('input[type="tel"]');
+
+            phoneInputs.forEach(phoneInput => {
+                // Format input as XXXX-XXXXXX
                 phoneInput.addEventListener('input', function (e) {
-                    // Remove all non-digit characters
-                    let cleaned = e.target.value.replace(/\D/g, '');
-                    // Limit to 10 digits
-                    if (cleaned.length > 10) {
-                        cleaned = cleaned.slice(0, 10);
-                    }
-                    // Apply xxxx-xxxxxx format
-                    if (cleaned.length > 4) {
-                        e.target.value = cleaned.slice(0, 4) + '-' + cleaned.slice(4);
-                    } else {
-                        e.target.value = cleaned;
-                    }
+                    const x = e.target.value.replace(/\D/g, '').match(/(\d{0,4})(\d{0,6})/);
+                    e.target.value = !x[2] ? x[1] : x[1] + '-' + x[2];
                 });
-            }
+
+                // Remove hyphen before form submission
+                const form = phoneInput.closest('form');
+                if (form) {
+                    form.addEventListener('submit', function () {
+                        phoneInput.value = phoneInput.value.replace(/-/g, '');
+                    });
+                }
+            });
         }
 
 
 
         initializePasswordToggles();
         initializeToastNotifications();
-        initializeFormSpinners();
         initializePhoneInput();
+        initializeFormSpinners();
 
     });
 

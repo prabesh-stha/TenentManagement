@@ -27,13 +27,27 @@
                         </li>
                         @if (!string.IsNullOrEmpty(Context.Session.GetString("Username")))
                     {
-                        <li class="nav-item">
-                            <form asp-controller="Authentication" asp-action="Logout" method="post">
-                                <button type="submit">
-                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
-                                </button>
-                            </form>
-                        </li>
+                            <li class="nav-item dropdown ms-auto">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person-circle me-1"></i> @Context.Session.GetString("Username")
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="User" asp-action="Profile">
+                                            <i class="bi bi-person me-2"></i> My Profile
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li>
+                                        <form asp-controller="Authentication" asp-action="Logout" method="post" class="dropdown-item p-0 m-0">
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="bi bi-box-arrow-right me-2"></i> Logout
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+
                         }
                     </ul>
                 </div>

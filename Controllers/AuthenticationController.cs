@@ -36,18 +36,18 @@ namespace TenentManagement.Controllers
                 try
                 {
                     var registrationResult = _authenticationService.RegisterUser(model);
-                    if (registrationResult.Status == "SUCCESS")
+                    if (registrationResult.STATUS == "SUCCESS")
                     {
                         try
                         {
-                            EmailVerificationModel? emailVerificationModel = _authenticationService.GenerateAndStoreEmailVerificationToken(model.Email.ToLower());
+                            TokenModel? emailVerificationModel = _authenticationService.GenerateAndStoreEmailVerificationToken(model.Email.ToLower());
                             if (emailVerificationModel != null)
                             {
 
                                 var verificationLink = Url.Action("VerifyEmail", "Authentication", new { token = emailVerificationModel.Token, email = model.Email.ToLower() }, Request.Scheme);
                                 _mailService.Send(model.Email.ToLower(), "Verify your email.", $"Click here: {verificationLink}");
 
-                                TempData["Message"] = $"{registrationResult.Message}. Check your {model.Email.ToLower()} email for verification.";
+                                TempData["Message"] = $"{registrationResult.MSG} Check your {model.Email.ToLower()} email for verification.";
                                 TempData["MessageType"] = "success";
                                 return RedirectToAction("Login");
                             }
@@ -66,7 +66,7 @@ namespace TenentManagement.Controllers
                     }
                     else
                     {
-                        ViewData["Message"] = registrationResult.Message;
+                        ViewData["Message"] = registrationResult.MSG;
                         ViewData["MessageType"] = "error";
                     }
                 }
@@ -84,7 +84,7 @@ namespace TenentManagement.Controllers
         {
             try
             {
-                var verifyEmailModel = _authenticationService.ValidateEmailVerificationToken(token);
+                var verifyEmailModel = _authenticationService.ValidateToken(token);
                 if (verifyEmailModel == null)
                 {
                     TempData["Message"] = "Invalid or expired token.";
@@ -197,6 +197,91 @@ namespace TenentManagement.Controllers
                 ViewData["MessageType"] = "error";
             }
             return View();
+        }
+
+
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult ForgotPassword(string email)
+        {
+            try
+            {
+                TokenModel? reset = _authenticationService.GenerateAndStorePasswordToken(email);
+                if (reset != null)
+                {
+
+                    var resetLink = Url.Action("ResetPassword", "Authentication", new { token = reset.Token }, Request.Scheme);
+                    _mailService.Send(email, "Reset your password", $"Click here: {resetLink}");
+
+                    TempData["Message"] = "Check your email for reset instructions.";
+                    TempData["MessageType"] = "success";
+                    return RedirectToAction("Login", "Authentication");
+                }
+                else
+                {
+                    ViewData["Message"] = "Invalid email.";
+                    ViewData["MessageType"] = "error";
+                }
+            }
+            catch (Exception e)
+            {
+                ViewData["Message"] = "Error while sending email." + e.Message.ToString();
+                ViewData["MessageType"] = "error";
+            }
+            return View();
+        }
+        [HttpGet]
+        public IActionResult ResetPassword(string token)
+        {
+            try
+            {
+                var resetModel = _authenticationService.ValidateToken(token);
+                if (resetModel == null)
+                {
+                    TempData["Message"] = "Invalid or expired token.";
+                    TempData["MessageType"] = "error";
+                    return RedirectToAction("Login", "Authentication");
+                }
+
+                return View(new ResetPasswordModel { Token = token });
+            }
+            catch (Exception e)
+            {
+                ViewData["Message"] = "Error while sending email." + e.Message.ToString();
+                ViewData["MessageType"] = "error";
+            }
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult ResetPassword(ResetPasswordModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            try
+            {
+                var status = _authenticationService.ResetPassword(model);
+                TempData["Message"] =
+                    status == "success"
+                    ? "Password reset complete."
+                    : "Couldn't reset password at the moment.";
+                TempData["MessageType"] = status;
+                return RedirectToAction("Login", "Authentication");
+            }
+            catch (Exception e)
+            {
+                ViewData["Message"] = "Error while reseting password." + e.Message.ToString();
+                ViewData["MessageType"] = "error";
+            }
+            return View();
+
         }
 
     }
