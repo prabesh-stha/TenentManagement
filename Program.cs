@@ -18,6 +18,9 @@ builder.Services.AddScoped<AuthenticationService>();
 
 builder.Services.AddScoped<MailService>();
 
+// Register the PropertyService
+builder.Services.AddScoped<TenentManagement.Services.Property.PropertyService>();
+
 
 //BCrypt service for password hashing
 builder.Services.AddScoped<BCryptService>();

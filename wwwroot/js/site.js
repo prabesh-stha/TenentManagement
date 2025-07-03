@@ -126,12 +126,80 @@
             });
         }
 
+        // Map Picker Initialization for any element with data-map-picker="true"
+        function initializeMapPicker(config) {
+            const map = L.map(config.mapElementId).setView([config.initialLat, config.initialLng], 13);
+            let marker;
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            L.Control.geocoder({
+                defaultMarkGeocode: false
+            })
+                .on('markgeocode', function (e) {
+                    const latlng = e.geocode.center;
+                    if (marker) map.removeLayer(marker);
+                    marker = L.marker(latlng).addTo(map);
+                    map.setView(latlng, 15);
+
+                    if (config.latInputId)
+                        document.getElementById(config.latInputId).value = latlng.lat;
+                    if (config.lngInputId)
+                        document.getElementById(config.lngInputId).value = latlng.lng;
+                    if (config.addressInputId)
+                        document.getElementById(config.addressInputId).value = e.geocode.name;
+                })
+                .addTo(map);
+
+            if (config.initialLat && config.initialLng) {
+                marker = L.marker([config.initialLat, config.initialLng]).addTo(map);
+            }
+
+            // Only enable map click if input fields exist
+            if (config.latInputId && config.lngInputId && config.addressInputId) {
+                map.on('click', function (e) {
+                    const lat = e.latlng.lat;
+                    const lng = e.latlng.lng;
+
+                    if (marker) map.removeLayer(marker);
+                    marker = L.marker([lat, lng]).addTo(map);
+
+                    document.getElementById(config.latInputId).value = lat;
+                    document.getElementById(config.lngInputId).value = lng;
+
+                    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
+                        .then(res => res.json())
+                        .then(data => {
+                            document.getElementById(config.addressInputId).value = data.display_name;
+                        });
+                });
+            }
+        }
+
+        function autoInitializeMapPickers() {
+            const mapElements = document.querySelectorAll("[data-map-picker='true']");
+            mapElements.forEach(mapElement => {
+                initializeMapPicker({
+                    mapElementId: mapElement.id,
+                    latInputId: mapElement.dataset.latInput,
+                    lngInputId: mapElement.dataset.lngInput,
+                    addressInputId: mapElement.dataset.addressInput,
+                    initialLat: parseFloat(mapElement.dataset.latitude) || 27.7172,
+                    initialLng: parseFloat(mapElement.dataset.longitude) || 85.3240,
+                    initialAddress: mapElement.dataset.address || ""
+                });
+            });
+        }
+
 
 
         initializePasswordToggles();
         initializeToastNotifications();
         initializePhoneInput();
         initializeFormSpinners();
+        autoInitializeMapPickers();
 
     });
 

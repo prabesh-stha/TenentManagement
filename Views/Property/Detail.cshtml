@@ -1,0 +1,60 @@
+﻿@model TenentManagement.Models.Property.PropertyModel
+
+@{
+    ViewData["Title"] = "Property Details";
+}
+
+<div class="container py-5">
+    <div class="card shadow-lg mx-auto rounded-corner" style="max-width: 700px;">
+        <div class="card-header bg-info text-white py-4 rounded-corner-top">
+            <h1 class="h4 mb-0 text-center d-flex flex-column align-items-center">
+                <span class="d-inline-flex align-items-center justify-content-center bg-opacity-25 bg-white text-info rounded-circle mb-2" style="width: 50px; height: 50px;">
+                    <i class="bi bi-info-circle-fill fa-lg"></i>
+                </span>
+                <span>Tenant Management System</span>
+                <span class="mt-2 mb-0 text-center">
+                    <i class="bi bi-eye-fill me-2"></i>Property Details
+                </span>
+            </h1>
+        </div>
+
+        <div class="card-body p-4">
+            <dl class="row mb-0">
+                <dt class="col-sm-4 text-muted">Property Name</dt>
+                <dd class="col-sm-8">@Model.Name</dd>
+
+                <dt class="col-sm-4 text-muted">Address</dt>
+                <dd class="col-sm-8">@Model.Address</dd>
+
+                <dt class="col-sm-4 text-muted">Latitude</dt>
+                <dd class="col-sm-8">@Model.Latitude</dd>
+
+                <dt class="col-sm-4 text-muted">Longitude</dt>
+                <dd class="col-sm-8">@Model.Longitude</dd>
+
+                <dt class="col-sm-4 text-muted">Description</dt>
+                <dd class="col-sm-8">@Model.Description</dd>
+
+                <dt class="col-sm-4 text-muted">Created At</dt>
+                <dd class="col-sm-8">@Model.CreatedAt.ToString("yyyy-MM-dd hh:mm tt")</dd>
+            </dl>
+
+            <div id="propertyMap"
+                 data-map-picker="true"
+                 data-latitude="@Model.Latitude"
+                 data-longitude="@Model.Longitude"
+                 data-address="@Model.Address"
+                 data-lat-input=""
+                 data-lng-input=""
+                 data-address-input=""
+                 style="height: 300px; border-radius: 10px;">
+            </div>
+
+            <div class="text-center mt-4">
+                <a asp-action="Index" asp-controller="Home" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
