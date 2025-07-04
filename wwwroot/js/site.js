@@ -135,30 +135,32 @@
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
 
-            L.Control.geocoder({
-                defaultMarkGeocode: false
-            })
-                .on('markgeocode', function (e) {
-                    const latlng = e.geocode.center;
-                    if (marker) map.removeLayer(marker);
-                    marker = L.marker(latlng).addTo(map);
-                    map.setView(latlng, 15);
+            const hasInputs = config.latInputId && config.lngInputId && config.addressInputId;
 
-                    if (config.latInputId)
-                        document.getElementById(config.latInputId).value = latlng.lat;
-                    if (config.lngInputId)
-                        document.getElementById(config.lngInputId).value = latlng.lng;
-                    if (config.addressInputId)
-                        document.getElementById(config.addressInputId).value = e.geocode.name;
+            // Only add search if editable
+            if (hasInputs) {
+                L.Control.geocoder({
+                    defaultMarkGeocode: false
                 })
-                .addTo(map);
+                    .on('markgeocode', function (e) {
+                        const latlng = e.geocode.center;
+                        if (marker) map.removeLayer(marker);
+                        marker = L.marker(latlng).addTo(map);
+                        map.setView(latlng, 15);
+
+                        document.getElementById(config.latInputId).value = latlng.lat;
+                        document.getElementById(config.lngInputId).value = latlng.lng;
+                        document.getElementById(config.addressInputId).value = e.geocode.name;
+                    })
+                    .addTo(map);
+            }
 
             if (config.initialLat && config.initialLng) {
                 marker = L.marker([config.initialLat, config.initialLng]).addTo(map);
             }
 
-            // Only enable map click if input fields exist
-            if (config.latInputId && config.lngInputId && config.addressInputId) {
+            // Only allow clicking map to set marker if inputs exist
+            if (hasInputs) {
                 map.on('click', function (e) {
                     const lat = e.latlng.lat;
                     const lng = e.latlng.lng;

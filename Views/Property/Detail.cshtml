@@ -1,60 +1,67 @@
-﻿@model TenentManagement.Models.Property.PropertyModel
-
+﻿@using TenentManagement.ViewModel
+@model PropertyDetailViewModel
 @{
-    ViewData["Title"] = "Property Details";
+	ViewData["Title"] = "Property Details";
 }
 
-<div class="container py-5">
-    <div class="card shadow-lg mx-auto rounded-corner" style="max-width: 700px;">
-        <div class="card-header bg-info text-white py-4 rounded-corner-top">
-            <h1 class="h4 mb-0 text-center d-flex flex-column align-items-center">
-                <span class="d-inline-flex align-items-center justify-content-center bg-opacity-25 bg-white text-info rounded-circle mb-2" style="width: 50px; height: 50px;">
-                    <i class="bi bi-info-circle-fill fa-lg"></i>
-                </span>
-                <span>Tenant Management System</span>
-                <span class="mt-2 mb-0 text-center">
-                    <i class="bi bi-eye-fill me-2"></i>Property Details
-                </span>
-            </h1>
-        </div>
+<h1>Property Detail</h1>
+<div class="container py-4">
+	<div class="row g-4">
+		<!-- Left side image -->
+		<div class="col-md-5">
+			<img src="/house.jpeg" class="img-fluid rounded shadow" alt="Property Image" />
+		</div>
 
-        <div class="card-body p-4">
-            <dl class="row mb-0">
-                <dt class="col-sm-4 text-muted">Property Name</dt>
-                <dd class="col-sm-8">@Model.Name</dd>
+		<!-- Right side details -->
+		<div class="col-md-7">
+			<div class="card shadow">
+				<div class="card-body">
+					<h4 class="card-title text-primary mb-3">@Model.Property.Name</h4>
+					<p><strong>Address:</strong> @Model.Property.Address</p>
+					<p><strong>Description:</strong> @Model.Property.Description</p>
+					<p><strong>Latitude:</strong> @Model.Property.Latitude</p>
+					<p><strong>Longitude:</strong> @Model.Property.Longitude</p>
+					<p><strong>Created:</strong> @Model.Property.CreatedAt.ToString("yyyy-MM-dd HH:mm")</p>
+					<!-- Map section (optional if needed) -->
+					<div class="my-4">
+						<div id="propertyDetailMap"
+							 style="height: 300px; border-radius: 10px;"
+							 data-map-picker="true"
+							 data-latitude="@Model.Property.Latitude"
+							 data-longitude="@Model.Property.Longitude"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 
-                <dt class="col-sm-4 text-muted">Address</dt>
-                <dd class="col-sm-8">@Model.Address</dd>
 
-                <dt class="col-sm-4 text-muted">Latitude</dt>
-                <dd class="col-sm-8">@Model.Latitude</dd>
-
-                <dt class="col-sm-4 text-muted">Longitude</dt>
-                <dd class="col-sm-8">@Model.Longitude</dd>
-
-                <dt class="col-sm-4 text-muted">Description</dt>
-                <dd class="col-sm-8">@Model.Description</dd>
-
-                <dt class="col-sm-4 text-muted">Created At</dt>
-                <dd class="col-sm-8">@Model.CreatedAt.ToString("yyyy-MM-dd hh:mm tt")</dd>
-            </dl>
-
-            <div id="propertyMap"
-                 data-map-picker="true"
-                 data-latitude="@Model.Latitude"
-                 data-longitude="@Model.Longitude"
-                 data-address="@Model.Address"
-                 data-lat-input=""
-                 data-lng-input=""
-                 data-address-input=""
-                 style="height: 300px; border-radius: 10px;">
-            </div>
-
-            <div class="text-center mt-4">
-                <a asp-action="Index" asp-controller="Home" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left me-1"></i> Back to List
-                </a>
-            </div>
-        </div>
+	<!-- Horizontal scrollable units -->
+    <div class="d-flex gap-3 align-items-center mt-4 mb-3">
+        <h5 class="mb-0">Units in this Property</h5>
+        <a asp-action="Create" asp-controller="Unit" asp-route-id="@Model.Property.Id" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-plus-circle me-1"></i> Add Unit
+        </a>
     </div>
+
+    <div class="d-flex overflow-auto gap-3 pb-2">
+        @foreach (var unit in Model.Units)
+        {
+            <a asp-action="Detail" asp-controller="Unit" asp-route-id="@unit.Id" class="text-decoration-none">
+                <div class="card shadow-sm" style="min-width: 250px;">
+                    <div class="card-body">
+                        <h6 class="card-title text-dark">@unit.Name</h6>
+                        <p class="card-text text-muted mb-1"><strong>Floor:</strong> 1</p>
+                        <p class="card-text text-muted mb-1"><strong>Type:</strong> House</p>
+                        <p class="card-text text-muted"><strong>Status:</strong> @(unit.IsVacant ? "Vacant" : "Occupied")</p>
+                    </div>
+                </div>
+            </a>
+        }
+        @if (!Model.Units.Any())
+        {
+            <span class="text-muted">No units available.</span>
+        }
+    </div>
+
 </div>

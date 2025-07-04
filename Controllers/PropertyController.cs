@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TenentManagement.Models.Property;
 using TenentManagement.Services.Property;
+using TenentManagement.ViewModel;
 
 namespace TenentManagement.Controllers
 {
@@ -60,7 +61,7 @@ namespace TenentManagement.Controllers
         {
             try
             {
-                PropertyModel? result = _propertyService.GetPropertyDetail(id);
+                PropertyDetailViewModel result = _propertyService.GetPropertyDetail(id);
                 if(result != null)
                 {
                     return View(result);

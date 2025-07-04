@@ -2,6 +2,8 @@
 using TenentManagement.Models.Property;
 using Dapper;
 using System.Data;
+using TenentManagement.ViewModel;
+using TenentManagement.Models.Property.Unit;
 
 namespace TenentManagement.Services.Property
 {
@@ -52,16 +54,25 @@ namespace TenentManagement.Services.Property
             return result.ToList();
         }
 
-        public PropertyModel? GetPropertyDetail(int propertyId)
+        public PropertyDetailViewModel GetPropertyDetail(int propertyId)
         {
             using var connection = _databaseConnection.GetConnection();
             connection.Open();
-            var parameters = new DynamicParameters();
-            parameters.Add("@FLAG", 'S');
-            parameters.Add("@ID", propertyId);
-            var result = connection.QueryFirstOrDefault<PropertyModel>("SP_PROPERTY", parameters, commandType: CommandType.StoredProcedure);
+            var parametersProperty = new DynamicParameters();
+            var parametersUnit = new DynamicParameters();
+            parametersProperty.Add("@FLAG", 'S');
+            parametersProperty.Add("@ID", propertyId);
+            parametersUnit.Add("@FLAG", 'R');
+            parametersUnit.Add("@PROPERTYID", propertyId);
+            var property = connection.QueryFirstOrDefault<PropertyModel>("SP_PROPERTY", parametersProperty, commandType: CommandType.StoredProcedure);
+            var units = connection.Query<UnitModel>("SP_UNITS", parametersUnit, commandType: CommandType.StoredProcedure).ToList();
             connection.Close();
-            return result;
+            PropertyDetailViewModel propertyDetailViewModel = new()
+            {
+                Property = property,
+                Units = units.ToList()
+            };
+            return propertyDetailViewModel;
         }
     }
 }
