@@ -284,5 +284,16 @@ namespace TenentManagement.Controllers
 
         }
 
+        [HttpGet]
+        public JsonResult ValidateUsername(string username)
+        {
+            var id = _authenticationService.GetIdByUsername(username); // Replace with your own logic
+            if (id.HasValue)
+            {
+                return Json(new { success = true, id = id.Value });
+            }
+            return Json(new { success = false });
+        }
+
     }
 }

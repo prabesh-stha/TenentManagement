@@ -28,6 +28,13 @@ namespace TenentManagement.Controllers
             {
                 try
                 {
+                    if (model.IsVacant == true)
+                    {
+                        model.RenterId = null;
+                        model.RentEndDate = null;
+                        model.RentAmount = null;
+                        model.RentStartDate = null;
+                    }
                     _unitService.CreateUnit(model);
                     
                         TempData["Message"] = "Unit created successfully!";

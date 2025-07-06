@@ -51,7 +51,20 @@ namespace TenentManagement.Services.Property
 
             var result = connection.Query<PropertyModel>("SP_PROPERTY", parameters, commandType: CommandType.StoredProcedure);
 
-            return result.ToList();
+            return [.. result];
+        }
+
+        public List<PropertyModel> GetAllRentedProperty(int userId)
+        {
+            using var connection = _databaseConnection.GetConnection();
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@FLAG", 'T');
+            parameters.Add("@USERID", userId);
+
+            var result = connection.Query<PropertyModel>("SP_PROPERTY", parameters, commandType: CommandType.StoredProcedure);
+
+            return [.. result];
         }
 
         public PropertyDetailViewModel GetPropertyDetail(int propertyId)

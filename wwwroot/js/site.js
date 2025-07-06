@@ -136,7 +136,9 @@
             }).addTo(map);
 
             const hasInputs = config.latInputId && config.lngInputId && config.addressInputId;
-
+            if (hasInputs && config.initialAddress) {
+                document.getElementById(config.addressInputId).value = config.initialAddress;
+            }
             // Only add search if editable
             if (hasInputs) {
                 L.Control.geocoder({
@@ -188,12 +190,77 @@
                     latInputId: mapElement.dataset.latInput,
                     lngInputId: mapElement.dataset.lngInput,
                     addressInputId: mapElement.dataset.addressInput,
-                    initialLat: parseFloat(mapElement.dataset.latitude) || 27.7172,
-                    initialLng: parseFloat(mapElement.dataset.longitude) || 85.3240,
-                    initialAddress: mapElement.dataset.address || ""
+                    initialLat: parseFloat(mapElement.dataset.latitude) || 27.703233528817258,
+                    initialLng: parseFloat(mapElement.dataset.longitude) || 85.315162539482131,
+                    initialAddress: mapElement.dataset.address || "Tundikhel, Kanti Path, Kathmandu-22, Kathmandu Metropolitan City, Kathmandu, Bagamati Province, 44066, Nepal"
                 });
             });
         }
+
+
+        // Renter Username Validation on Input
+        function initializeRenterUsernameValidation() {
+            const usernameInput = document.getElementById("usernameInput");
+            const iconContainer = document.getElementById("usernameStatusIcon");
+            const statusIcon = iconContainer ? iconContainer.querySelector("i") : null;
+
+            const renterIdField = document.getElementById("RenterId");
+
+            if (!usernameInput || !statusIcon || !renterIdField) return;
+
+            let debounceTimer;
+
+            usernameInput.addEventListener("input", function () {
+                clearTimeout(debounceTimer);
+                const username = this.value.trim();
+
+                statusIcon.className = "";
+
+                if (username.length === 0) {
+                    renterIdField.value = "";
+                    return;
+                }
+
+                debounceTimer = setTimeout(() => {
+                    fetch(`/Authentication/ValidateUsername?username=${encodeURIComponent(username)}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                statusIcon.className = "bi bi-check-circle-fill text-success";
+                                renterIdField.value = data.id;
+                            } else {
+                                statusIcon.className = "bi bi-x-circle-fill text-danger";
+                                renterIdField.value = "";
+                            }
+                        })
+                        .catch(() => {
+                            statusIcon.className = "bi bi-exclamation-circle-fill text-danger";
+                            renterIdField.value = "";
+                        });
+                }, 500);
+            });
+
+            usernameInput.addEventListener("focus", function () {
+                statusIcon.className = "";
+            });
+        }
+
+        // Hides validation spans when the corresponding input is focused
+        function initializeValidationSpanHiding() {
+            document.querySelectorAll("input, textarea, select").forEach(input => {
+                const name = input.getAttribute("name");
+                if (!name) return;
+
+                const span = document.querySelector(`span[data-valmsg-for="${CSS.escape(name)}"]`);
+                if (span) {
+                    input.addEventListener("focus", () => {
+                        span.classList.add("d-none");
+                    });
+                }
+            });
+        }
+
+
 
 
 
@@ -203,6 +270,8 @@
         initializeFormSpinners();
         autoInitializeMapPickers();
 
+        initializeRenterUsernameValidation();
+        initializeValidationSpanHiding();
     });
 
 })(document);

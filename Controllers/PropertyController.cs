@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TenentManagement.Models.Property;
 using TenentManagement.Services.Property;
+using TenentManagement.Services.Property.Unit;
 using TenentManagement.ViewModel;
 
 namespace TenentManagement.Controllers
@@ -8,9 +9,15 @@ namespace TenentManagement.Controllers
     public class PropertyController : Controller
     {
         private readonly PropertyService _propertyService;
-        public PropertyController(PropertyService propertyService)
+        private readonly UnitService _unitService;
+        public PropertyController
+            (
+            PropertyService propertyService
+            , UnitService unitService
+            )
         {
             _propertyService = propertyService ?? throw new ArgumentNullException(nameof(propertyService));
+            _unitService = unitService ?? throw new ArgumentNullException(nameof(unitService)); 
         }
         [HttpGet]
         public IActionResult Create(int id)
@@ -76,6 +83,30 @@ namespace TenentManagement.Controllers
             catch
             {
                 ViewData["Message"] = "Couldn't get the detail.";
+                ViewData["MessageType"] = "error";
+                return RedirectToAction("Index", "Home");
+            }
+        }
+
+        public IActionResult RenterDetail(int id)
+        {
+            try
+            {
+                var result = _unitService.GetRentalDetail(id);
+                if (result != null)
+                {
+                    return View(result);
+                }
+                else
+                {
+                    ViewData["Message"] = "Couldn't get the renter detail.";
+                    ViewData["MessageType"] = "error";
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+            catch
+            {
+                ViewData["Message"] = "Couldn't get the renter detail.";
                 ViewData["MessageType"] = "error";
                 return RedirectToAction("Index", "Home");
             }

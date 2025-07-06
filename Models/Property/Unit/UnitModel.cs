@@ -12,10 +12,11 @@ namespace TenentManagement.Models.Property.Unit
         [Required(ErrorMessage = "Please enter the address of the unit.")]
         public string Description { get; set; } = string.Empty;
         public bool IsVacant { get; set; } = true;
-        [Required(ErrorMessage = "Please enter the rent amount for the unit.")]
-        public float RentAmount { get; set; }
-        public DateTime RentStartDate { get; set; } = DateTime.Now;
-        public DateTime RentEndDate { get; set; } = DateTime.Now.AddMonths(1);
+        public float? RentAmount { get; set; } = 1000;
+        public DateTime? RentStartDate { get; set; } = DateTime.Now;
+        public DateTime? RentEndDate { get; set; } = DateTime.Now.AddMonths(1);
+
+        public string? RenterUsername { get; set; }
         public int? RenterId { get; set; } = null;
         public int PropertyId { get; set; }
     }

@@ -188,5 +188,17 @@ namespace TenentManagement.Services.Authentication
                 return "error";
             }
         }
+
+        public int? GetIdByUsername(string username)
+        {
+            using var connection = _databaseConnection.GetConnection();
+            connection.Open();
+            var parameters = new DynamicParameters();
+            parameters.Add("@FLAG", 'S');
+            parameters.Add("@USERNAME", username);
+            var result = connection.QueryFirstOrDefault<int?>("SP_AUTHENTICATION", parameters, commandType: CommandType.StoredProcedure);
+            connection.Close();
+            return result;
+        }
     }
 }

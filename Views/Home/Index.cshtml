@@ -1,58 +1,97 @@
 ﻿@using TenentManagement.Models.Property
-@model List<PropertyModel>
+@model Tuple<List<PropertyModel>, List<PropertyModel>> // Item1 = Owned, Item2 = Rented
 
 @{
     ViewData["Title"] = "Home Page";
+    var ownedProperties = Model.Item1;
+    var rentedProperties = Model.Item2;
 }
 
 <div class="container mt-4">
 
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-semibold mb-0">
-            <i class="bi bi-house-door-fill me-2 text-primary"></i>Properties
-        </h2>
-        <a asp-controller="Property" asp-action="Create" asp-route-id="@Context.Session.GetInt32("UserId")"
-           class="btn btn-primary d-flex align-items-center">
-            <i class="bi bi-plus-circle me-2"></i> Add Property
-        </a>
-    </div>
+    <!-- Tabs -->
+    <ul class="nav nav-pills mb-4" id="propertyTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="owned-tab" data-bs-toggle="pill" data-bs-target="#owned-tab-pane"
+            type="button" role="tab" aria-controls="owned-tab-pane" aria-selected="true">
+                <i class="bi bi-house-door-fill me-1"></i> Owned Properties
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link rented-tab" id="rented-tab" data-bs-toggle="pill" data-bs-target="#rented-tab-pane"
+            type="button" role="tab" aria-controls="rented-tab-pane" aria-selected="false">
+                <i class="bi bi-building me-1"></i> Rented Properties
+            </button>
+        </li>
+    </ul>
 
-    <!-- Property Cards Grid -->
-    @if (Model == null || !Model.Any())
-    {
-        <div class="alert alert-info">No properties available.</div>
-    }
-    else
-    {
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-            @foreach (var property in Model)
+
+    <div class="tab-content" id="propertyTabsContent">
+        <!-- Owned Properties Tab -->
+        <div class="tab-pane fade show active" id="owned-tab-pane" role="tabpanel" aria-labelledby="owned-tab" tabindex="0">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-semibold mb-0">
+                    <i class="bi bi-house-door-fill me-2 text-primary"></i>Owned Properties
+                </h2>
+                <a asp-controller="Property" asp-action="Create" asp-route-id="@Context.Session.GetInt32("UserId")"
+                class="btn btn-primary d-flex align-items-center">
+                    <i class="bi bi-plus-circle me-2"></i> Add Property
+                </a>
+            </div>
+
+            @if (ownedProperties == null || !ownedProperties.Any())
             {
-                <div class="col">
-                    <div class="card h-100 shadow-sm border-0 rounded-4">
-                        <div class="card-body d-flex flex-column">
-                            <div class="d-flex align-items-center mb-3">
-                                <img src="/house.jpeg"
-                                     alt="Property Image"
-                                     class="rounded-3 me-3"
-                                     style="width: 80px; height: 80px; object-fit: cover;" />
-                                <div>
-                                    <h5 class="card-title mb-1">@property.Name</h5>
-                                    <h6 class="card-subtitle text-muted">@property.Address</h6>
-                                </div>
-                            </div>
-                            <p class="card-text text-muted flex-grow-1">@property.Description</p>
-                            <p class="text-end text-muted small">Created: @property.CreatedAt.ToShortDateString()</p>
-                            <a asp-action="Detail"
-                               asp-controller="Property"
-                               asp-route-id="@property.Id"
-                               class="btn btn-outline-primary w-100 mt-auto">
-                                <i class="bi bi-eye-fill me-1"></i> View Details
-                            </a>
-                        </div>
-                    </div>
+                <div class="alert alert-info">No owned properties found.</div>
+            }
+            else
+            {
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    @foreach (var property in ownedProperties)
+                    {
+                        ViewData["IsOwner"] = true;
+                        <partial name="_PropertyCardPartial" model="property" />
+                    }
                 </div>
             }
         </div>
-    }
+
+        <!-- Rented Properties Tab -->
+        <div class="tab-pane fade" id="rented-tab-pane" role="tabpanel" aria-labelledby="rented-tab" tabindex="0">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-semibold mb-0">
+                    <i class="bi bi-building me-2 text-success"></i>Rented Properties
+                </h2>
+            </div>
+
+            @if (rentedProperties == null || !rentedProperties.Any())
+            {
+                <div class="alert alert-info">No rented properties found.</div>
+            }
+            else
+            {
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    @foreach (var property in rentedProperties)
+                    {
+                        ViewData["IsOwner"] = false;
+                        <partial name="_PropertyCardPartial" model="property" />
+                    }
+                </div>
+            }
+        </div>
+    </div>
 </div>
+
+<style>
+    .nav-pills .nav-link {
+        color: gray;
+    }
+
+/*     .nav-pills .owned-tab.active {
+        background-color: #0d6efd;
+    } */
+
+    .nav-pills .rented-tab.active {
+        background-color: #198754; /* Bootstrap Success Green */
+        color: white;
+    }
+</style>
