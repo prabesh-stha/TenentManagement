@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Reflection;
+using Microsoft.AspNetCore.Mvc;
 using TenentManagement.Models.Property;
 using TenentManagement.Services.Property;
 using TenentManagement.Services.Property.Unit;
 using TenentManagement.ViewModel;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TenentManagement.Controllers
 {
@@ -68,8 +70,8 @@ namespace TenentManagement.Controllers
         {
             try
             {
-                PropertyDetailViewModel result = _propertyService.GetPropertyDetail(id);
-                if(result != null)
+                PropertyDetailViewModel result = _propertyService.GetPropertyAndUnitDetail(id);
+                if (result != null)
                 {
                     return View(result);
                 }
@@ -87,6 +89,47 @@ namespace TenentManagement.Controllers
                 return RedirectToAction("Index", "Home");
             }
         }
+
+        //[HttpGet]
+        //public IActionResult Detail(int id)
+        //{
+        //    try
+        //    {
+        //        var userId = HttpContext.Session.GetInt32("UserId");
+        //        if (userId == null)
+        //        {
+        //            TempData["Message"] = "Please log in to view property details.";
+        //            TempData["MessageType"] = "error";
+        //            return RedirectToAction("Login", "Authentication");
+        //        }
+
+        //        PropertyDetailViewModel result = _propertyService.GetPropertyDetail(id);
+
+        //        if (result == null)
+        //        {
+        //            TempData["Message"] = "Couldn't get the property detail.";
+        //            TempData["MessageType"] = "error";
+        //            return RedirectToAction("Index", "Home");
+        //        }
+
+        //        // 🚫 Ownership check
+        //        if (result.Property.UserId != userId)
+        //        {
+        //            TempData["Message"] = "You are not authorized to view this property.";
+        //            TempData["MessageType"] = "error";
+        //            return RedirectToAction("Index", "Home");
+        //        }
+
+        //        return View(result);
+        //    }
+        //    catch
+        //    {
+        //        TempData["Message"] = "An error occurred while getting the property detail.";
+        //        TempData["MessageType"] = "error";
+        //        return RedirectToAction("Index", "Home");
+        //    }
+        //}
+
 
         public IActionResult RenterDetail(int id)
         {
@@ -109,6 +152,87 @@ namespace TenentManagement.Controllers
                 ViewData["Message"] = "Couldn't get the renter detail.";
                 ViewData["MessageType"] = "error";
                 return RedirectToAction("Index", "Home");
+            }
+        }
+
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            var property = _propertyService.GetPropertyDetail(id);
+            if (property == null) return NotFound();
+            return View(property);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(PropertyModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    int row = _propertyService.UpdateProperty(model);
+                    if (row > 0)
+                    {
+                        TempData["Message"] = "Property detail updated successfully!";
+                        TempData["MessageType"] = "success";
+                        return RedirectToAction("Index", "Home");
+                    }
+                    else
+                    {
+                        ViewData["Message"] = "An error occurred while updating the property.";
+                        ViewData["MessageType"] = "error";
+                        return View(model);
+                    }
+                }
+                catch
+                {
+                    ViewData["Message"] = "An error occurred while creating the property.";
+                    ViewData["MessageType"] = "error";
+                    return View(model);
+                }
+            }
+            else
+            {
+                return View(model);
+            }
+
+        }
+
+        [HttpGet]
+        public IActionResult Delete(int id)
+        {
+            var property = _propertyService.GetPropertyDetail(id);
+            if (property == null) return NotFound();
+            return View(property);
+        }
+
+        // POST: Property/DeleteConfirmed/5
+        [HttpPost, ActionName("DeleteConfirmed")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            try
+            {
+                int row = _propertyService.DeleteProperty(id);
+                if (row > 0)
+                {
+                    TempData["Message"] = "Property deleted successfully!";
+                    TempData["MessageType"] = "success";
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    ViewData["Message"] = "An error occurred while deleting the property.";
+                    ViewData["MessageType"] = "error";
+                    return View();
+                }
+            }
+            catch
+            {
+                ViewData["Message"] = "An error occurred while deleting the property.";
+                ViewData["MessageType"] = "error";
+                return View();
             }
         }
     }

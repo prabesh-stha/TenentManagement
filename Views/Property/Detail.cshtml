@@ -6,59 +6,23 @@
 
 <h1>Property Detail</h1>
 <div class="container py-4">
-	<div class="row g-4">
-		<!-- Left side image -->
-		<div class="col-md-5">
-			<img src="/house.jpeg" class="img-fluid rounded shadow" alt="Property Image" />
-		</div>
 
-		<!-- Right side details -->
-		<div class="col-md-7">
-			<div class="card shadow">
-				<div class="card-body">
-					<h4 class="card-title text-primary mb-3">@Model.Property.Name</h4>
-					<p><strong>Address:</strong> @Model.Property.Address</p>
-					<p><strong>Description:</strong> @Model.Property.Description</p>
-					<p><strong>Latitude:</strong> @Model.Property.Latitude</p>
-					<p><strong>Longitude:</strong> @Model.Property.Longitude</p>
-					<p><strong>Created:</strong> @Model.Property.CreatedAt.ToString("yyyy-MM-dd HH:mm")</p>
-					<!-- Map section (optional if needed) -->
-					<div class="my-4">
-						<div id="propertyDetailMap"
-							 style="height: 300px; border-radius: 10px;"
-							 data-map-picker="true"
-							 data-latitude="@Model.Property.Latitude"
-							 data-longitude="@Model.Property.Longitude"></div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-
+	<partial name="_PropertyDetailPartial" model="@Model.Property" />
 
 	<!-- Horizontal scrollable units -->
-    <div class="d-flex gap-3 align-items-center mt-4 mb-3">
-        <h5 class="mb-0">Units in this Property</h5>
-        <a asp-action="Create" asp-controller="Unit" asp-route-id="@Model.Property.Id" class="btn btn-outline-primary btn-sm">
-            <i class="bi bi-plus-circle me-1"></i> Add Unit
-        </a>
-    </div>
+	<div class="d-flex gap-3 align-items-center mt-4 mb-3">
+		<h5 class="mb-0">Units in this Property</h5>
+		<a asp-action="Create" asp-controller="Unit" asp-route-id="@Model.Property.Id" class="btn btn-outline-primary btn-sm">
+			<i class="bi bi-plus-circle me-1"></i> Add Unit
+		</a>
+	</div>
 
-    <div class="d-flex overflow-auto gap-3 pb-2">
-        @foreach (var unit in Model.Units)
-        {
-            <a asp-action="Detail" asp-controller="Unit" asp-route-id="@unit.Id" class="text-decoration-none">
-                <div class="card shadow-sm" style="min-width: 250px;">
-                    <div class="card-body">
-                        <h6 class="card-title text-dark">@unit.Name</h6>
-                        <p class="card-text text-muted mb-1"><strong>Floor:</strong> 1</p>
-                        <p class="card-text text-muted mb-1"><strong>Type:</strong> House</p>
-                        <p class="card-text text-muted"><strong>Status:</strong> @(unit.IsVacant ? "Vacant" : "Occupied")</p>
-                    </div>
-                </div>
-            </a>
-        }
-        @if (!Model.Units.Any())
+	<div class="d-flex overflow-auto gap-3 pb-2">
+		@foreach (var unit in Model.Units)
+		{
+			<partial name="_UnitCardPartial" model="unit" />
+		}
+		@if (!Model.Units.Any())
         {
             <span class="text-muted">No units available.</span>
         }

@@ -1,4 +1,4 @@
-﻿@using TenentManagement.Models.Property
+﻿@using TenentManagement.Models.Property;
 @model Tuple<List<PropertyModel>, List<PropertyModel>> // Item1 = Owned, Item2 = Rented
 
 @{
@@ -85,13 +85,8 @@
     .nav-pills .nav-link {
         color: gray;
     }
-
-/*     .nav-pills .owned-tab.active {
-        background-color: #0d6efd;
-    } */
-
     .nav-pills .rented-tab.active {
-        background-color: #198754; /* Bootstrap Success Green */
+        background-color: #198754;
         color: white;
     }
 </style>

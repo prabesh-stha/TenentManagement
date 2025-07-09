@@ -16,28 +16,38 @@
                     <h6 class="card-subtitle text-muted">@Model.Address</h6>
                 </div>
             </div>
+
             <p class="card-text text-muted flex-grow-1">@Model.Description</p>
             <p class="text-end text-muted small">Created: @Model.CreatedAt.ToShortDateString()</p>
+
+            <a asp-action="Detail"
+            asp-controller="Property"
+            asp-route-id="@Model.Id"
+            class="btn btn-outline-primary w-100">
+                <i class="bi bi-eye-fill me-1"></i> View Details
+            </a>
             @{
                 if (isOwner)
                 {
-                    <a asp-action="Detail"
-                    asp-controller="Property"
-                    asp-route-id="@Model.Id"
-                    class="btn btn-outline-primary w-100 mt-auto">
-                        <i class="bi bi-eye-fill me-1"></i> View Details
-                    </a>
-                }
-                else
-                {
-                    <a asp-action="RenterDetail"
-                    asp-controller="Property"
-                       asp-route-id="@Model.Id"
-                       class="btn btn-outline-primary w-100 mt-auto">
-                        <i class="bi bi-eye-fill me-1"></i> View Details
-                    </a>
+                    <div class="d-flex justify-content-between mt-2">
+                        <a asp-action="Edit"
+                           asp-controller="Property"
+                           asp-route-id="@Model.Id"
+                           class="btn btn-outline-secondary w-50 me-1">
+                            <i class="bi bi-pencil-square me-1"></i> Edit
+                        </a>
+
+                        <a asp-action="Delete"
+                           asp-controller="Property"
+                           asp-route-id="@Model.Id"
+                           class="btn btn-outline-danger w-50 me-1">
+                            <i class="bi bi-trash-fill me-1"></i> Delete
+                        </a>
+
+                    </div>
                 }
             }
+            
         </div>
     </div>
 </div>

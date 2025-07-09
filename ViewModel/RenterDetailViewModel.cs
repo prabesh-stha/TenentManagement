@@ -6,8 +6,8 @@
         public string UnitName { get; set; } = string.Empty;
         public string UnitDescription { get; set; } = string.Empty;
         public float RentAmount { get; set; } = 1000;
-        public DateTime RentStartDate { get; set; } = DateTime.Now;
-        public DateTime RentEndDate { get; set; } = DateTime.Now.AddMonths(1);
+        public DateTime? RentStartDate { get; set; }
+        public DateTime? RentEndDate { get; set; }
         public int RenterId { get; set; }
         public string PropertyName { get; set; } = string.Empty;
         public string PropertyAddress { get; set; } = string.Empty;

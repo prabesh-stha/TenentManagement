@@ -13,8 +13,8 @@
 
         <div class="card-body">
             <h5 class="text-muted mb-3">Rental Period</h5>
-            <p><strong>Start:</strong> @Model.RentStartDate.ToLongDateString()</p>
-            <p><strong>End:</strong> @Model.RentEndDate.ToLongDateString()</p>
+            <p><strong>Start:</strong> @Model.RentStartDate?.ToLongDateString()</p>
+            <p><strong>End:</strong> @Model.RentEndDate?.ToLongDateString()</p>
 
             <hr />
             <h5 class="text-muted mb-3">Property Information</h5>

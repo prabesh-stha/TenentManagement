@@ -4,6 +4,8 @@ using Dapper;
 using System.Data;
 using TenentManagement.ViewModel;
 using TenentManagement.Models.Property.Unit;
+using System.Net;
+using System;
 
 namespace TenentManagement.Services.Property
 {
@@ -67,7 +69,7 @@ namespace TenentManagement.Services.Property
             return [.. result];
         }
 
-        public PropertyDetailViewModel GetPropertyDetail(int propertyId)
+        public PropertyDetailViewModel GetPropertyAndUnitDetail(int propertyId)
         {
             using var connection = _databaseConnection.GetConnection();
             connection.Open();
@@ -86,6 +88,47 @@ namespace TenentManagement.Services.Property
                 Units = units.ToList()
             };
             return propertyDetailViewModel;
+        }
+
+        public PropertyModel? GetPropertyDetail(int propertyId)
+        {
+            using var connection = _databaseConnection.GetConnection();
+            connection.Open();
+            var parametersProperty = new DynamicParameters();
+            parametersProperty.Add("@FLAG", 'S');
+            parametersProperty.Add("@ID", propertyId);
+            var property = connection.QueryFirstOrDefault<PropertyModel>("SP_PROPERTY", parametersProperty, commandType: CommandType.StoredProcedure);
+            connection.Close();
+            return property;
+        }
+
+        public int DeleteProperty(int propertyId)
+        {
+            using var connection = _databaseConnection.GetConnection();
+            connection.Open();
+            var parameter = new DynamicParameters();
+            parameter.Add("@FLAG", 'D');
+            parameter.Add("@ID", propertyId);
+            int row = connection.Execute("SP_PROPERTY", parameter, commandType: CommandType.StoredProcedure);
+            connection.Close();
+            return row;
+        }
+
+        public int UpdateProperty(PropertyModel property)
+        {
+            using var connection = _databaseConnection.GetConnection();
+            connection.Open();
+            var parameter = new DynamicParameters();
+            parameter.Add("@FLAG", 'U');
+            parameter.Add("@ID", property.Id);
+            parameter.Add("@NAME", property.Name);
+            parameter.Add("@ADDRESS", property.Address);
+            parameter.Add("@LATITUDE", property.Latitude);
+            parameter.Add("@LONGITUDE", property.Longitude);
+            parameter.Add("@DESCRIPTION", property.Description);
+            int row = connection.Execute("SP_PROPERTY", parameter, commandType: CommandType.StoredProcedure);
+            connection.Close();
+            return row;
         }
     }
 }

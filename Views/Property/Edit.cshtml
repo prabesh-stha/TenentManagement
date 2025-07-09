@@ -1,0 +1,75 @@
+﻿@using TenentManagement.Models.Property
+@model PropertyModel
+
+@{
+    ViewData["Title"] = "Edit Property";
+}
+
+<div class="container py-5">
+    <div class="card shadow-lg mx-auto rounded-corner" style="max-width: 700px;">
+        <div class="card-header bg-primary text-white py-4 rounded-corner-top">
+            <h1 class="h4 mb-0 text-center d-flex flex-column align-items-center">
+                <span class="d-inline-flex align-items-center justify-content-center bg-opacity-25 bg-info text-white rounded-circle mb-2" style="width: 50px; height: 50px;">
+                    <i class="bi bi-house-fill fa-lg"></i>
+                </span>
+                <span>Tenant Management System</span>
+                <span class="mt-2 mb-0 text-center">
+                    <i class="bi bi-pencil-square me-2"></i>Edit Property
+                </span>
+            </h1>
+        </div>
+
+        <div class="card-body p-4">
+            <form asp-action="Edit" method="post" class="needs-validation" novalidate data-enable-spinner="true">
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="UserId" id="OwnerId" />
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label small text-muted">Property Name *</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-type"></i></span>
+                        <input asp-for="Name" class="form-control" placeholder="Property Name" required />
+                    </div>
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small text-muted">Select Location on Map *</label>
+                    <div id="propertyMap"
+                         style="height: 300px; border-radius: 10px; margin-bottom: 1rem;"
+                         data-map-picker="true"
+                         data-latitude="@Model.Latitude"
+                         data-longitude="@Model.Longitude"
+                         data-address="@Model.Address"
+                         data-lat-input="Latitude"
+                         data-lng-input="Longitude"
+                         data-address-input="Address"></div>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Address" class="form-label small text-muted">Address *</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-geo-alt-fill"></i></span>
+                        <input asp-for="Address" id="Address" class="form-control" placeholder="Property Address" required readonly />
+                    </div>
+                    <span asp-validation-for="Address" class="text-danger small"></span>
+                </div>
+
+                <input type="hidden" asp-for="Latitude" id="Latitude" />
+                <input type="hidden" asp-for="Longitude" id="Longitude" />
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label small text-muted">Description</label>
+                    <textarea asp-for="Description" class="form-control" placeholder="Optional details about the property" rows="3"></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 mt-4 rounded-corner">
+                    <i class="bi bi-save me-2"></i>Update Property
+                </button>
+
+                <div class="text-center small mt-4">
+                    <a asp-action="Index" asp-controller="Home" class="text-muted text-decoration-none">← Back to Property List</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
