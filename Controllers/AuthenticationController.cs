@@ -154,7 +154,8 @@ namespace TenentManagement.Controllers
                                 IsPersistent = true
                             });
 
-                        HttpContext.Session.SetInt32("UserId", loginResult.Id);
+                        HttpContext.Session.SetInt32("Id", loginResult.Id);
+                        HttpContext.Session.SetInt32("UserId", loginResult.UserId);
                         HttpContext.Session.SetString("Username", loginResult.UserName);
                         HttpContext.Session.SetString("Role", loginResult.Role);
 

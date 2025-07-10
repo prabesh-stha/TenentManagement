@@ -1,31 +1,68 @@
 ﻿@using TenentManagement.ViewModel
 @model PropertyDetailViewModel
 @{
-	ViewData["Title"] = "Property Details";
+    ViewData["Title"] = "Property Details";
 }
 
-<h1>Property Detail</h1>
+<h1 class="mb-4">Property Detail</h1>
 <div class="container py-4">
 
-	<partial name="_PropertyDetailPartial" model="@Model.Property" />
+    <partial name="_PropertyDetailPartial" model="@Model.Property" />
 
-	<!-- Horizontal scrollable units -->
-	<div class="d-flex gap-3 align-items-center mt-4 mb-3">
-		<h5 class="mb-0">Units in this Property</h5>
-		<a asp-action="Create" asp-controller="Unit" asp-route-id="@Model.Property.Id" class="btn btn-outline-primary btn-sm">
-			<i class="bi bi-plus-circle me-1"></i> Add Unit
-		</a>
-	</div>
-
-	<div class="d-flex overflow-auto gap-3 pb-2">
-		@foreach (var unit in Model.Units)
-		{
-			<partial name="_UnitCardPartial" model="unit" />
-		}
-		@if (!Model.Units.Any())
-        {
-            <span class="text-muted">No units available.</span>
-        }
+    <!-- Units header and Add Unit button -->
+    <div class="d-flex justify-content-between align-items-center mb-3 pt-3">
+        <h5 class="mb-0">Units in this Property</h5>
+        <a asp-action="Create" asp-controller="Unit" asp-route-id="@Model.Property.Id" class="btn btn-primary btn-sm rounded-pill px-3 py-1">
+            <i class="bi bi-plus-circle me-1"></i> Add Unit
+        </a>
     </div>
 
+    @if (Model.Units.Any())
+    {
+        <div class="row g-3 pt-2">
+            @foreach (var unit in Model.Units)
+            {
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card shadow-sm h-100 border-0 rounded-4 position-relative d-flex flex-column">
+
+                        <!-- Card content container -->
+                        <div class="card-body flex-grow-1 position-relative">
+
+                            <!-- The stretched link -->
+                            <a asp-action="RenterDetail"
+                               asp-controller="Unit"
+                               asp-route-id="@unit.Id"
+                               class="stretched-link"></a>
+
+                            <h5 class="card-title fw-semibold mb-1">@unit.Name</h5>
+                            <h6 class="card-subtitle text-muted mb-3">@unit.Description</h6>
+                            <p class="card-text text-muted"><strong>Status:</strong> @(unit.IsVacant ? "Vacant" : "Occupied")</p>
+                        </div>
+
+                        <!-- Buttons at the bottom -->
+                        <div class="d-flex gap-2 p-3 border-top">
+                            <a asp-action="Edit"
+                               asp-controller="Unit"
+                               asp-route-id="@unit.Id"
+                               class="btn btn-outline-secondary btn-sm  flex-grow-1">
+                                <i class="bi bi-pencil-square me-1"></i>Edit
+                            </a>
+
+                            <button type="button"
+                                    class="btn btn-outline-danger btn-sm flex-grow-1"
+                                    onclick="confirmDeletion('Unit', @unit.Id, '/Unit/Delete')"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Delete Unit">
+                                <i class="bi bi-trash-fill me-1"></i>Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <span class="text-muted">No units available.</span>
+    }
 </div>
+

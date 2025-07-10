@@ -39,9 +39,65 @@ namespace TenentManagement.Services.Property.Unit
             var parameters = new DynamicParameters();
             parameters.Add("@FLAG", 'R');
             parameters.Add("@PROPERTYID", propertyId);
+            connection.Open();
             var result = connection.Query<UnitModel>("SP_UNITS", parameters, commandType: System.Data.CommandType.StoredProcedure);
             connection.Close();
             return [.. result];
+        }
+
+        public List<UnitModel> GetAllRenterUnits(int renterId)
+        {
+            using var connection = _databaseConnection.GetConnection();
+            var parameters = new DynamicParameters();
+            parameters.Add("@FLAG", 'A');
+            parameters.Add("@RENTERID", renterId);
+            connection.Open();
+            var result = connection.Query<UnitModel>("SP_UNITS", parameters, commandType: System.Data.CommandType.StoredProcedure);
+            connection.Close();
+            return [.. result];
+        }
+
+        public UnitModel? GetUnitById(int unitId)
+        {
+            using var connection = _databaseConnection.GetConnection();
+            var parameters = new DynamicParameters();
+            parameters.Add("@FLAG", 'L');
+            parameters.Add("@ID", unitId);
+            var result = connection.QueryFirstOrDefault<UnitModel>("SP_UNITS", parameters, commandType: System.Data.CommandType.StoredProcedure);
+            connection.Close();
+            return result;
+        }
+
+        public int UpdateUnit(UnitModel model)
+        {
+            using var connection = _databaseConnection.GetConnection();
+            var parameters = new DynamicParameters();
+            parameters.Add("@FLAG", 'U');
+            parameters.Add("@ID", model.Id);
+            parameters.Add("@NAME", model.Name);
+            parameters.Add("@DESCRIPTION", model.Description);
+            parameters.Add("@ISVACANT", model.IsVacant);
+            parameters.Add("@RENTAMOUNT", model.RentAmount);
+            parameters.Add("@RENTSTARTDATE", model.RentStartDate);
+            parameters.Add("@RENTENDDATE", model.RentEndDate);
+            parameters.Add("@RENTERID", model.RenterId);
+            parameters.Add("@PROPERTYID", model.PropertyId);
+            connection.Open();
+            int rowsAffected = connection.Execute("SP_UNITS", parameters, commandType: System.Data.CommandType.StoredProcedure);
+            connection.Close();
+            return rowsAffected;
+        }
+
+        public int DeleteUnit(int unitId)
+        {
+            using var connection = _databaseConnection.GetConnection();
+            var parameters = new DynamicParameters();
+            parameters.Add("@FLAG", 'D');
+            parameters.Add("@ID", unitId);
+            connection.Open();
+            int rowsAffected = connection.Execute("SP_UNITS", parameters, commandType: System.Data.CommandType.StoredProcedure);
+            connection.Close();
+            return rowsAffected;
         }
 
         public RenterDetailViewModel? GetRentalDetail(int unitId)

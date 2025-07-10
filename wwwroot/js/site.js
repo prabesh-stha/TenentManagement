@@ -261,6 +261,52 @@
         }
 
 
+        // Reusable SweetAlert delete confirmation
+        function confirmDeletion(itemType, itemId, deleteUrlBase, onSuccessRedirectUrl = null) {
+            Swal.fire({
+                title: `Delete ${itemType}?`,
+                text: `Are you sure you want to delete this ${itemType.toLowerCase()}? This action cannot be undone.`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#6c757d",
+                confirmButtonText: "Yes, delete it!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`${deleteUrlBase}/${itemId}`, {
+                        method: 'POST'
+                    })
+                        .then(response => {
+                            if (response.ok) {
+                                Swal.fire(
+                                    `${itemType} Deleted`,
+                                    `The ${itemType.toLowerCase()} was successfully deleted.`,
+                                    "success"
+                                ).then(() => {
+                                    if (onSuccessRedirectUrl) {
+                                        window.location.href = onSuccessRedirectUrl;
+                                    } else {
+                                        location.reload(); // fallback
+                                    }
+                                });
+                            } else {
+                                return response.text().then(text => {
+                                    throw new Error(text || "Deletion failed.");
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            Swal.fire(
+                                "Error",
+                                error.message || `Failed to delete the ${itemType.toLowerCase()}.`,
+                                "error"
+                            );
+                        });
+                }
+            });
+        }
+        window.confirmDeletion = confirmDeletion;
+
 
 
 

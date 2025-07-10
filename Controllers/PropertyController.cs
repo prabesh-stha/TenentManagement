@@ -131,29 +131,7 @@ namespace TenentManagement.Controllers
         //}
 
 
-        public IActionResult RenterDetail(int id)
-        {
-            try
-            {
-                var result = _unitService.GetRentalDetail(id);
-                if (result != null)
-                {
-                    return View(result);
-                }
-                else
-                {
-                    ViewData["Message"] = "Couldn't get the renter detail.";
-                    ViewData["MessageType"] = "error";
-                    return RedirectToAction("Index", "Home");
-                }
-            }
-            catch
-            {
-                ViewData["Message"] = "Couldn't get the renter detail.";
-                ViewData["MessageType"] = "error";
-                return RedirectToAction("Index", "Home");
-            }
-        }
+
 
         [HttpGet]
         public IActionResult Edit(int id)
@@ -180,14 +158,14 @@ namespace TenentManagement.Controllers
                     }
                     else
                     {
-                        ViewData["Message"] = "An error occurred while updating the property.";
+                        ViewData["Message"] = "An error occurred while updating the property detail.";
                         ViewData["MessageType"] = "error";
                         return View(model);
                     }
                 }
                 catch
                 {
-                    ViewData["Message"] = "An error occurred while creating the property.";
+                    ViewData["Message"] = "An error occurred while updating the property detail.";
                     ViewData["MessageType"] = "error";
                     return View(model);
                 }
@@ -199,19 +177,11 @@ namespace TenentManagement.Controllers
 
         }
 
-        [HttpGet]
+        [HttpPost]
         public IActionResult Delete(int id)
         {
             var property = _propertyService.GetPropertyDetail(id);
             if (property == null) return NotFound();
-            return View(property);
-        }
-
-        // POST: Property/DeleteConfirmed/5
-        [HttpPost, ActionName("DeleteConfirmed")]
-        [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(int id)
-        {
             try
             {
                 int row = _propertyService.DeleteProperty(id);
@@ -219,7 +189,7 @@ namespace TenentManagement.Controllers
                 {
                     TempData["Message"] = "Property deleted successfully!";
                     TempData["MessageType"] = "success";
-                    return RedirectToAction("Index", "Home");
+                    return Ok();
                 }
                 else
                 {

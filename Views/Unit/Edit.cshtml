@@ -1,16 +1,17 @@
 ﻿@model TenentManagement.Models.Property.Unit.UnitModel
 
 @{
-    ViewData["Title"] = "Add Unit";
+    ViewData["Title"] = "Edit Unit";
 }
 
 <div class="container mt-5">
     <div class="card shadow-lg mx-auto" style="max-width: 700px;">
         <div class="card-header bg-primary text-white">
-            <h4 class="mb-0"><i class="bi bi-house-add me-2"></i>Add Unit</h4>
+            <h4 class="mb-0"><i class="bi bi-house-gear me-2"></i>Edit Unit</h4>
         </div>
         <div class="card-body p-4">
-            <form asp-action="Create" method="post" id="unitForm">
+            <form asp-action="Edit" method="post" id="unitForm">
+                <input type="hidden" asp-for="Id" />
 
                 <!-- Unit Name -->
                 <div class="mb-3">
@@ -30,44 +31,49 @@
                 <div class="mb-3">
                     <label class="form-label">Occupancy Status *</label>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="IsVacant" value="true" id="vacantTrue" checked />
+                        <input class="form-check-input" type="radio" name="IsVacant" id="vacantTrue" value="true"
+                        @(Model.IsVacant ? "checked" : "") />
                         <label class="form-check-label" for="vacantTrue">Vacant</label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="IsVacant" value="false" id="vacantFalse" />
+                        <input class="form-check-input" type="radio" name="IsVacant" id="vacantFalse" value="false"
+                        @(!Model.IsVacant ? "checked" : "") />
                         <label class="form-check-label" for="vacantFalse">Occupied</label>
                     </div>
                 </div>
 
                 <!-- Renter Fields (Shown only if Occupied) -->
-                <div id="renterFields" style="display: none;">
+                <div id="renterFields" style="display: @(Model.IsVacant ? "none" : "block")">
                     <div id="renterSection" class="mb-3">
                         <label asp-for="RenterUsername" class="form-label">Renter Username / email</label>
                         <div class="input-group">
-                            <input asp-for="RenterUsername" id="usernameInput" class="form-control" placeholder="Enter renter's username or email" />
+                            <input asp-for="RenterUsername" id="usernameInput" class="form-control"
+                                   value="@Model.RenterUsername" placeholder="Enter renter's username or email" />
                             <span class="input-group-text" id="usernameStatusIcon"><i class="bi"></i></span>
                         </div>
                         <small id="usernameValidationMsg" class="form-text"></small>
                         <small id="renterValidationMessage" class="text-danger d-none">
                             Please enter a valid renter before submitting.
                         </small>
-
                     </div>
 
                     <div class="mb-3">
                         <label asp-for="RentAmount" class="form-label">Rent Amount *</label>
-                        <input asp-for="RentAmount" id="RentAmount" type="number" step="1000" class="form-control" />
+                        <input asp-for="RentAmount" id="RentAmount" type="number" step="1000"
+                               class="form-control" value="@Model.RentAmount" />
                         <span asp-validation-for="RentAmount" class="text-danger small"></span>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label asp-for="RentStartDate" class="form-label">Rent Start Date *</label>
-                            <input asp-for="RentStartDate" id="RentStartDate" type="date" class="form-control" />
+                            <input asp-for="RentStartDate" id="RentStartDate" type="date"
+                                   class="form-control" value="@Model.RentStartDate?.ToString("yyyy-MM-dd")" />
                         </div>
                         <div class="col-md-6 mb-3">
                             <label asp-for="RentEndDate" class="form-label">Rent End Date *</label>
-                            <input asp-for="RentEndDate" id="RentEndDate" type="date" class="form-control" />
+                            <input asp-for="RentEndDate" id="RentEndDate" type="date"
+                                   class="form-control" value="@Model.RentEndDate?.ToString("yyyy-MM-dd")" />
                         </div>
                     </div>
                 </div>
@@ -75,13 +81,19 @@
                 <input type="hidden" asp-for="RenterId" />
                 <input type="hidden" asp-for="PropertyId" />
 
-                <button type="submit" class="btn btn-primary w-100 mt-3">
-                    <i class="bi bi-plus-circle me-2"></i>Create Unit
-                </button>
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-2"></i>Save Changes
+                    </button>
+                    <a asp-action="Detail" asp-controller="Property" asp-route-id="@Model.PropertyId" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Back to List
+                    </a>
+                </div>
             </form>
         </div>
     </div>
 </div>
+
 @section Scripts {
     <script>
         const vacantRadio = document.getElementById("vacantTrue");
@@ -95,7 +107,6 @@
         const renterUsernameInput = document.getElementById("usernameInput");
         const validationMsg = document.getElementById("renterValidationMessage");
 
-       
         function toggleRenterFields() {
             if (occupiedRadio.checked) {
                 renterFields.style.display = "block";
@@ -108,14 +119,14 @@
 
         vacantRadio.addEventListener("change", toggleRenterFields);
         occupiedRadio.addEventListener("change", toggleRenterFields);
-        window.addEventListener("DOMContentLoaded", toggleRenterFields);
 
+        // Hide error on input focus
         renterUsernameInput.addEventListener("focus", function () {
             validationMsg.classList.add("d-none");
             renterUsernameInput.classList.remove("is-invalid");
         });
 
-
+        // Validate before submit
         document.getElementById("unitForm").addEventListener("submit", function (e) {
             if (occupiedRadio.checked) {
                 const renterId = renterIdInput.value.trim();
@@ -127,9 +138,14 @@
                 }
             }
 
+            // Hide validation if valid
             validationMsg.classList.add("d-none");
             renterUsernameInput.classList.remove("is-invalid");
         });
+
+        // Initialize the view based on current state
+        document.addEventListener("DOMContentLoaded", function() {
+            toggleRenterFields();
+        });
     </script>
 }
-
