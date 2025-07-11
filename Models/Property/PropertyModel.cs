@@ -19,5 +19,9 @@ namespace TenentManagement.Models.Property
         public string Description { get; set; } = string.Empty;
         public int UserId { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public int Type { get; set; }
+        public string TypeName { get; set; } = string.Empty;
+
+        public IEnumerable<PropertyTypeModel> PropertyTypes { get; set; } = new List<PropertyTypeModel>();
     }
 }

@@ -19,6 +19,18 @@ namespace TenentManagement.Services.Property
             
         }
 
+        public List<PropertyTypeModel> GetAllPropertyTypes()
+        {
+            using var connection = _databaseConnection.GetConnection();
+            connection.Open();
+            var parameters = new DynamicParameters();
+            parameters.Add("@FLAG", 'R');
+            var result = connection.Query<PropertyTypeModel>("SP_PROPERTY_TYPES", parameters, commandType: CommandType.StoredProcedure);
+            connection.Close();
+            return [.. result];
+        }
+
+
         public string CreateProperty(PropertyModel property)
         {
             using var connection = _databaseConnection.GetConnection();
@@ -31,6 +43,7 @@ namespace TenentManagement.Services.Property
             parameters.Add("@LONGITUDE", property.Longitude);
             parameters.Add("@DESCRIPTION", property.Description);
             parameters.Add("@USERID", property.UserId);
+            parameters.Add("@TYPE", property.Type);
             var row = connection.Execute("SP_PROPERTY", parameters, commandType: System.Data.CommandType.StoredProcedure);
             connection.Close();
             if (row >= 1)
@@ -69,7 +82,7 @@ namespace TenentManagement.Services.Property
             return [.. result];
         }
 
-        public PropertyDetailViewModel GetPropertyAndUnitDetail(int propertyId)
+        public PropertyDetailViewModel GetPropertyAndUnitDetail(int propertyId, int? renterId)
         {
             using var connection = _databaseConnection.GetConnection();
             connection.Open();
@@ -77,8 +90,16 @@ namespace TenentManagement.Services.Property
             var parametersUnit = new DynamicParameters();
             parametersProperty.Add("@FLAG", 'S');
             parametersProperty.Add("@ID", propertyId);
-            parametersUnit.Add("@FLAG", 'R');
             parametersUnit.Add("@PROPERTYID", propertyId);
+            if(renterId == null)
+            {
+                parametersUnit.Add("@FLAG", 'R');
+            }
+            else
+            {
+                parametersUnit.Add("@FLAG", 'M');
+                parametersUnit.Add("@RENTERID", renterId);
+            }
             var property = connection.QueryFirstOrDefault<PropertyModel>("SP_PROPERTY", parametersProperty, commandType: CommandType.StoredProcedure);
             var units = connection.Query<UnitModel>("SP_UNITS", parametersUnit, commandType: CommandType.StoredProcedure).ToList();
             connection.Close();

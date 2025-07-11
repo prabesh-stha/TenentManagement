@@ -24,10 +24,15 @@ namespace TenentManagement.Controllers
         [HttpGet]
         public IActionResult Create(int id)
         {
+            var propertyTypes = _propertyService.GetAllPropertyTypes();
+
             PropertyModel model = new()
             {
-                UserId = id
+                UserId = id,
+                // Store the property types in ViewData to pass to the view
+                PropertyTypes = propertyTypes
             };
+
             return View(model);
         }
 
@@ -49,6 +54,7 @@ namespace TenentManagement.Controllers
                     {
                         ViewData["Message"] = result;
                         ViewData["MessageType"] = "error";
+                        var propertyTypes = _propertyService.GetAllPropertyTypes();
                         return View(property);
                     }
                 }
@@ -56,11 +62,13 @@ namespace TenentManagement.Controllers
                 {
                     ViewData["Message"] = "An error occurred while creating the property.";
                     ViewData["MessageType"] = "error";
+                    var propertyTypes = _propertyService.GetAllPropertyTypes();
                     return View(property);
                 }
             }
             else
             {
+                var propertyTypes = _propertyService.GetAllPropertyTypes();
                 return View(property);
             }
         }
@@ -70,7 +78,7 @@ namespace TenentManagement.Controllers
         {
             try
             {
-                PropertyDetailViewModel result = _propertyService.GetPropertyAndUnitDetail(id);
+                PropertyDetailViewModel result = _propertyService.GetPropertyAndUnitDetail(id,null);
                 if (result != null)
                 {
                     return View(result);
@@ -203,6 +211,31 @@ namespace TenentManagement.Controllers
                 ViewData["Message"] = "An error occurred while deleting the property.";
                 ViewData["MessageType"] = "error";
                 return View();
+            }
+        }
+
+        [HttpGet]
+        public IActionResult RentedPropertyDetail(int propertyId, int renterId)
+        {
+            try
+            {
+                PropertyDetailViewModel result = _propertyService.GetPropertyAndUnitDetail(propertyId, renterId);
+                if (result != null)
+                {
+                    return View(result);
+                }
+                else
+                {
+                    ViewData["Message"] = "Couldn't get the detail.";
+                    ViewData["MessageType"] = "error";
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+            catch
+            {
+                ViewData["Message"] = "Couldn't get the detail.";
+                ViewData["MessageType"] = "error";
+                return RedirectToAction("Index", "Home");
             }
         }
     }

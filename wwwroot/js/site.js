@@ -157,8 +157,17 @@
                     .addTo(map);
             }
 
+            //if (config.initialLat && config.initialLng) {
+            //    marker = L.marker([config.initialLat, config.initialLng]).addTo(map);
+            //}
             if (config.initialLat && config.initialLng) {
                 marker = L.marker([config.initialLat, config.initialLng]).addTo(map);
+
+                // Set the hidden input values on page load
+                if (hasInputs) {
+                    document.getElementById(config.latInputId).value = config.initialLat;
+                    document.getElementById(config.lngInputId).value = config.initialLng;
+                }
             }
 
             // Only allow clicking map to set marker if inputs exist
