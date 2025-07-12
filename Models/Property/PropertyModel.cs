@@ -10,6 +10,8 @@ namespace TenentManagement.Models.Property
         [Display(Name = "Property Name")]
         public string Name { get; set; } = string.Empty;
 
+        public string OwnerName { get; set; } = string.Empty;
+
         [Required(ErrorMessage = "Please enter the address of the propery")]
         public string Address { get; set; } = string.Empty;
         [Required(ErrorMessage = "Please enter the description of the property.")]

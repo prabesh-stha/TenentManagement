@@ -1,21 +1,31 @@
-﻿@using TenentManagement.Models.Property
+﻿@using TenentManagement.Services.Utilities
+@using TenentManagement.Models.Property
+@{
+	var isOwner = ViewData["IsOwner"] as bool? ?? false;
+}
 
-	<div class="row g-4">
-		<!-- Left side image -->
-		<div class="col-md-5">
-			<img src="/house.jpeg" class="img-fluid rounded shadow" alt="Property Image" />
-		</div>
+<div class="row g-4">
+	<!-- Left side image -->
+	<div class="col-md-5">
+		<img src="/house.jpeg" class="img-fluid rounded shadow" alt="Property Image" />
+	</div>
 
-		<!-- Right side details -->
-		<div class="col-md-7">
-			<div class="card shadow">
-				<div class="card-body">
-					<h4 class="card-title text-primary mb-3">@Model.Name</h4>
-					<p><strong>Address:</strong> @Model.Address</p>
-					<p><strong>Description:</strong> @Model.Description</p>
-					<p><strong>Latitude:</strong> @Model.Latitude</p>
-					<p><strong>Longitude:</strong> @Model.Longitude</p>
-					<p><strong>Created:</strong> @Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</p>
+	<!-- Right side details -->
+	<div class="col-md-7">
+		<div class="card shadow">
+			<div class="card-body">
+				<h4 class="card-title text-primary mb-3">@Model.Name</h4>
+				@{
+					if (!isOwner)
+					{
+						<p><strong>Owner name: </strong>@Model.OwnerName</p>
+					}
+				}
+				<p><strong>Address:</strong> @Model.Address</p>
+				<p><strong>Description:</strong> @Model.Description</p>
+				@* <p><strong>Latitude:</strong> @Model.Latitude</p> *@
+				@* <p><strong>Longitude:</strong> @Model.Longitude</p> *@
+				@* <p><strong>Created:</strong> @Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</p> *@
 					<div class="my-4">
 						<div id="propertyDetailMap"
 							 style="height: 300px; border-radius: 10px;"

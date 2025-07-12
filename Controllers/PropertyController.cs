@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TenentManagement.Models.Property;
 using TenentManagement.Services.Property;
 using TenentManagement.Services.Property.Unit;
+using TenentManagement.Services.Utilities;
 using TenentManagement.ViewModel;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -222,6 +223,10 @@ namespace TenentManagement.Controllers
                 PropertyDetailViewModel result = _propertyService.GetPropertyAndUnitDetail(propertyId, renterId);
                 if (result != null)
                 {
+                    if(result.Property.OwnerName != null)
+                    {
+                        result.Property.OwnerName = result.Property.OwnerName.ToTitleCase();
+                    }
                     return View(result);
                 }
                 else

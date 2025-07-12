@@ -1,5 +1,4 @@
 ﻿@model TenentManagement.Models.Property.Unit.UnitModel
-
 @{
     ViewData["Title"] = "Add Unit";
 }
@@ -51,7 +50,6 @@
                         <small id="renterValidationMessage" class="text-danger d-none">
                             Please enter a valid renter before submitting.
                         </small>
-
                     </div>
 
                     <div class="mb-3">
@@ -64,16 +62,33 @@
                         <div class="col-md-6 mb-3">
                             <label asp-for="RentStartDate" class="form-label">Rent Start Date *</label>
                             <input asp-for="RentStartDate" id="RentStartDate" type="date" class="form-control" />
+                            <span asp-validation-for="RentStartDate" class="text-danger small"></span>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label asp-for="RentEndDate" class="form-label">Rent End Date *</label>
-                            <input asp-for="RentEndDate" id="RentEndDate" type="date" class="form-control" />
+                            <label asp-for="RentDurationMonths" class="form-label">Rent Duration (Months) *</label>
+                            <input asp-for="RentDurationMonths" id="RentDurationMonths" type="number" min="1" max="120"
+                                   class="form-control" value="@(Model.RentDurationMonths)" />
+                            <span asp-validation-for="RentDurationMonths" class="text-danger small"></span>
+                            <small id="endDatePreview" class="form-text text-muted"></small>
+                        </div>
+                    </div>
+
+                    <!-- Quick Add Months Buttons -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="btn-group w-100" role="group">
+                                <button type="button" class="btn btn-outline-secondary add-months" data-months="1">+1 Month</button>
+                                <button type="button" class="btn btn-outline-secondary add-months" data-months="3">+3 Months</button>
+                                <button type="button" class="btn btn-outline-secondary add-months" data-months="6">+6 Months</button>
+                                <button type="button" class="btn btn-outline-secondary add-months" data-months="12">+1 Year</button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <input type="hidden" asp-for="RenterId" />
                 <input type="hidden" asp-for="PropertyId" />
+                <input type="hidden" asp-for="RentEndDate" />
 
                 <button type="submit" class="btn btn-primary w-100 mt-3">
                     <i class="bi bi-plus-circle me-2"></i>Create Unit
@@ -82,27 +97,29 @@
         </div>
     </div>
 </div>
+
 @section Scripts {
     <script>
+        // Toggle renter fields based on occupancy
         const vacantRadio = document.getElementById("vacantTrue");
         const occupiedRadio = document.getElementById("vacantFalse");
         const renterFields = document.getElementById("renterFields");
 
-        const renterIdInput = document.getElementById("RenterId");
-        const rentAmountInput = document.getElementById("RentAmount");
-        const rentStartDateInput = document.getElementById("RentStartDate");
-        const rentEndDateInput = document.getElementById("RentEndDate");
-        const renterUsernameInput = document.getElementById("usernameInput");
-        const validationMsg = document.getElementById("renterValidationMessage");
-
-       
         function toggleRenterFields() {
             if (occupiedRadio.checked) {
                 renterFields.style.display = "block";
+                // Set default values when switching to occupied
+                document.getElementById('RentStartDate').value = new Date().toISOString().split('T')[0];
+                document.getElementById('RentDurationMonths').value = 1;
+                updateEndDatePreview();
             } else {
                 renterFields.style.display = "none";
-                validationMsg.classList.add("d-none");
-                renterUsernameInput.classList.remove("is-invalid");
+                // Clear values when switching to vacant
+                document.getElementById('RentStartDate').value = '';
+                document.getElementById('RentDurationMonths').value = '';
+                document.getElementById('endDatePreview').textContent = '';
+                document.getElementById('RentAmount').value = '';
+                document.getElementById('usernameInput').value = '';
             }
         }
 
@@ -110,26 +127,42 @@
         occupiedRadio.addEventListener("change", toggleRenterFields);
         window.addEventListener("DOMContentLoaded", toggleRenterFields);
 
-        renterUsernameInput.addEventListener("focus", function () {
-            validationMsg.classList.add("d-none");
-            renterUsernameInput.classList.remove("is-invalid");
+        // Month addition functionality
+        document.querySelectorAll('.add-months').forEach(button => {
+            button.addEventListener('click', function() {
+                const monthsToAdd = parseInt(this.dataset.months);
+                const currentMonths = parseInt(document.getElementById('RentDurationMonths').value) || 0;
+                document.getElementById('RentDurationMonths').value = currentMonths + monthsToAdd;
+                updateEndDatePreview();
+            });
         });
 
+        // Update end date preview
+        function updateEndDatePreview() {
+            const startDate = new Date(document.getElementById('RentStartDate').value);
+            const months = parseInt(document.getElementById('RentDurationMonths').value) || 1;
 
-        document.getElementById("unitForm").addEventListener("submit", function (e) {
-            if (occupiedRadio.checked) {
-                const renterId = renterIdInput.value.trim();
-                if (!renterId || renterId === "0") {
-                    e.preventDefault();
-                    validationMsg.classList.remove("d-none");
-                    renterUsernameInput.classList.add("is-invalid");
-                    return;
-                }
+            if (!isNaN(startDate.getTime())) {
+                const endDate = new Date(startDate);
+                endDate.setMonth(endDate.getMonth() + months);
+
+                // Format date for display
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                document.getElementById('endDatePreview').textContent =
+                    `Lease will end on: ${endDate.toLocaleDateString('en-US', options)}`;
+
+                // Update hidden RentEndDate field
+                document.getElementById('RentEndDate').value = endDate.toISOString().split('T')[0];
             }
+        }
 
-            validationMsg.classList.add("d-none");
-            renterUsernameInput.classList.remove("is-invalid");
-        });
+        // Initialize and add event listeners
+        document.getElementById('RentStartDate').addEventListener('change', updateEndDatePreview);
+        document.getElementById('RentDurationMonths').addEventListener('input', updateEndDatePreview);
+
+        // Initialize based on current model state
+        if (!@Json.Serialize(Model.IsVacant)) {
+            updateEndDatePreview();
+        }
     </script>
 }
-

@@ -14,6 +14,10 @@ namespace TenentManagement.Models.Property.Unit
         public bool IsVacant { get; set; } = true;
         public float? RentAmount { get; set; } = 1000;
         public DateTime? RentStartDate { get; set; } = DateTime.Now;
+        [Display(Name = "Rent Duration (Months)")]
+        [Range(1, 120, ErrorMessage = "Rent must be between 1 and 120 months")]
+        public int RentDurationMonths { get; set; } = 1; 
+
         public DateTime? RentEndDate { get; set; } = DateTime.Now.AddMonths(1);
 
         public string? RenterUsername { get; set; }

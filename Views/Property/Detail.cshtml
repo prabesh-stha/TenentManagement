@@ -7,6 +7,7 @@
 <h1 class="mb-4">Property Detail</h1>
 <div class="container py-4">
 
+    @{ViewData["IsOwner"] = true;}
     <partial name="_PropertyDetailPartial" model="@Model.Property" />
 
     <!-- Units header and Add Unit button -->

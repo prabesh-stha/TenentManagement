@@ -36,7 +36,12 @@ namespace TenentManagement.Controllers
                         model.RentAmount = null;
                         model.RentStartDate = null;
                     }
-                    _unitService.CreateUnit(model);
+                    else
+                    {
+                        model.RentEndDate = model.RentStartDate?.AddMonths(model.RentDurationMonths) ?? null;
+                    }
+
+                        _unitService.CreateUnit(model);
                     
                         TempData["Message"] = "Unit created successfully!";
                         TempData["MessageType"] = "success";
@@ -93,28 +98,39 @@ namespace TenentManagement.Controllers
         {
             if (ModelState.IsValid)
             {
-                try
+                if (model.IsVacant == true)
                 {
-                    int row = _unitService.UpdateUnit(model);
-                    if (row > 0)
+                    model.RenterId = null;
+                    model.RentEndDate = null;
+                    model.RentAmount = null;
+                    model.RentStartDate = null;
+                }
+                else
+                {
+                    model.RentEndDate = model.RentEndDate?.AddMonths(model.RentDurationMonths) ?? null;
+                }
+                    try
                     {
-                        TempData["Message"] = "Unit detail updated successfully!";
-                        TempData["MessageType"] = "success";
-                        return RedirectToAction("Detail", "Property", new { id = model.PropertyId });
+                        int row = _unitService.UpdateUnit(model);
+                        if (row > 0)
+                        {
+                            TempData["Message"] = "Unit detail updated successfully!";
+                            TempData["MessageType"] = "success";
+                            return RedirectToAction("Detail", "Property", new { id = model.PropertyId });
+                        }
+                        else
+                        {
+                            ViewData["Message"] = "An error occurred while updating the unit detail.";
+                            ViewData["MessageType"] = "error";
+                            return View(model);
+                        }
                     }
-                    else
+                    catch
                     {
                         ViewData["Message"] = "An error occurred while updating the unit detail.";
                         ViewData["MessageType"] = "error";
                         return View(model);
                     }
-                }
-                catch
-                {
-                    ViewData["Message"] = "An error occurred while updating the unit detail.";
-                    ViewData["MessageType"] = "error";
-                    return View(model);
-                }
             }
             else
             {
