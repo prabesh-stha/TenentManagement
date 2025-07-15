@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Edit Unit";
+    bool hasDuration = false;
 }
 
 <div class="container mt-5">
@@ -66,20 +67,49 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label asp-for="RentStartDate" class="form-label">Rent Start Date *</label>
-                            <input asp-for="RentStartDate" id="RentStartDate" type="date"
-                                   class="form-control" value="@Model.RentStartDate?.ToString("yyyy-MM-dd")" />
+                            <label asp-for="RentStartDate" class="form-label">Rent Start Date</label>
+                            <input asp-for="RentStartDate" id="RentStartDate" type="date" class="form-control" readonly/>
+                            
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label asp-for="RentEndDate" class="form-label">Rent End Date *</label>
-                            <input asp-for="RentEndDate" id="RentEndDate" type="date"
-                                   class="form-control" value="@Model.RentEndDate?.ToString("yyyy-MM-dd")" />
+                            <label asp-for="RentEndDate" class="form-label">Current Rent End Date</label>
+                            <input asp-for="RentEndDate" id="RentEndDate" type="date" class="form-control" readonly />
+                        </div>
+
+                    </div>
+                    <!-- Add Rent Month Button -->
+                    <div class="mb-3">
+                        <button type="button" id="toggleDurationBtn" class="btn @(hasDuration ? "btn-danger" : "btn-outline-primary")">
+                            <i class="bi @(hasDuration ? "bi-calendar-x" : "bi-calendar-plus") me-2"></i>
+                            @(hasDuration ? "Remove Rent Month" : "Add Rent Month")
+                        </button>
+                    </div>
+                    <div id="rentDurationSection" style="display: none">
+                        <div class="mb-3">
+                            <label asp-for="RentDurationMonths" class="form-label">Rent Duration (Months) *</label>
+                            <input asp-for="RentDurationMonths" id="RentDurationMonths" type="number" min="0" max="120"
+                                   class="form-control" value="1" />
+                            <span asp-validation-for="RentDurationMonths" class="text-danger small"></span>
+                            <small id="endDatePreview" class="form-text text-muted"></small>
+                        </div>
+
+                        <!-- Quick Add Months Buttons -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="btn-group w-100" role="group">
+                                    <button type="button" class="btn btn-outline-secondary add-months" data-months="1">+1 Month</button>
+                                    <button type="button" class="btn btn-outline-secondary add-months" data-months="3">+3 Months</button>
+                                    <button type="button" class="btn btn-outline-secondary add-months" data-months="6">+6 Months</button>
+                                    <button type="button" class="btn btn-outline-secondary add-months" data-months="12">+1 Year</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <input type="hidden" asp-for="RenterId" />
                 <input type="hidden" asp-for="PropertyId" />
+
 
                 <div class="d-flex justify-content-between mt-4">
                     <button type="submit" class="btn btn-primary">
@@ -99,7 +129,8 @@
         const vacantRadio = document.getElementById("vacantTrue");
         const occupiedRadio = document.getElementById("vacantFalse");
         const renterFields = document.getElementById("renterFields");
-
+        const rentDurationSection = document.getElementById("rentDurationSection");
+        const toggleDurationBtn = document.getElementById("toggleDurationBtn");
         const renterIdInput = document.getElementById("RenterId");
         const rentAmountInput = document.getElementById("RentAmount");
         const rentStartDateInput = document.getElementById("RentStartDate");
@@ -116,7 +147,25 @@
                 renterUsernameInput.classList.remove("is-invalid");
             }
         }
+        function toggleDurationSection() {
+            const isVisible = rentDurationSection.style.display === "block";
 
+            if (isVisible) {
+                document.getElementById('RentDurationMonths').value = 0;
+                rentDurationSection.style.display = "none";
+                toggleDurationBtn.innerHTML = `<i class="bi bi-calendar-plus me-2"></i>Add Rent Month`;
+                toggleDurationBtn.classList.remove("btn-danger");
+                toggleDurationBtn.classList.add("btn-outline-primary");
+            } else {
+                document.getElementById('RentDurationMonths').value = 1;
+                rentDurationSection.style.display = "block";
+                toggleDurationBtn.innerHTML = `<i class="bi bi-calendar-x me-2"></i>Remove Rent Month`;
+                toggleDurationBtn.classList.remove("btn-outline-primary");
+                toggleDurationBtn.classList.add("btn-danger");
+                updateEndDatePreview();
+            }
+        }
+        toggleDurationBtn.addEventListener("click", toggleDurationSection);
         vacantRadio.addEventListener("change", toggleRenterFields);
         occupiedRadio.addEventListener("change", toggleRenterFields);
 
@@ -147,5 +196,40 @@
         document.addEventListener("DOMContentLoaded", function() {
             toggleRenterFields();
         });
+
+                // Month addition functionality
+        document.querySelectorAll('.add-months').forEach(button => {
+            button.addEventListener('click', function() {
+                const monthsToAdd = parseInt(this.dataset.months);
+                const currentMonths = parseInt(document.getElementById('RentDurationMonths').value) || 0;
+                document.getElementById('RentDurationMonths').value = currentMonths + monthsToAdd;
+                updateEndDatePreview();
+            });
+        });
+
+        // Update end date preview
+        function updateEndDatePreview() {
+            const startDate = new Date(document.getElementById('RentEndDate').value);
+            const months = parseInt(document.getElementById('RentDurationMonths').value) || 1;
+
+            if (!isNaN(startDate.getTime())) {
+                const endDate = new Date(startDate);
+                endDate.setMonth(endDate.getMonth() + months);
+
+                // Format date for display
+                const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
+                document.getElementById('endDatePreview').textContent =
+                    `New lease will end on: ${endDate.toLocaleDateString('en-US', options)}`;
+            }
+        }
+
+        // Initialize and add event listeners
+        document.getElementById('RentStartDate').addEventListener('change', updateEndDatePreview);
+        document.getElementById('RentDurationMonths').addEventListener('input', updateEndDatePreview);
+
+        // Initialize based on current model state
+        if (!@Json.Serialize(Model.IsVacant)) {
+            updateEndDatePreview();
+        }
     </script>
 }
