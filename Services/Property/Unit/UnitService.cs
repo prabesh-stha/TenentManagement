@@ -100,13 +100,24 @@ namespace TenentManagement.Services.Property.Unit
             return rowsAffected;
         }
 
-        public RenterDetailViewModel? GetRentalDetail(int unitId)
+        public RenterUnitDetailViewModel? GetRentalDetail(int unitId)
         {
             using var connection = _databaseConnection.GetConnection();
             var parameters = new DynamicParameters();
             parameters.Add("@FLAG", 'S');
             parameters.Add("@ID", unitId);
-            var result = connection.QueryFirstOrDefault<RenterDetailViewModel>("SP_UNITS", parameters, commandType: System.Data.CommandType.StoredProcedure);
+            var result = connection.QueryFirstOrDefault<RenterUnitDetailViewModel>("SP_UNITS", parameters, commandType: System.Data.CommandType.StoredProcedure);
+            connection.Close();
+            return result;
+        }
+
+        public OwnerUnitDetailViewModel? GetOwnerUnitDetail(int unitId)
+        {
+            using var connection = _databaseConnection.GetConnection();
+            var parameters = new DynamicParameters();
+            parameters.Add("@FLAG", 'O');
+            parameters.Add("@ID", unitId);
+            var result = connection.QueryFirstOrDefault<OwnerUnitDetailViewModel>("SP_UNITS", parameters, commandType: System.Data.CommandType.StoredProcedure);
             connection.Close();
             return result;
         }

@@ -84,6 +84,30 @@ namespace TenentManagement.Controllers
             }
         }
 
+        public IActionResult Detail(int id)
+        {
+            try
+            {
+                var result = _unitService.GetOwnerUnitDetail(id);
+                if (result != null)
+                {
+                    return View(result);
+                }
+                else
+                {
+                    ViewData["Message"] = "Couldn't get the renter detail.";
+                    ViewData["MessageType"] = "error";
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+            catch
+            {
+                ViewData["Message"] = "Couldn't get the renter detail.";
+                ViewData["MessageType"] = "error";
+                return RedirectToAction("Index", "Home");
+            }
+        }
+
         [HttpGet]
         public IActionResult Edit(int id)
         {

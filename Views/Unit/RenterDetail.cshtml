@@ -1,4 +1,4 @@
-﻿@model TenentManagement.ViewModel.RenterDetailViewModel
+﻿@model TenentManagement.ViewModel.RenterUnitDetailViewModel
 
 @{
     ViewData["Title"] = "Rented Unit Detail";
@@ -22,6 +22,16 @@
 
         <!-- Card Body -->
         <div class="card-body">
+            <!-- Unit Description -->
+            <div class="mb-4">
+                <h5 class="text-uppercase text-muted mb-3 fw-bold">
+                    <i class="bi bi-card-text me-2"></i>Unit Description
+                </h5>
+                <div class="p-3 bg-light rounded">
+                    <p class="mb-0">@Model.UnitDescription</p>
+                </div>
+            </div>
+            <hr class="my-4">
             <!-- Rental Period Section -->
             @if (Model.RentStartDate != null || Model.RentEndDate != null)
             {
@@ -127,17 +137,17 @@
         <!-- Card Footer -->
         <div class="card-footer bg-light py-3">
             <div class="d-flex justify-content-between">
-                <a asp-action="Index" asp-controller="Home" class="btn btn-outline-secondary">
+                <a asp-action="RentedPropertyDetail" asp-controller="Property" asp-route-propertyId="@Model.PropertyId" asp-route-renterId="@Model.RenterId" class="btn btn-outline-secondary">
                     <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
                 </a>
-                <div>
+@*                 <div>
                     <button class="btn btn-outline-success me-2">
                         <i class="bi bi-printer me-1"></i> Print Details
                     </button>
                     <button class="btn btn-success">
                         <i class="bi bi-chat-dots me-1"></i> Contact Owner
                     </button>
-                </div>
+                </div> *@
             </div>
         </div>
     </div>

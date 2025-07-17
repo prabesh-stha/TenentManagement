@@ -1,14 +1,17 @@
 ﻿using System.Reflection;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TenentManagement.Models.Property;
 using TenentManagement.Services.Property;
 using TenentManagement.Services.Property.Unit;
 using TenentManagement.Services.Utilities;
 using TenentManagement.ViewModel;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+
 
 namespace TenentManagement.Controllers
 {
+    [BlockDirectAccess]
+    [Authorize]
     public class PropertyController : Controller
     {
         private readonly PropertyService _propertyService;
@@ -30,7 +33,6 @@ namespace TenentManagement.Controllers
             PropertyModel model = new()
             {
                 UserId = id,
-                // Store the property types in ViewData to pass to the view
                 PropertyTypes = propertyTypes
             };
 

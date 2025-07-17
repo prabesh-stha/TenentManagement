@@ -29,3 +29,12 @@ body {
     border-top-left-radius : 12px !important;
     border-top-right-radius: 12px !important;
 }
+
+.text-truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Limit to 2 lines */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 3em; /* Approx height for 2 lines (adjust if needed) */
+}

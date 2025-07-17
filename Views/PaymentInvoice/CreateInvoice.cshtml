@@ -1,0 +1,101 @@
+﻿@model TenentManagement.Models.Payment.PaymentInvoiceModel
+@{
+    ViewData["Title"] = "Create Invoice";
+        var availableMonths = ViewBag.AvailableMonths as List<DateTime> ?? new List<DateTime>();
+
+}
+
+<div class="container py-5">
+    <div class="card shadow-lg mx-auto rounded-corner" style="max-width: 700px;">
+        <div class="card-header bg-primary text-white py-4 rounded-corner-top">
+            <h1 class="h4 mb-0 text-center d-flex flex-column align-items-center">
+                <span class="d-inline-flex align-items-center justify-content-center bg-opacity-25 bg-info text-white rounded-circle mb-2" style="width: 50px; height: 50px;">
+                    <i class="bi bi-receipt"></i>
+                </span>
+                <span>Tenant Management System</span>
+                <span class="mt-2 mb-0 text-center">
+                    <i class="bi bi-plus-circle-fill me-2"></i>Create Invoice
+                </span>
+            </h1>
+        </div>
+
+        <div class="card-body p-4">
+            <form method="post" asp-action="CreateInvoice" asp-controller="PaymentInvoice" class="needs-validation" novalidate>
+                <input type="hidden" asp-for="UnitId" />
+                <input type="hidden" asp-for="RenterId" />
+                <input type="hidden" asp-for="OwnerId" />
+
+
+                <div class="mb-3">
+                    <label class="form-label small text-muted">From Month *</label>
+                    <select asp-for="FromMonth" class="form-control" id="FromMonth" required>
+                        @foreach (var month in availableMonths.OrderBy(m => m))
+                        {
+                            <option value="@month.ToString("yyyy-MM-01")">@month.ToString("yyyy MMMM")</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small text-muted">To Month *</label>
+                    <select asp-for="ToMonth" class="form-control" id="ToMonth" required>
+                        @foreach (var month in availableMonths.OrderBy(m => m))
+                        {
+                            <option value="@month.ToString("yyyy-MM-01")">@month.ToString("yyyy MMMM")</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small text-muted">Amount Per Month *</label>
+                    <div class="input-group">
+                        <span class="input-group-text">Rs.</span>
+                        <input asp-for="AmountPerMonth" class="form-control" id="AmountPerMonth" placeholder="e.g. 10000" readonly />
+                    </div>
+                    @* <span asp-validation-for="AmountPerMonth" class="text-danger small"></span> *@
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small text-muted">Total Amount</label>
+                    <div class="input-group">
+                        <span class="input-group-text">Rs</span>
+                        <input type="text" class="form-control" id="TotalAmountDisplay" readonly />
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 mt-3 rounded-corner">
+                    <i class="bi bi-file-earmark-text-fill me-2"></i>Create Invoice
+                </button>
+
+                @* <div class="text-center small mt-4"> *@
+                @*     <a asp-action="Index" asp-controller="PaymentInvoice" class="text-muted text-decoration-none">← Back to Invoices</a> *@
+                @* </div> *@
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function calculateTotal() {
+            const from = new Date(document.getElementById("FromMonth").value);
+            const to = new Date(document.getElementById("ToMonth").value);
+            const amount = parseFloat(document.getElementById("AmountPerMonth").value);
+
+            if (!isNaN(from) && !isNaN(to) && !isNaN(amount)) {
+                const months = (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth()) + 1;
+                if (months > 0) {
+                    document.getElementById("TotalAmountDisplay").value = (months * amount).toFixed(2);
+                } else {
+                    document.getElementById("TotalAmountDisplay").value = "0.00";
+                }
+            }
+        }
+
+        document.getElementById("FromMonth").addEventListener("change", calculateTotal);
+        document.getElementById("ToMonth").addEventListener("change", calculateTotal);
+        document.getElementById("AmountPerMonth").addEventListener("input", calculateTotal);
+
+        window.addEventListener("DOMContentLoaded", calculateTotal);
+    </script>
+}
