@@ -10,10 +10,13 @@ namespace TenentManagement.Controllers
     {
         private readonly UnitService _unitService;
         private readonly PaymentInvoiceService _paymentInvoiceService;
-        public PaymentInvoiceController(UnitService unitService, PaymentInvoiceService paymentInvoiceService)
+        private readonly PaymentService _paymentService;
+        public PaymentInvoiceController(UnitService unitService, PaymentInvoiceService paymentInvoiceService, PaymentService paymentService)
         {
             _unitService = unitService ?? throw new ArgumentNullException(nameof(unitService));
             _paymentInvoiceService = paymentInvoiceService ?? throw new ArgumentNullException(nameof(paymentInvoiceService));
+            _paymentService = paymentService ?? throw new ArgumentNullException(nameof(paymentService));
+
 
         }
 
@@ -23,14 +26,14 @@ namespace TenentManagement.Controllers
             var unit = _unitService.GetUnitById(unitId);
             if (unit == null)
             {
-                ViewData["Message"] = "Unit not found.";
-                ViewData["MessageType"] = "error";
+                TempData["Message"] = "Unit not found.";
+                TempData["MessageType"] = "error";
                 return RedirectToAction("Index", "Home");
             }
-            //        var paidMonths = _db.Payments
-            //.Where(p => p.UnitId == unitId)
-            //.Select(p => new DateTime(p.PaidMonth.Year, p.PaidMonth.Month, 1))
-            //.ToList();
+            var payment = _paymentService.GetAllPaymentByUnit(unitId);
+            var paidMonths = payment
+                .Select(p => new DateTime(p.PaidMonth.Year, p.PaidMonth.Month, 1))
+                .ToList();
             if (!unit.RentStartDate.HasValue || !unit.RentEndDate.HasValue)
             {
                 ViewData["Message"] = "Rent duration is not configured.";
@@ -47,16 +50,19 @@ namespace TenentManagement.Controllers
                 allMonths.Add(dt);
             }
 
-            //var availableMonths = allMonths.Except(paidMonths).ToList();
-            var availableMonths = allMonths; // Assuming no months are paid yet for simplicity
+            var monthsExceptPaidMonth = allMonths.Except(paidMonths).ToList();
+            var availableMonths = monthsExceptPaidMonth.OrderBy(m => m).Where(m => m > monthsExceptPaidMonth.First()).ToList();
 
-            ViewBag.AvailableMonths = availableMonths;
+            //ViewBag.AvailableMonths = availableMonths;
             var model = new PaymentInvoiceModel
             {
+                FromMonth = monthsExceptPaidMonth.First(),
                 UnitId = unitId,
                 AmountPerMonth = unit.RentAmount ?? 0,
                 RenterId = unit.RenterId ?? 0,
                 OwnerId = userId,
+                AvailableMonth = availableMonths,
+                DueDate = new DateTime(unit.RentStartDate.Value.Year, unit.RentStartDate.Value.Month, unit.RentStartDate.Value.Day)
             };
             return View(model);
         }
@@ -71,7 +77,11 @@ namespace TenentManagement.Controllers
             // Get rent range
             var unit = _unitService.GetUnitById(model.UnitId);
             if (unit == null)
-                return BadRequest("Tenant rent info not found.");
+            {
+                TempData["Message"] = "Unit not found.";
+                TempData["MessageType"] = "error";
+                return RedirectToAction("Index", "Home");
+            }
 
             if (!unit.RentStartDate.HasValue || !unit.RentEndDate.HasValue)
             {
@@ -84,9 +94,7 @@ namespace TenentManagement.Controllers
             var rentEnd = unit.RentEndDate.Value;
 
             // Normalize RentStartDate (round up to next 1st if not already 1st)
-            DateTime startLimit = rentStart.Day == 1
-                    ? new DateTime(rentStart.Year, rentStart.Month, 1)
-                    : new DateTime(rentStart.Year, rentStart.Month, 1).AddMonths(1);
+            DateTime startLimit = new DateTime(rentStart.Year, rentStart.Month, 1);
 
                 // Normalize RentEndDate (round down to 1st of that month)
                 DateTime endLimit = new DateTime(rentEnd.Year, rentEnd.Month, 1);
@@ -98,29 +106,28 @@ namespace TenentManagement.Controllers
                     return View(model);
                 }
 
-            // Get paid months for this unit
-            //var paidMonths = .Payments
-            //    .Where(p => p.UnitId == UnitId)
-            //    .Select(p => new DateTime(p.PaidMonth.Year, p.PaidMonth.Month, 1))
-            //    .ToHashSet();
+
+            var payment = _paymentService.GetAllPaymentByUnit(model.UnitId);
+            var paidMonths = payment
+                .Select(p => new DateTime(p.PaidMonth.Year, p.PaidMonth.Month, 1))
+                .ToHashSet();
 
             // Generate range of months to invoice
             var invoiceMonths = new List<DateTime>();
 
             for (var dt = model.FromMonth; dt <= model.ToMonth; dt = dt.AddMonths(1))
             {
-                //if (paidMonths.Contains(dt))
-                //{
-                //    ViewData["Message"] = $"Month {dt:yyyy-MM} is already paid.";
-                //    ViewData["MessageType"] = "error";
-                //    return View(model);
-                //}
+                if (paidMonths.Contains(dt))
+                {
+                    ViewData["Message"] = $"Month {dt:yyyy-MM} is already paid.";
+                    ViewData["MessageType"] = "error";
+                    return View(model);
+                }
                 invoiceMonths.Add(dt);
             }
 
             // Valid invoice
             model.AmountDue = invoiceMonths.Count * model.AmountPerMonth;
-            model.DueDate = DateTime.Now;
 
                 try {
                     int row = _paymentInvoiceService.CreatePaymentInvoice(model);

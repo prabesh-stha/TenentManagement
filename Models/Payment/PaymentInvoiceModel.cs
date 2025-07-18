@@ -20,6 +20,8 @@
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime? UpdatedAt { get; set; } = DateTime.Now;
 
+        public List<DateTime> AvailableMonth { get; set; } = new List<DateTime>();
+
         public IEnumerable<PaymentMethodModel> PaymentMethods { get; set; } = new List<PaymentMethodModel>();
         public IEnumerable<PaymentStatusModel> PaymentStatuses { get; set; } = new List<PaymentStatusModel>();
 

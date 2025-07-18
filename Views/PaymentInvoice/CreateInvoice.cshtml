@@ -1,101 +1,167 @@
 ﻿@model TenentManagement.Models.Payment.PaymentInvoiceModel
 @{
-    ViewData["Title"] = "Create Invoice";
-        var availableMonths = ViewBag.AvailableMonths as List<DateTime> ?? new List<DateTime>();
+	ViewData["Title"] = "Create Invoice";
 
 }
 
 <div class="container py-5">
-    <div class="card shadow-lg mx-auto rounded-corner" style="max-width: 700px;">
-        <div class="card-header bg-primary text-white py-4 rounded-corner-top">
-            <h1 class="h4 mb-0 text-center d-flex flex-column align-items-center">
-                <span class="d-inline-flex align-items-center justify-content-center bg-opacity-25 bg-info text-white rounded-circle mb-2" style="width: 50px; height: 50px;">
-                    <i class="bi bi-receipt"></i>
-                </span>
-                <span>Tenant Management System</span>
-                <span class="mt-2 mb-0 text-center">
-                    <i class="bi bi-plus-circle-fill me-2"></i>Create Invoice
-                </span>
-            </h1>
-        </div>
+	<div class="card shadow-lg mx-auto rounded-corner" style="max-width: 700px;">
+		<div class="card-header bg-primary text-white py-4 rounded-corner-top">
+			<h1 class="h4 mb-0 text-center d-flex flex-column align-items-center">
+				<span class="d-inline-flex align-items-center justify-content-center bg-opacity-25 bg-info text-white rounded-circle mb-2" style="width: 50px; height: 50px;">
+					<i class="bi bi-receipt"></i>
+				</span>
+				<span>Tenant Management System</span>
+				<span class="mt-2 mb-0 text-center">
+					<i class="bi bi-plus-circle-fill me-2"></i>Create Invoice
+				</span>
+			</h1>
+		</div>
 
-        <div class="card-body p-4">
-            <form method="post" asp-action="CreateInvoice" asp-controller="PaymentInvoice" class="needs-validation" novalidate>
-                <input type="hidden" asp-for="UnitId" />
-                <input type="hidden" asp-for="RenterId" />
-                <input type="hidden" asp-for="OwnerId" />
+		<div class="card-body p-4">
+			<form method="post" asp-action="CreateInvoice" asp-controller="PaymentInvoice" class="needs-validation" novalidate>
+				<input type="hidden" asp-for="UnitId" />
+				<input type="hidden" asp-for="RenterId" />
+				<input type="hidden" asp-for="OwnerId" />
+				@for (int i = 0; i < Model.AvailableMonth.Count; i++)
+				{
+					<input type="hidden" name="AvailableMonth[@i]" value="@Model.AvailableMonth[i].ToString("o")" />
+				}
+				<input type="hidden" asp-for="FromMonth" id="FromMonth" />
 
 
-                <div class="mb-3">
-                    <label class="form-label small text-muted">From Month *</label>
-                    <select asp-for="FromMonth" class="form-control" id="FromMonth" required>
-                        @foreach (var month in availableMonths.OrderBy(m => m))
-                        {
-                            <option value="@month.ToString("yyyy-MM-01")">@month.ToString("yyyy MMMM")</option>
-                        }
-                    </select>
-                </div>
+				<div class="mb-3">
+					<label class="form-label small text-muted">From Month *</label>
+					<select class="form-control" disabled>
+						@{
 
-                <div class="mb-3">
-                    <label class="form-label small text-muted">To Month *</label>
-                    <select asp-for="ToMonth" class="form-control" id="ToMonth" required>
-                        @foreach (var month in availableMonths.OrderBy(m => m))
-                        {
-                            <option value="@month.ToString("yyyy-MM-01")">@month.ToString("yyyy MMMM")</option>
-                        }
-                    </select>
-                </div>
+							var month = Model.AvailableMonth.First();
+							<option value="@Model.FromMonth.ToString("yyyy-MM-01")" selected>@Model.FromMonth.ToString("yyyy MMMM")</option>
 
-                <div class="mb-3">
-                    <label class="form-label small text-muted">Amount Per Month *</label>
-                    <div class="input-group">
-                        <span class="input-group-text">Rs.</span>
-                        <input asp-for="AmountPerMonth" class="form-control" id="AmountPerMonth" placeholder="e.g. 10000" readonly />
-                    </div>
-                    @* <span asp-validation-for="AmountPerMonth" class="text-danger small"></span> *@
-                </div>
+						}
 
-                <div class="mb-3">
-                    <label class="form-label small text-muted">Total Amount</label>
-                    <div class="input-group">
-                        <span class="input-group-text">Rs</span>
-                        <input type="text" class="form-control" id="TotalAmountDisplay" readonly />
-                    </div>
-                </div>
 
-                <button type="submit" class="btn btn-primary w-100 py-2 mt-3 rounded-corner">
-                    <i class="bi bi-file-earmark-text-fill me-2"></i>Create Invoice
-                </button>
+					</select>
+				</div>
 
-                @* <div class="text-center small mt-4"> *@
-                @*     <a asp-action="Index" asp-controller="PaymentInvoice" class="text-muted text-decoration-none">← Back to Invoices</a> *@
-                @* </div> *@
-            </form>
-        </div>
-    </div>
+				<div class="mb-3">
+					<label class="form-label small text-muted">To Month *</label>
+					<select asp-for="ToMonth" id="ToMonth" class="form-control">
+						@if (Model.AvailableMonth != null && Model.AvailableMonth.Any())
+						{
+							foreach (var m in Model.AvailableMonth.OrderBy(m => m))
+							{
+								<option value="@m.ToString("yyyy-MM-01")">@m.ToString("yyyy MMMM")</option>
+							}
+						}
+						else
+						{
+							<option disabled>No available months</option>
+						}
+					</select>
+
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label small text-muted">Amount Per Month *</label>
+					<div class="input-group">
+						<span class="input-group-text">Rs.</span>
+						<input asp-for="AmountPerMonth" class="form-control" id="AmountPerMonth" placeholder="e.g. 10000" readonly />
+					</div>
+					@* <span asp-validation-for="AmountPerMonth" class="text-danger small"></span> *@
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label small text-muted">Total Amount</label>
+					<div class="input-group">
+						<span class="input-group-text">Rs</span>
+						<input type="text" class="form-control" id="TotalAmountDisplay" readonly />
+					</div>
+				</div>
+				<div class="mb-3">
+					<label asp-for="DueDate" class="form-label">Rent Due Date *</label>
+					<input asp-for="DueDate" id="DueDate" type="date" class="form-control" />
+				</div>
+
+				<div class="mb-3">
+					<label asp-for="Remark" class="form-label small text-muted">Remark</label>
+					<textarea asp-for="Remark" class="form-control" placeholder="Remark" rows="3"></textarea>
+					<span asp-validation-for="Remark" class="text-danger small"></span>
+				</div>
+
+				<button type="submit" class="btn btn-primary w-100 py-2 mt-3 rounded-corner">
+					<i class="bi bi-file-earmark-text-fill me-2"></i>Create Invoice
+				</button>
+
+				@* <div class="text-center small mt-4"> *@
+				@*     <a asp-action="Index" asp-controller="PaymentInvoice" class="text-muted text-decoration-none">← Back to Invoices</a> *@
+				@* </div> *@
+			</form>
+		</div>
+	</div>
 </div>
 
 @section Scripts {
-    <script>
-        function calculateTotal() {
-            const from = new Date(document.getElementById("FromMonth").value);
-            const to = new Date(document.getElementById("ToMonth").value);
-            const amount = parseFloat(document.getElementById("AmountPerMonth").value);
+	<script>
+		function calculateTotal() {
+			const from = new Date(document.getElementById("FromMonth").value);
+			const to = new Date(document.getElementById("ToMonth").value);
+			const amount = parseFloat(document.getElementById("AmountPerMonth").value);
 
-            if (!isNaN(from) && !isNaN(to) && !isNaN(amount)) {
-                const months = (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth()) + 1;
-                if (months > 0) {
-                    document.getElementById("TotalAmountDisplay").value = (months * amount).toFixed(2);
-                } else {
-                    document.getElementById("TotalAmountDisplay").value = "0.00";
-                }
-            }
-        }
+			if (!isNaN(from) && !isNaN(to) && !isNaN(amount)) {
+				const months = (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth());
+				if (months > 0) {
+					document.getElementById("TotalAmountDisplay").value = (months * amount).toFixed(2);
+				} else {
+					document.getElementById("TotalAmountDisplay").value = "0.00";
+				}
+			}
+		}
+		let initialDueDay = null;
+		function calculateDueDate(useInitialDay = false) {
+		const to = new Date(document.getElementById("ToMonth").value);
+		const dueDateElement = document.getElementById("DueDate");
+		let day;
+		if (useInitialDay && initialDueDay !== null) {
+			day = initialDueDay;
+		} else {
+			const currentDate = dueDateElement.value ? new Date(dueDateElement.value) : new Date();
+			day = currentDate.getDate();
+		}
 
-        document.getElementById("FromMonth").addEventListener("change", calculateTotal);
-        document.getElementById("ToMonth").addEventListener("change", calculateTotal);
-        document.getElementById("AmountPerMonth").addEventListener("input", calculateTotal);
+		const minDueDate = new Date(to.getFullYear(), to.getMonth(), day);
 
-        window.addEventListener("DOMContentLoaded", calculateTotal);
-    </script>
+		const year = minDueDate.getFullYear();
+		const month = String(minDueDate.getMonth() + 1).padStart(2, '0');
+		const dayFormatted = String(minDueDate.getDate()).padStart(2, '0');
+		const formattedMin = `${year}-${month}-${dayFormatted}`;
+
+			dueDateElement.min = formattedMin;
+			console.log(formattedMin);
+			if (!dueDateElement.value || new Date(dueDateElement.value) < minDueDate) {
+				dueDateElement.value = formattedMin;
+			}
+		}
+
+
+
+		document.getElementById("ToMonth").addEventListener("change", function() {
+			calculateTotal();
+			calculateDueDate();
+		});
+		document.getElementById("AmountPerMonth").addEventListener("input", calculateTotal);
+		window.addEventListener("DOMContentLoaded", function() {
+					const initialDueDate = new Date(document.getElementById("DueDate").value);
+					initialDueDay = initialDueDate.getDate();
+					calculateTotal();
+					calculateDueDate(true);
+
+					document.getElementById("ToMonth").addEventListener("change", function() {
+						calculateTotal();
+						calculateDueDate();
+					});
+
+					document.getElementById("AmountPerMonth").addEventListener("input", calculateTotal);
+		 });
+	</script>
 }

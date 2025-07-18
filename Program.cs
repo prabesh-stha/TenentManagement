@@ -25,6 +25,8 @@ builder.Services.AddScoped<TenentManagement.Services.Property.Unit.UnitService>(
 
 builder.Services.AddScoped<TenentManagement.Services.Payment.PaymentInvoiceService>();
 
+builder.Services.AddScoped<TenentManagement.Services.Payment.PaymentService>();
+
 //BCrypt service for password hashing
 builder.Services.AddScoped<BCryptService>();
 
