@@ -1,4 +1,5 @@
-﻿using Dapper;
+﻿using System.Data;
+using Dapper;
 using TenentManagement.Models.Payment;
 using TenentManagement.Services.Database;
 
@@ -16,7 +17,7 @@ namespace TenentManagement.Services.Payment
             var connection = _dbConnection.GetConnection();
             var parameters = new DynamicParameters();
             parameters.Add("@FLAG", 'G');
-            parameters.Add("@Id", id);
+            parameters.Add("@ID", id);
             connection.Open();
             var result = connection.QueryFirstOrDefault<PaymentInvoiceModel>("SP_PAYMENTINVOICES", parameters, commandType: System.Data.CommandType.StoredProcedure);
             connection.Close();
@@ -38,10 +39,23 @@ namespace TenentManagement.Services.Payment
             parameters.Add("@REMARK", payment.Remark);
             parameters.Add("@ISVERIFIED", payment.IsVerified);
             parameters.Add("@STATUSID", payment.StatusId);
+            parameters.Add("@INSERTEDID", dbType: DbType.Int32, direction: ParameterDirection.Output);
             connection.Open();
             var result = connection.Execute("SP_PAYMENTINVOICES", parameters, commandType: System.Data.CommandType.StoredProcedure);
             connection.Close();
-            return result;
+            return parameters.Get<int>("@INSERTEDID");
+        }
+
+        public List<PaymentInvoiceModel> GetAllInvoiceOfUnit(int unitId)
+        {
+            var connection = _dbConnection.GetConnection();
+            var parameters = new DynamicParameters();
+            parameters.Add("@FLAG", 'A');
+            parameters.Add("@UNITID", unitId);
+            connection.Open();
+            var result = connection.Query<PaymentInvoiceModel>("SP_PAYMENTINVOICES", parameters, commandType: System.Data.CommandType.StoredProcedure);
+            connection.Close();
+            return [.. result];
         }
 
         public int DeletePaymentInvoice(int id)
@@ -49,7 +63,7 @@ namespace TenentManagement.Services.Payment
             var connection = _dbConnection.GetConnection();
             var parameters = new DynamicParameters();
             parameters.Add("@FLAG", 'D');
-            parameters.Add("@Id", id);
+            parameters.Add("@ID", id);
             connection.Open();
             var result = connection.Execute("SP_PAYMENTINVOICES", parameters, commandType: System.Data.CommandType.StoredProcedure);
             connection.Close();
@@ -75,6 +89,17 @@ namespace TenentManagement.Services.Payment
             var result = connection.Query<PaymentStatusModel>("SP_PAYMENTSTATUS", parameters, commandType: System.Data.CommandType.StoredProcedure);
             connection.Close();
             return [.. result];
+        }
+        public PaymentInvoiceModel? GetLatestMonth(int unitId)
+        {
+            var connection = _dbConnection.GetConnection();
+            var parameters = new DynamicParameters();
+            parameters.Add("@FLAG", 'L');
+            parameters.Add("@UNITID", unitId);
+            connection.Open();
+            var result = connection.QueryFirstOrDefault<PaymentInvoiceModel>("SP_PAYMENTINVOICES", parameters, commandType: System.Data.CommandType.StoredProcedure);
+            connection.Close();
+            return result;
         }
     }
 }

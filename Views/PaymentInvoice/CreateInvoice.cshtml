@@ -89,6 +89,36 @@
 					<span asp-validation-for="Remark" class="text-danger small"></span>
 				</div>
 
+				<div class="mb-3">
+					<label asp-for="PaymentMethodId" class="form-label small text-muted">Payment Method *</label>
+					<select asp-for="PaymentMethodId" id="paymentMethodSelect" class="form-select" required>
+						@foreach (var method in Model.PaymentMethods)
+						{
+							<option value="@method.Id" selected="@(method.Id == Model.PaymentMethodId)">
+								@(method.PaymentMethod.Length > 0 ?
+															char.ToUpper(method.PaymentMethod[0]) + method.PaymentMethod.Substring(1).ToLower() :
+															method.PaymentMethod)
+							</option>
+						}
+					</select>
+					<span asp-validation-for="PaymentMethodId" class="text-danger small"></span>
+				</div>
+
+				<div class="mb-3" id="paymentStatusContainer" style="display: none;">
+					<label asp-for="StatusId" class="form-label small text-muted">Payment Status *</label>
+					<select asp-for="StatusId" class="form-select" required>
+						@foreach (var status in Model.PaymentStatuses)
+						{
+							<option value="@status.Id" selected="@(status.Id == Model.StatusId)">
+								@(status.Status.Length > 0 ?
+															char.ToUpper(status.Status[0]) + status.Status.Substring(1).ToLower() :
+															status.Status)
+							</option>
+						}
+					</select>
+					<span asp-validation-for="StatusId" class="text-danger small"></span>
+				</div>
+
 				<button type="submit" class="btn btn-primary w-100 py-2 mt-3 rounded-corner">
 					<i class="bi bi-file-earmark-text-fill me-2"></i>Create Invoice
 				</button>
@@ -143,6 +173,30 @@
 			}
 		}
 
+				function setupPaymentVisibility() {
+			const paymentMethodSelect = document.getElementById('paymentMethodSelect');
+			const paymentStatusContainer = document.getElementById('paymentStatusContainer');
+
+			function togglePaymentStatus() {
+				const selectedValue = paymentMethodSelect.value;
+				const cashPaymentId = @Model.PaymentMethods.FirstOrDefault(m => m.PaymentMethod.Equals("CASH", StringComparison.OrdinalIgnoreCase))?.Id ?? 0;
+
+				if (selectedValue == cashPaymentId) {
+					paymentStatusContainer.style.display = 'block';
+					document.getElementById('StatusId').required = true;
+				} else {
+					paymentStatusContainer.style.display = 'none';
+					document.getElementById('StatusId').required = false;
+				}
+			}
+
+			// Initial check
+			togglePaymentStatus();
+
+			// Add event listener
+			paymentMethodSelect.addEventListener('change', togglePaymentStatus);
+		}
+
 
 
 		document.getElementById("ToMonth").addEventListener("change", function() {
@@ -151,6 +205,7 @@
 		});
 		document.getElementById("AmountPerMonth").addEventListener("input", calculateTotal);
 		window.addEventListener("DOMContentLoaded", function() {
+			 setupPaymentVisibility();
 					const initialDueDate = new Date(document.getElementById("DueDate").value);
 					initialDueDay = initialDueDate.getDate();
 					calculateTotal();

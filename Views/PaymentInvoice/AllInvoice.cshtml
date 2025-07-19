@@ -1,0 +1,80 @@
+﻿@model TenentManagement.ViewModel.PaymentInvoiceListViewModel
+@{
+    ViewData["Title"] = "All Invoices";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">All Invoices</h2>
+
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+            <tr>
+                <th rowspan="2">Invoice No</th>
+                <th rowspan="2" style="white-space: nowrap">Tenant</th> <!-- Added nowrap -->
+                <th colspan="2" class="text-center">Period</th>
+                <th rowspan="2">Total</th>
+                <th rowspan="2">Status</th>
+                <th rowspan="2">Payment Method</th>
+                <th rowspan="2">Created At</th>
+                <th rowspan="2">Due Date</th>
+                <th rowspan="2">Verified</th>
+                <th rowspan="2">Verified At</th>
+                <th rowspan="2">Updated At</th>
+                <th rowspan="2">Remark</th>
+                <th rowspan="2" class="text-end">Actions</th>
+            </tr>
+            <tr>
+                <th>From</th>
+                <th>To</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.PaymentInvoices.Any())
+            {
+                foreach (var invoice in Model.PaymentInvoices)
+                {
+                    <tr>
+                        <td>@invoice.Id</td>
+                        <td style="white-space: nowrap">@invoice.RenterName</td> <!-- Added nowrap -->
+                        <td>@invoice.FromMonth.ToString("MMMM")</td>
+                        <td>@invoice.ToMonth.ToString("MMMM")</td>
+                        <td>@invoice.AmountDue.ToString("F2")</td>
+                        <td>@invoice.Status</td>
+                        <td>@invoice.PaymentMethod</td>
+                        <td style="white-space: nowrap">@invoice.CreatedAt.ToString("yyyy-MMMM-d")</td>
+                        <td style="white-space: nowrap">@invoice.DueDate.ToString("yyyy-MMMM-d")</td>
+                        <td>@(invoice.IsVerified ? "✅" : "❌")</td>
+                        <td>@(invoice.VerifiedAt?.ToString("yyyy-MMMM-d") ?? "-")</td>
+                        <td>@(invoice.UpdatedAt?.ToString("yyyy-MMMM-d") ?? "-")</td>
+                        <td style="white-space: nowrap">@invoice.Remark</td>
+                        <td class="text-end" style="white-space: nowrap">
+                            <div class="d-inline-flex">
+                            <a asp-controller="PaymentInvoice" asp-action="Edit" asp-route-id="@invoice.Id"
+                               class="btn text-primary p-1 me-1" title="Edit Invoice">
+                                <!-- Added me-1 -->
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <button type="button"
+                                    class="btn text-danger p-1"
+                                    onclick="confirmDeletion('PaymentInvoice', @invoice.Id, '/PaymentInvoice/Delete')"
+                                    title="Delete Invoice">
+                                <i class="bi bi-trash-fill"></i>
+                            </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="14" class="text-center text-muted">No invoices found.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+	<div class="d-flex">
+		<a asp-action="Detail" asp-controller="Unit" asp-route-id="@Model.UnitId" class="btn btn-secondary">
+			<i class="bi bi-arrow-left me-1"></i> Back to Unit
+		</a>
+</div>

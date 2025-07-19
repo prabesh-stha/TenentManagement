@@ -1,11 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TenentManagement.Models.Payment;
 using TenentManagement.Services.Database;
 using TenentManagement.Services.Payment;
 using TenentManagement.Services.Property.Unit;
+using TenentManagement.Services.Utilities;
+using TenentManagement.ViewModel;
 
 namespace TenentManagement.Controllers
 {
+    [BlockDirectAccess]
+    [Authorize]
     public class PaymentInvoiceController : Controller
     {
         private readonly UnitService _unitService;
@@ -24,22 +29,25 @@ namespace TenentManagement.Controllers
         public IActionResult CreateInvoice(int unitId, int userId)
         {
             var unit = _unitService.GetUnitById(unitId);
+            var paymentMethods = _paymentInvoiceService.GetAllPaymentMethod();
+            var paymentStatuses = _paymentInvoiceService.GetAllPaymentStatus();
             if (unit == null)
             {
                 TempData["Message"] = "Unit not found.";
                 TempData["MessageType"] = "error";
                 return RedirectToAction("Index", "Home");
             }
-            var payment = _paymentService.GetAllPaymentByUnit(unitId);
-            var paidMonths = payment
-                .Select(p => new DateTime(p.PaidMonth.Year, p.PaidMonth.Month, 1))
-                .ToList();
+            //var payment = _paymentService.GetAllPaymentByUnit(unitId);
+            //var paidMonths = payment
+            //    .Select(p => new DateTime(p.PaidMonth.Year, p.PaidMonth.Month, 1))
+            //    .ToList();
             if (!unit.RentStartDate.HasValue || !unit.RentEndDate.HasValue)
             {
                 ViewData["Message"] = "Rent duration is not configured.";
                 ViewData["MessageType"] = "error";
                 return View();
             }
+
 
             var rentStart = new DateTime(unit.RentStartDate.Value.Year, unit.RentStartDate.Value.Month, 1);
             var rentEnd = new DateTime(unit.RentEndDate.Value.Year, unit.RentEndDate.Value.Month, 1);
@@ -50,19 +58,47 @@ namespace TenentManagement.Controllers
                 allMonths.Add(dt);
             }
 
-            var monthsExceptPaidMonth = allMonths.Except(paidMonths).ToList();
-            var availableMonths = monthsExceptPaidMonth.OrderBy(m => m).Where(m => m > monthsExceptPaidMonth.First()).ToList();
+            //var monthsExceptPaidMonth = allMonths.Except(paidMonths).ToList();
+            var invoice = _paymentInvoiceService.GetLatestMonth(unitId);
+            var excludedMonths = new List<DateTime>();
 
-            //ViewBag.AvailableMonths = availableMonths;
+            if (invoice != null)
+            {
+                // Get all months up to the latest invoice's ToMonth
+                var latestInvoiceMonth = new DateTime(invoice.ToMonth.Year, invoice.ToMonth.Month, 1);
+
+                // Generate all months from rent start to the latest invoice month
+                for (var dt = rentStart; dt <= latestInvoiceMonth; dt = dt.AddMonths(1))
+                {
+                    excludedMonths.Add(dt);
+                }
+            }
+
+            // Now exclude these months from allMonths
+            var monthsExcludingExisting = allMonths
+                .Except(excludedMonths)
+                .OrderBy(m => m)
+                .ToList();
+
+            var availableMonths = monthsExcludingExisting.OrderBy(m => m).Where(m => m > monthsExcludingExisting.First()).ToList();
+            if(availableMonths.Count <= 0)
+            {
+                TempData["Message"] = "Already created available invoices";
+                TempData["MessageType"] = "error";
+                return RedirectToAction("Detail", "Unit", new {id = unitId} );
+            }
+
             var model = new PaymentInvoiceModel
             {
-                FromMonth = monthsExceptPaidMonth.First(),
+                FromMonth = monthsExcludingExisting.First(),
                 UnitId = unitId,
                 AmountPerMonth = unit.RentAmount ?? 0,
                 RenterId = unit.RenterId ?? 0,
                 OwnerId = userId,
                 AvailableMonth = availableMonths,
-                DueDate = new DateTime(unit.RentStartDate.Value.Year, unit.RentStartDate.Value.Month, unit.RentStartDate.Value.Day)
+                DueDate = new DateTime(unit.RentStartDate.Value.Year, unit.RentStartDate.Value.Month, unit.RentStartDate.Value.Day),
+                PaymentMethods = paymentMethods,
+                PaymentStatuses = paymentStatuses
             };
             return View(model);
         }
@@ -130,12 +166,38 @@ namespace TenentManagement.Controllers
             model.AmountDue = invoiceMonths.Count * model.AmountPerMonth;
 
                 try {
+                if (model.PaymentMethodId == 1 && model.StatusId == 2)
+                {
+                    model.IsVerified = true;
+                    model.VerifiedAt = DateTime.Now;
+                }
                     int row = _paymentInvoiceService.CreatePaymentInvoice(model);
                     if (row > 0)
                     {
                         TempData["Message"] = "Invoice created successfully!";
                         TempData["MessageType"] = "success";
-                        return RedirectToAction("Detail", "Unit", new { id = model.UnitId });
+
+                    if (model.PaymentMethodId == 1 && model.StatusId == 2)
+                    {
+                        var months = new List<DateTime>();
+                        for (var dt = model.FromMonth; dt < model.ToMonth; dt = dt.AddMonths(1))
+                        {
+                            months.Add(new DateTime(dt.Year, dt.Month, 1));
+                        }
+
+                        foreach (var month in months)
+                        {
+                            _paymentService.CreatePayment(new PaymentModel
+                            {
+                                UnitId = model.UnitId,
+                                PaymentDate = DateTime.Now,
+                                PaidMonth = month,
+                                Amount = model.AmountDue / months.Count,
+                                InvoiceId = row
+                            });
+                        }
+                    }
+                    return RedirectToAction("Detail", "Unit", new { id = model.UnitId });
                     }
                     else
                     {
@@ -150,6 +212,18 @@ namespace TenentManagement.Controllers
                     ViewData["MessageType"] = "error";
                     return View(model);
                 }
+        }
+
+        [HttpGet]
+        public IActionResult AllInvoice(int id)
+        {
+            var paymentInvoice = _paymentInvoiceService.GetAllInvoiceOfUnit(id);
+            var model = new PaymentInvoiceListViewModel
+            {
+                UnitId = id,
+                PaymentInvoices = paymentInvoice
+            };
+            return View(model);
         }
     }
 }

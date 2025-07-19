@@ -23,5 +23,22 @@ namespace TenentManagement.Services.Payment
             connection.Close();
             return [..result];
         }
+
+        public int CreatePayment(PaymentModel payment)
+        {
+            using var connection = _dbConnection.GetConnection();
+            var parameters = new DynamicParameters();
+            parameters.Add("@FLAG", 'I');
+            parameters.Add("@PAIDMONTH", payment.PaidMonth);
+            parameters.Add("@UNITID", payment.UnitId);
+            parameters.Add("@PAYMENTDATE", payment.PaymentDate);
+            parameters.Add("@AMOUNT", payment.Amount);
+            parameters.Add("@INVOICEID", payment.InvoiceId);
+            connection.Open();
+            var result = connection.Execute("SP_PAYMENT", parameters, commandType: System.Data.CommandType.StoredProcedure);
+            connection.Close();
+            return result;
+        }
+
     }
 }
