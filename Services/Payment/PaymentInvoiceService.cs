@@ -38,6 +38,7 @@ namespace TenentManagement.Services.Payment
             parameters.Add("@PAYMENTMETHODID", payment.PaymentMethodId);
             parameters.Add("@REMARK", payment.Remark);
             parameters.Add("@ISVERIFIED", payment.IsVerified);
+            parameters.Add("@VERIFIEDAT", payment.VerifiedAt);
             parameters.Add("@STATUSID", payment.StatusId);
             parameters.Add("@INSERTEDID", dbType: DbType.Int32, direction: ParameterDirection.Output);
             connection.Open();
@@ -100,6 +101,31 @@ namespace TenentManagement.Services.Payment
             var result = connection.QueryFirstOrDefault<PaymentInvoiceModel>("SP_PAYMENTINVOICES", parameters, commandType: System.Data.CommandType.StoredProcedure);
             connection.Close();
             return result;
+        }
+
+        public int UpdatePaymentInvoice(PaymentInvoiceModel payment)
+        {
+            var connection = _dbConnection.GetConnection();
+            var parameters = new DynamicParameters();
+            parameters.Add("@FLAG", 'U');
+            parameters.Add("@ID", payment.Id);
+            parameters.Add("@FROMMONTH", payment.FromMonth);
+            parameters.Add("@TOMONTH", payment.ToMonth);
+            parameters.Add("@DUEDATE", payment.DueDate);
+            parameters.Add("@AMOUNTDUE", payment.AmountDue);
+            parameters.Add("@PAYMENTMETHODID", payment.PaymentMethodId);
+            parameters.Add("@REMARK", payment.Remark);
+            parameters.Add("@ISVERIFIED", payment.IsVerified);
+            if (payment.IsVerified)
+            {
+                parameters.Add("@VERIFIEDAT", DateTime.Now);
+            }
+            parameters.Add("@UPDATEDAT", DateTime.Now);
+            parameters.Add("@STATUSID", payment.StatusId);
+            connection.Open();
+            int row = connection.Execute("SP_PAYMENTINVOICES", parameters, commandType: CommandType.StoredProcedure);
+            connection.Close();
+            return row;
         }
     }
 }

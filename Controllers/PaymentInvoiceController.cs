@@ -37,10 +37,6 @@ namespace TenentManagement.Controllers
                 TempData["MessageType"] = "error";
                 return RedirectToAction("Index", "Home");
             }
-            //var payment = _paymentService.GetAllPaymentByUnit(unitId);
-            //var paidMonths = payment
-            //    .Select(p => new DateTime(p.PaidMonth.Year, p.PaidMonth.Month, 1))
-            //    .ToList();
             if (!unit.RentStartDate.HasValue || !unit.RentEndDate.HasValue)
             {
                 ViewData["Message"] = "Rent duration is not configured.";
@@ -57,24 +53,19 @@ namespace TenentManagement.Controllers
             {
                 allMonths.Add(dt);
             }
-
-            //var monthsExceptPaidMonth = allMonths.Except(paidMonths).ToList();
             var invoice = _paymentInvoiceService.GetLatestMonth(unitId);
             var excludedMonths = new List<DateTime>();
 
             if (invoice != null)
             {
-                // Get all months up to the latest invoice's ToMonth
                 var latestInvoiceMonth = new DateTime(invoice.ToMonth.Year, invoice.ToMonth.Month, 1);
 
-                // Generate all months from rent start to the latest invoice month
                 for (var dt = rentStart; dt <= latestInvoiceMonth; dt = dt.AddMonths(1))
                 {
                     excludedMonths.Add(dt);
                 }
             }
 
-            // Now exclude these months from allMonths
             var monthsExcludingExisting = allMonths
                 .Except(excludedMonths)
                 .OrderBy(m => m)
@@ -106,7 +97,7 @@ namespace TenentManagement.Controllers
         [HttpPost]
         public IActionResult CreateInvoice(PaymentInvoiceModel model)
         {
-            // Normalize dates to 1st of month
+
             model.FromMonth = new DateTime(model.FromMonth.Year, model.FromMonth.Month, 1);
             model.ToMonth = new DateTime(model.ToMonth.Year, model.ToMonth.Month, 1);
 
@@ -139,31 +130,34 @@ namespace TenentManagement.Controllers
                 {
                     ViewData["Message"] = $"You must select months between {startLimit:yyyy-MM} and {endLimit:yyyy-MM}.";
                     ViewData["MessageType"] = "error";
-                    return View(model);
+                model.PaymentStatuses = _paymentInvoiceService.GetAllPaymentStatus();
+                model.PaymentMethods = _paymentInvoiceService.GetAllPaymentMethod();
+                return View(model);
                 }
 
 
-            var payment = _paymentService.GetAllPaymentByUnit(model.UnitId);
-            var paidMonths = payment
-                .Select(p => new DateTime(p.PaidMonth.Year, p.PaidMonth.Month, 1))
-                .ToHashSet();
+            //var payment = _paymentService.GetAllPaymentByUnit(model.UnitId);
+            //var paidMonths = payment
+            //    .Select(p => new DateTime(p.PaidMonth.Year, p.PaidMonth.Month, 1))
+            //    .ToHashSet();
 
-            // Generate range of months to invoice
-            var invoiceMonths = new List<DateTime>();
+            //// Generate range of months to invoice
+            //var invoiceMonths = new List<DateTime>();
 
-            for (var dt = model.FromMonth; dt <= model.ToMonth; dt = dt.AddMonths(1))
-            {
-                if (paidMonths.Contains(dt))
-                {
-                    ViewData["Message"] = $"Month {dt:yyyy-MM} is already paid.";
-                    ViewData["MessageType"] = "error";
-                    return View(model);
-                }
-                invoiceMonths.Add(dt);
-            }
+            //for (var dt = model.FromMonth; dt <= model.ToMonth; dt = dt.AddMonths(1))
+            //{
+            //    if (paidMonths.Contains(dt))
+            //    {
+            //        ViewData["Message"] = $"Month {dt:yyyy-MM} is already paid.";
+            //        ViewData["MessageType"] = "error";
+            //        return View(model);
+            //    }
+            //    invoiceMonths.Add(dt);
+            //}
 
             // Valid invoice
-            model.AmountDue = invoiceMonths.Count * model.AmountPerMonth;
+            //model.AmountDue = invoiceMonths.Count - 1 * model.AmountPerMonth;
+
 
                 try {
                 if (model.PaymentMethodId == 1 && model.StatusId == 2)
@@ -203,27 +197,149 @@ namespace TenentManagement.Controllers
                     {
                         ViewData["Message"] = "An error occurred while creating the invoice.";
                         ViewData["MessageType"] = "error";
-                        return View(model);
+                    model.PaymentStatuses = _paymentInvoiceService.GetAllPaymentStatus();
+                    model.PaymentMethods = _paymentInvoiceService.GetAllPaymentMethod();
+                    return View(model);
                     }
                 }
                 catch(Exception ex)
                 {
                     ViewData["Message"] = $"An error occurred while creating the invoice: {ex.Message}";
                     ViewData["MessageType"] = "error";
-                    return View(model);
+                model.PaymentStatuses = _paymentInvoiceService.GetAllPaymentStatus();
+                model.PaymentMethods = _paymentInvoiceService.GetAllPaymentMethod();
+                return View(model);
                 }
         }
 
         [HttpGet]
-        public IActionResult AllInvoice(int id)
+        public IActionResult AllInvoice(int id, int page = 1)
         {
-            var paymentInvoice = _paymentInvoiceService.GetAllInvoiceOfUnit(id);
+            //var paymentInvoice = _paymentInvoiceService.GetAllInvoiceOfUnit(id);
+            const int pageSize = 10;
+
+            var allInvoices = _paymentInvoiceService.GetAllInvoiceOfUnit(id);
+            var totalInvoices = allInvoices.Count;
+
+            var invoices = allInvoices
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
             var model = new PaymentInvoiceListViewModel
             {
                 UnitId = id,
-                PaymentInvoices = paymentInvoice
+                PaymentInvoices = invoices,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalInvoices / (double)pageSize)
             };
             return View(model);
         }
+
+        [HttpPost]
+        public IActionResult Delete(int id)
+        {
+
+            var paymentInvoice = _paymentInvoiceService.GetPaymentInvoiceById(id);
+            if(paymentInvoice == null)
+            {
+                return NotFound();
+            }
+            var invoiceForLatestMonth = _paymentInvoiceService.GetLatestMonth(paymentInvoice.UnitId);
+            if(invoiceForLatestMonth != null)
+            {
+                if (invoiceForLatestMonth.FromMonth > paymentInvoice.FromMonth)
+                {
+                    return BadRequest("Cannot delete this invoice before deleting the latest invoice.");
+                }
+            }
+            try
+            {
+                int row = _paymentInvoiceService.DeletePaymentInvoice(id);
+                if (row > 0)
+                {
+                    TempData["Message"] = "Payment invoice deleted successfully!";
+                    TempData["MessageType"] = "success";
+                    return Ok();
+                }
+                else
+                {
+                    ViewData["Message"] = "An error occurred while deleting the property.";
+                    ViewData["MessageType"] = "error";
+                    return View();
+                }
+            }
+            catch
+            {
+                ViewData["Message"] = "An error occurred while deleting the property.";
+                ViewData["MessageType"] = "error";
+                return View();
+            }
+        }
+
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+
+            var payInvoice = _paymentInvoiceService.GetPaymentInvoiceById(id);
+            if (payInvoice == null) return NotFound();
+            var unit = _unitService.GetUnitById(payInvoice.UnitId);
+            var paymentMethods = _paymentInvoiceService.GetAllPaymentMethod();
+            var paymentStatuses = _paymentInvoiceService.GetAllPaymentStatus();    
+            payInvoice.AmountPerMonth = unit?.RentAmount ?? 0;
+            payInvoice.PaymentMethods = paymentMethods;
+            payInvoice.PaymentStatuses = paymentStatuses;
+            return View(payInvoice);
+        }
+
+        [HttpPost]
+        public IActionResult Edit(PaymentInvoiceModel model)
+        {
+                try
+                {
+                    int row = _paymentInvoiceService.UpdatePaymentInvoice(model);
+                    if(row > 0)
+                    {
+                        if (model.StatusId == 2)
+                        {
+                            var months = new List<DateTime>();
+                            for (var dt = model.FromMonth; dt < model.ToMonth; dt = dt.AddMonths(1))
+                            {
+                                months.Add(new DateTime(dt.Year, dt.Month, 1));
+                            }
+
+                            foreach (var month in months)
+                            {
+                                _paymentService.CreatePayment(new PaymentModel
+                                {
+                                    UnitId = model.UnitId,
+                                    PaymentDate = DateTime.Now,
+                                    PaidMonth = month,
+                                    Amount = model.AmountDue / months.Count,
+                                    InvoiceId = model.Id
+                                });
+                            }
+                        }
+                        TempData["Message"] = "Invoice updated successfully!";
+                        TempData["MessageType"] = "success";
+                        return RedirectToAction("AllInvoice", "PaymentInvoice", new { id = model.UnitId });
+                    }
+                    else
+                    {
+                        ViewData["Message"] = "An error occurred while updating the payment invoice.";
+                        ViewData["MessageType"] = "error";
+                        model.PaymentStatuses = _paymentInvoiceService.GetAllPaymentStatus();
+                        model.PaymentMethods = _paymentInvoiceService.GetAllPaymentMethod();
+                        return View(model);
+                    }
+                }
+                catch
+                {
+                    ViewData["Message"] = "An error occurred while updating the payment invoice.";
+                    ViewData["MessageType"] = "error";
+                model.PaymentStatuses = _paymentInvoiceService.GetAllPaymentStatus();
+                model.PaymentMethods = _paymentInvoiceService.GetAllPaymentMethod();
+                return View(model);
+                }
+            }
+        }
     }
-}

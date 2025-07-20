@@ -1,6 +1,6 @@
 ﻿@model TenentManagement.Models.Payment.PaymentInvoiceModel
 @{
-	ViewData["Title"] = "Create Invoice";
+	ViewData["Title"] = "Edit Invoice";
 
 }
 
@@ -19,23 +19,18 @@
 		</div>
 
 		<div class="card-body p-4">
-			<form method="post" asp-action="CreateInvoice" asp-controller="PaymentInvoice" class="needs-validation" novalidate>
+			<form method="post" asp-action="Edit" asp-controller="PaymentInvoice" class="needs-validation" novalidate>
 				<input type="hidden" asp-for="UnitId" />
 				<input type="hidden" asp-for="RenterId" />
 				<input type="hidden" asp-for="OwnerId" />
-				@for (int i = 0; i < Model.AvailableMonth.Count; i++)
-				{
-					<input type="hidden" name="AvailableMonth[@i]" value="@Model.AvailableMonth[i].ToString("o")" />
-				}
 				<input type="hidden" asp-for="FromMonth" id="FromMonth" />
+				<input type="hidden" asp-for="ToMonth" id="ToMonth" />
 
 
 				<div class="mb-3">
 					<label class="form-label small text-muted">From Month *</label>
 					<select class="form-control" disabled>
 						@{
-
-							var month = Model.AvailableMonth.First();
 							<option value="@Model.FromMonth.ToString("yyyy-MM-01")" selected>@Model.FromMonth.ToString("yyyy MMMM")</option>
 
 						}
@@ -46,18 +41,8 @@
 
 				<div class="mb-3">
 					<label class="form-label small text-muted">To Month *</label>
-					<select asp-for="ToMonth" id="ToMonth" class="form-control">
-						@if (Model.AvailableMonth != null && Model.AvailableMonth.Any())
-						{
-							foreach (var m in Model.AvailableMonth.OrderBy(m => m))
-							{
-								<option value="@m.ToString("yyyy-MM-01")">@m.ToString("yyyy MMMM")</option>
-							}
-						}
-						else
-						{
-							<option disabled>No available months</option>
-						}
+					<select asp-for="ToMonth" id="ToMonth" class="form-control" disabled>
+						<option value="@Model.ToMonth.ToString("yyyy-MM-01")" selected>@Model.ToMonth.ToString("yyyy MMMM")</option>
 					</select>
 
 				</div>
@@ -91,7 +76,7 @@
 
 				<div class="mb-3">
 					<label asp-for="PaymentMethodId" class="form-label small text-muted">Payment Method *</label>
-					<select asp-for="PaymentMethodId" id="paymentMethodSelect" class="form-select" required>
+					<select asp-for="PaymentMethodId" class="form-select" required>
 						@foreach (var method in Model.PaymentMethods)
 						{
 							<option value="@method.Id" selected="@(method.Id == Model.PaymentMethodId)">
@@ -104,7 +89,7 @@
 					<span asp-validation-for="PaymentMethodId" class="text-danger small"></span>
 				</div>
 
-				<div class="mb-3" id="paymentStatusContainer" style="display: none;">
+				<div class="mb-3">
 					<label asp-for="StatusId" class="form-label small text-muted">Payment Status *</label>
 					<select asp-for="StatusId" class="form-select" required>
 						@foreach (var status in Model.PaymentStatuses)
@@ -118,14 +103,25 @@
 					</select>
 					<span asp-validation-for="StatusId" class="text-danger small"></span>
 				</div>
+				<div class="form-group mb-3">
+					<label class="form-label small text-muted" asp-for="IsVerified">Payment Verified by Owner?</label><br>
+
+					<label>
+						<input type="radio" asp-for="IsVerified" value="true" /> Yes
+					</label>
+
+					<label class="ms-3">
+						<input type="radio" asp-for="IsVerified" value="false" /> No
+					</label>
+				</div>
 
 				<button type="submit" class="btn btn-primary w-100 py-2 mt-3 rounded-corner">
-					<i class="bi bi-file-earmark-text-fill me-2"></i>Create Invoice
+					<i class="bi bi-file-earmark-text-fill me-2"></i>Update Invoice
 				</button>
 
-				@* <div class="text-center small mt-4"> *@
-				@*     <a asp-action="Index" asp-controller="PaymentInvoice" class="text-muted text-decoration-none">← Back to Invoices</a> *@
-				@* </div> *@
+				<div class="text-center small mt-4">
+				    <a asp-action="AllInvoice" asp-controller="PaymentInvoice" asp-route-id="@Model.UnitId" class="text-muted text-decoration-none">← Back to Invoices</a>
+				</div>
 			</form>
 		</div>
 	</div>
@@ -173,29 +169,6 @@
 			}
 		}
 
-				function setupPaymentVisibility() {
-			const paymentMethodSelect = document.getElementById('paymentMethodSelect');
-			const paymentStatusContainer = document.getElementById('paymentStatusContainer');
-
-			function togglePaymentStatus() {
-				const selectedValue = paymentMethodSelect.value;
-				const cashPaymentId = @Model.PaymentMethods.FirstOrDefault(m => m.PaymentMethod.Equals("CASH", StringComparison.OrdinalIgnoreCase))?.Id ?? 0;
-
-				if (selectedValue == cashPaymentId) {
-					paymentStatusContainer.style.display = 'block';
-					document.getElementById('StatusId').required = true;
-				} else {
-					paymentStatusContainer.style.display = 'none';
-					document.getElementById('StatusId').required = false;
-				}
-			}
-
-			// Initial check
-			togglePaymentStatus();
-
-			// Add event listener
-			paymentMethodSelect.addEventListener('change', togglePaymentStatus);
-		}
 
 
 
@@ -205,7 +178,6 @@
 		});
 		document.getElementById("AmountPerMonth").addEventListener("input", calculateTotal);
 		window.addEventListener("DOMContentLoaded", function() {
-			 setupPaymentVisibility();
 					const initialDueDate = new Date(document.getElementById("DueDate").value);
 					initialDueDay = initialDueDate.getDate();
 					calculateTotal();
