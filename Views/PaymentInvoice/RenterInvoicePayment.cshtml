@@ -1,6 +1,6 @@
 ﻿@model TenentManagement.Models.Payment.PaymentInvoiceModel
 @{
-	ViewData["Title"] = "Edit Invoice";
+	ViewData["Title"] = "Renter Payment Invoice";
 
 }
 
@@ -13,18 +13,19 @@
 				</span>
 				<span>Tenant Management System</span>
 				<span class="mt-2 mb-0 text-center">
-					<i class="bi bi-plus-circle-fill me-2"></i>Edit Invoice
+					<i class="bi bi-plus-circle-fill me-2"></i>Renter Payment Invoice
 				</span>
 			</h1>
 		</div>
 
 		<div class="card-body p-4">
-			<form method="post" asp-action="Edit" asp-controller="PaymentInvoice" class="needs-validation" novalidate>
+			<form method="post" asp-action="RenterInvoicePayment" asp-controller="PaymentInvoice" class="needs-validation" novalidate>
 				<input type="hidden" asp-for="UnitId" />
 				<input type="hidden" asp-for="RenterId" />
 				<input type="hidden" asp-for="OwnerId" />
 				<input type="hidden" asp-for="FromMonth" id="FromMonth" />
 				<input type="hidden" asp-for="ToMonth" id="ToMonth" />
+				<input type="hidden" asp-for="StatusId" />
 
 
 				<div class="mb-3">
@@ -53,7 +54,6 @@
 						<span class="input-group-text">Rs.</span>
 						<input asp-for="AmountPerMonth" class="form-control" id="AmountPerMonth" placeholder="e.g. 10000" readonly />
 					</div>
-					@* <span asp-validation-for="AmountPerMonth" class="text-danger small"></span> *@
 				</div>
 
 				<div class="mb-3">
@@ -65,13 +65,20 @@
 				</div>
 				<div class="mb-3">
 					<label asp-for="DueDate" class="form-label">Rent Due Date *</label>
-					<input asp-for="DueDate" id="DueDate" type="date" class="form-control" />
+					<input asp-for="DueDate" id="DueDate" type="date" class="form-control" readonly/>
 				</div>
 
 				<div class="mb-3">
 					<label asp-for="Remark" class="form-label small text-muted">Remark</label>
-					<textarea asp-for="Remark" class="form-control" placeholder="Remark" rows="3"></textarea>
+					<textarea asp-for="Remark" class="form-control" placeholder="Remark" rows="3" readonly></textarea>
 					<span asp-validation-for="Remark" class="text-danger small"></span>
+				</div>
+
+				<div class="mb-3">
+					<label asp-for="Status" class="form-label small text-muted">Payment Status *</label>
+					<select asp-for="Status" class="form-select" disabled>
+						<option value="@Model.Status" selected>@Model.Status</option>
+					</select>
 				</div>
 
 				<div class="mb-3">
@@ -89,38 +96,14 @@
 					<span asp-validation-for="PaymentMethodId" class="text-danger small"></span>
 				</div>
 
-				<div class="mb-3">
-					<label asp-for="StatusId" class="form-label small text-muted">Payment Status *</label>
-					<select asp-for="StatusId" class="form-select" required>
-						@foreach (var status in Model.PaymentStatuses)
-						{
-							<option value="@status.Id" selected="@(status.Id == Model.StatusId)">
-								@(status.Status.Length > 0 ?
-															char.ToUpper(status.Status[0]) + status.Status.Substring(1).ToLower() :
-															status.Status)
-							</option>
-						}
-					</select>
-					<span asp-validation-for="StatusId" class="text-danger small"></span>
-				</div>
-				<div class="form-group mb-3">
-					<label class="form-label small text-muted" asp-for="IsVerified">Payment Verified by Owner?</label><br>
 
-					<label>
-						<input type="radio" asp-for="IsVerified" value="true" /> Yes
-					</label>
-
-					<label class="ms-3">
-						<input type="radio" asp-for="IsVerified" value="false" /> No
-					</label>
-				</div>
 
 				<button type="submit" class="btn btn-primary w-100 py-2 mt-3 rounded-corner">
-					<i class="bi bi-file-earmark-text-fill me-2"></i>Update Invoice
+					<i class="bi bi-file-earmark-text-fill me-2"></i>Request Payment Invoice
 				</button>
 
 				<div class="text-center small mt-4">
-				    <a asp-action="AllInvoice" asp-controller="PaymentInvoice" asp-route-id="@Model.UnitId" class="text-muted text-decoration-none">← Back to Invoices</a>
+					<a asp-action="RenterInvoices" asp-controller="PaymentInvoice" asp-route-unitId="@Model.UnitId" asp-route-renterId="@Model.RenterId" class="text-muted text-decoration-none">← Back to Invoices</a>
 				</div>
 			</form>
 		</div>

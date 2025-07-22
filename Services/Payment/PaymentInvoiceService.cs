@@ -12,17 +12,6 @@ namespace TenentManagement.Services.Payment
         {
             _dbConnection = dbConnection;
         }
-        public PaymentInvoiceModel? GetPaymentInvoiceById(int id)
-        {
-            var connection = _dbConnection.GetConnection();
-            var parameters = new DynamicParameters();
-            parameters.Add("@FLAG", 'G');
-            parameters.Add("@ID", id);
-            connection.Open();
-            var result = connection.QueryFirstOrDefault<PaymentInvoiceModel>("SP_PAYMENTINVOICES", parameters, commandType: System.Data.CommandType.StoredProcedure);
-            connection.Close();
-            return result;
-        }
         public int CreatePaymentInvoice(PaymentInvoiceModel payment)
         {
             var connection = _dbConnection.GetConnection();
@@ -46,19 +35,41 @@ namespace TenentManagement.Services.Payment
             connection.Close();
             return parameters.Get<int>("@INSERTEDID");
         }
-
-        public List<PaymentInvoiceModel> GetAllInvoiceOfUnit(int unitId)
+        public PaymentInvoiceModel? GetPaymentInvoiceById(int id)
         {
             var connection = _dbConnection.GetConnection();
             var parameters = new DynamicParameters();
-            parameters.Add("@FLAG", 'A');
-            parameters.Add("@UNITID", unitId);
+            parameters.Add("@FLAG", 'G');
+            parameters.Add("@ID", id);
             connection.Open();
-            var result = connection.Query<PaymentInvoiceModel>("SP_PAYMENTINVOICES", parameters, commandType: System.Data.CommandType.StoredProcedure);
+            var result = connection.QueryFirstOrDefault<PaymentInvoiceModel>("SP_PAYMENTINVOICES", parameters, commandType: System.Data.CommandType.StoredProcedure);
             connection.Close();
-            return [.. result];
+            return result;
         }
-
+        public int UpdatePaymentInvoice(PaymentInvoiceModel payment)
+        {
+            var connection = _dbConnection.GetConnection();
+            var parameters = new DynamicParameters();
+            parameters.Add("@FLAG", 'U');
+            parameters.Add("@ID", payment.Id);
+            parameters.Add("@FROMMONTH", payment.FromMonth);
+            parameters.Add("@TOMONTH", payment.ToMonth);
+            parameters.Add("@DUEDATE", payment.DueDate);
+            parameters.Add("@AMOUNTDUE", payment.AmountDue);
+            parameters.Add("@PAYMENTMETHODID", payment.PaymentMethodId);
+            parameters.Add("@REMARK", payment.Remark);
+            parameters.Add("@ISVERIFIED", payment.IsVerified);
+            if (payment.IsVerified)
+            {
+                parameters.Add("@VERIFIEDAT", DateTime.Now);
+            }
+            parameters.Add("@UPDATEDAT", DateTime.Now);
+            parameters.Add("@STATUSID", payment.StatusId);
+            connection.Open();
+            int row = connection.Execute("SP_PAYMENTINVOICES", parameters, commandType: CommandType.StoredProcedure);
+            connection.Close();
+            return row;
+        }
         public int DeletePaymentInvoice(int id)
         {
             var connection = _dbConnection.GetConnection();
@@ -103,29 +114,29 @@ namespace TenentManagement.Services.Payment
             return result;
         }
 
-        public int UpdatePaymentInvoice(PaymentInvoiceModel payment)
+        public List<PaymentInvoiceModel> GetAllInvoiceOfUnit(int unitId)
         {
             var connection = _dbConnection.GetConnection();
             var parameters = new DynamicParameters();
-            parameters.Add("@FLAG", 'U');
-            parameters.Add("@ID", payment.Id);
-            parameters.Add("@FROMMONTH", payment.FromMonth);
-            parameters.Add("@TOMONTH", payment.ToMonth);
-            parameters.Add("@DUEDATE", payment.DueDate);
-            parameters.Add("@AMOUNTDUE", payment.AmountDue);
-            parameters.Add("@PAYMENTMETHODID", payment.PaymentMethodId);
-            parameters.Add("@REMARK", payment.Remark);
-            parameters.Add("@ISVERIFIED", payment.IsVerified);
-            if (payment.IsVerified)
-            {
-                parameters.Add("@VERIFIEDAT", DateTime.Now);
-            }
-            parameters.Add("@UPDATEDAT", DateTime.Now);
-            parameters.Add("@STATUSID", payment.StatusId);
+            parameters.Add("@FLAG", 'A');
+            parameters.Add("@UNITID", unitId);
             connection.Open();
-            int row = connection.Execute("SP_PAYMENTINVOICES", parameters, commandType: CommandType.StoredProcedure);
+            var result = connection.Query<PaymentInvoiceModel>("SP_PAYMENTINVOICES", parameters, commandType: System.Data.CommandType.StoredProcedure);
             connection.Close();
-            return row;
+            return [.. result];
+        }
+
+        public List<PaymentInvoiceModel> GetAllInvoiceOfRenter(int unitId, int renterId)
+        {
+            var connection = _dbConnection.GetConnection();
+            var parameters = new DynamicParameters();
+            parameters.Add("@FLAG", 'R');
+            parameters.Add("@UNITID", unitId);
+            parameters.Add("@RENTERID", renterId);
+            connection.Open();
+            var result = connection.Query<PaymentInvoiceModel>("SP_PAYMENTINVOICES", parameters, commandType: System.Data.CommandType.StoredProcedure);
+            connection.Close();
+            return [.. result];
         }
     }
 }

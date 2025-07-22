@@ -341,5 +341,68 @@ namespace TenentManagement.Controllers
                 return View(model);
                 }
             }
+
+        [HttpGet]
+        public IActionResult RenterInvoices(int unitId, int renterId, int page = 1)
+        {
+            const int pageSize = 10;
+            var allInvoices = _paymentInvoiceService.GetAllInvoiceOfRenter(unitId, renterId);
+            var totalInvoices = allInvoices.Count;
+            var invoices = allInvoices
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+            var model = new RenterPaymentInvoiceListViewModel
+            {
+                UnitId = unitId,
+                RenterId = renterId,
+                PaymentInvoices = invoices,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalInvoices / (double)pageSize)
+            };
+            return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult RenterInvoicePayment(int id)
+        {
+            var payInvoice = _paymentInvoiceService.GetPaymentInvoiceById(id);
+            if (payInvoice == null) return NotFound();
+            var unit = _unitService.GetUnitById(payInvoice.UnitId);
+            var payMethods = _paymentInvoiceService.GetAllPaymentMethod();
+            payInvoice.AmountPerMonth = unit?.RentAmount ?? 0;
+            payInvoice.PaymentMethods = payMethods;
+            return View(payInvoice);
+        }
+        [HttpPost]
+        public IActionResult RenterInvoicePayment(PaymentInvoiceModel model)
+        {
+            try
+            {
+                model.StatusId = 1;
+                int row = _paymentInvoiceService.UpdatePaymentInvoice(model);
+                if (row > 0)
+                {
+                    TempData["Message"] = "Payment Invoice sent for verification!";
+                    TempData["MessageType"] = "success";
+                    return RedirectToAction("RenterInvoices", "PaymentInvoice", new { unitId = model.UnitId, renterId = model.RenterId });
+                }
+                else
+                {
+                    ViewData["Message"] = "An error occurred while updating the payment invoice.";
+                    ViewData["MessageType"] = "error";
+                    model.PaymentMethods = _paymentInvoiceService.GetAllPaymentMethod();
+                    return View(model);
+                }
+            }
+            catch
+            {
+                ViewData["Message"] = "An error occurred while updating the payment invoice.";
+                ViewData["MessageType"] = "error";
+                model.PaymentMethods = _paymentInvoiceService.GetAllPaymentMethod();
+                return View(model);
+            }
+        }
+
         }
     }

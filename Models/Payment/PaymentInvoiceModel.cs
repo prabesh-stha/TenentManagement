@@ -13,6 +13,7 @@
         public float AmountDue { get; set; }
         public float AmountPerMonth { get; set; }
         public int OwnerId { get; set; }
+        public string OwnerName { get; set; } = string.Empty;
         public int PaymentMethodId { get; set; } = 1;
         public string PaymentMethod { get; set; } = string.Empty;
         public string Remark { get; set; } = string.Empty;

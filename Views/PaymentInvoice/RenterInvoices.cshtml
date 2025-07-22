@@ -1,12 +1,12 @@
-﻿@model TenentManagement.ViewModel.PaymentInvoiceListViewModel
+﻿@model TenentManagement.ViewModel.RenterPaymentInvoiceListViewModel
 @{
-    ViewData["Title"] = "All Invoices";
+    ViewData["Title"] = "Renter Invoices";
 }
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0">All Invoices</h2>
-        <a asp-action="Detail" asp-controller="Unit" asp-route-id="@Model.UnitId" class="btn btn-outline-secondary">
+        <a asp-action="RenterDetail" asp-controller="Unit" asp-route-id="@Model.UnitId" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1"></i> Back to Unit
         </a>
     </div>
@@ -85,7 +85,7 @@
                         <tr>
                             <th class="align-middle" rowspan="2">SN</th>
                             <th class="align-middle" rowspan="2">Invoice #</th>
-                            <th class="align-middle" rowspan="2">Tenant</th>
+                            <th class="align-middle" rowspan="2">Owner Name</th>
                             <th colspan="2" class="text-center">Period</th>
                             <th class="align-middle text-end" rowspan="2">Amount</th>
                             <th class="align-middle" rowspan="2">Status</th>
@@ -116,7 +116,7 @@
                                 data-paymentmethod="@invoice.PaymentMethod">
                                     <td class="text-center">@(serialNumber++)</td>
                                     <td class="fw-semibold">@invoice.Id</td>
-                                    <td class="text-nowrap">@invoice.RenterName</td>
+                                    <td class="text-nowrap">@invoice.OwnerName</td>
                                     <td class="text-nowrap">@invoice.FromMonth.ToString("MMM yyyy")</td>
                                     <td class="text-nowrap">@invoice.ToMonth.ToString("MMM yyyy")</td>
                                     <td class="text-end">@invoice.AmountDue.ToString("N2")</td>
@@ -157,44 +157,29 @@
                                         @invoice.Remark
                                     </td>
                                     <td class="text-end text-nowrap">
-                                        @if(invoice.Status == "PENDING")
+                                        @if (invoice.Status == "UNPAID")
                                         {
-                                            <a asp-controller="PaymentInvoice" asp-action="ValidatePayment" asp-route-id="@invoice.Id" class="btn btn-outline-warning" title="Validate Payment">
-                                                <i class="bi bi-cash"></i>
-                                            </a>
+                                            <div class="btn-group" role="group">
+                                                <a asp-controller="PaymentInvoice"
+                                                   asp-action="RenterInvoicePayment"
+                                                   asp-route-id="@invoice.Id"
+                                                   class="btn btn-outline-primary btn-sm"
+                                                   title="Edit Invoice">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </a>
+                                            </div>
                                         }
-                                        else
-                                        {
-                                            if (!invoice.IsVerified)
-                                            {
-                                                <div class="btn-group" role="group">
-                                                    <a asp-controller="PaymentInvoice"
-                                                       asp-action="Edit"
-                                                       asp-route-id="@invoice.Id"
-                                                       class="btn btn-outline-primary btn-sm"
-                                                       title="Edit Invoice">
-                                                        <i class="bi bi-pencil-square"></i>
-                                                    </a>
-                                                    <button type="button"
-                                                            class="btn btn-outline-danger btn-sm"
-                                                            onclick="confirmDeletion('PaymentInvoice', @invoice.Id, '/PaymentInvoice/Delete')"
-                                                            title="Delete Invoice">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                </div>
-                                            }
-                                        }
-                                    </td>
-                                </tr>
+                                            </td>
+                                        </tr>
                             }
                         }
                     </tbody>
                 </table>
                 @if (!Model.PaymentInvoices.Any())
                 {
-                    <div class="text-center py-4 text-muted">
-                        <i class="bi bi-file-earmark-excel me-2"></i> No invoices found
-                    </div>
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-file-earmark-excel me-2"></i> No invoices found
+                        </div>
                 }
             </div>
         </div>
@@ -203,150 +188,150 @@
     <!-- Pagination -->
     @if (Model.TotalPages > 1)
     {
-        <nav aria-label="Invoice pagination" class="mt-4">
-            <ul class="pagination justify-content-center">
-                <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
-                    <a class="page-link"
-                       asp-action="AllInvoice"
-                       asp-controller="PaymentInvoice"
-                       asp-route-id="@Model.UnitId"
-                       asp-route-page="@(Model.CurrentPage - 1)">
-                        <i class="bi bi-chevron-left"></i>
-                    </a>
-                </li>
-
-                @for (int i = 1; i <= Model.TotalPages; i++)
-                {
-                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+            <nav aria-label="Invoice pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
                         <a class="page-link"
                            asp-action="AllInvoice"
                            asp-controller="PaymentInvoice"
                            asp-route-id="@Model.UnitId"
-                           asp-route-page="@i">
-                            @i
+                           asp-route-page="@(Model.CurrentPage - 1)">
+                            <i class="bi bi-chevron-left"></i>
                         </a>
                     </li>
+
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                <a class="page-link"
+                                   asp-action="AllInvoice"
+                                   asp-controller="PaymentInvoice"
+                                   asp-route-id="@Model.UnitId"
+                                   asp-route-page="@i">
+                            @i
+                                </a>
+                            </li>
                 }
 
-                <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
-                    <a class="page-link"
-                       asp-action="AllInvoice"
-                       asp-controller="PaymentInvoice"
-                       asp-route-id="@Model.UnitId"
-                       asp-route-page="@(Model.CurrentPage + 1)">
-                        <i class="bi bi-chevron-right"></i>
-                    </a>
-                </li>
-            </ul>
-        </nav>
+                    <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                        <a class="page-link"
+                           asp-action="AllInvoice"
+                           asp-controller="PaymentInvoice"
+                           asp-route-id="@Model.UnitId"
+                           asp-route-page="@(Model.CurrentPage + 1)">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
     }
 </div>
 
 @section Scripts {
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const applyFiltersBtn = document.getElementById('applyFilters');
-            const resetFiltersBtn = document.getElementById('resetFilters');
-            const invoiceTableBody = document.getElementById('invoiceTableBody');
-            const invoiceRows = document.querySelectorAll('#invoiceTableBody tr[data-frommonth]');
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const applyFiltersBtn = document.getElementById('applyFilters');
+                const resetFiltersBtn = document.getElementById('resetFilters');
+                const invoiceTableBody = document.getElementById('invoiceTableBody');
+                const invoiceRows = document.querySelectorAll('#invoiceTableBody tr[data-frommonth]');
 
-            const noResultsRow = document.createElement('tr');
-            noResultsRow.innerHTML = '<td colspan="15" class="text-center py-4 text-muted"><i class="bi bi-file-earmark-excel me-2"></i> No invoices match the selected filters</td>';
-            noResultsRow.style.display = 'none';
-            invoiceTableBody.appendChild(noResultsRow);
+                const noResultsRow = document.createElement('tr');
+                noResultsRow.innerHTML = '<td colspan="15" class="text-center py-4 text-muted"><i class="bi bi-file-earmark-excel me-2"></i> No invoices match the selected filters</td>';
+                noResultsRow.style.display = 'none';
+                invoiceTableBody.appendChild(noResultsRow);
 
-            const hasData = invoiceRows.length > 0;
+                const hasData = invoiceRows.length > 0;
 
-            applyFiltersBtn.addEventListener('click', applyFilters);
-            resetFiltersBtn.addEventListener('click', resetFilters);
+                applyFiltersBtn.addEventListener('click', applyFilters);
+                resetFiltersBtn.addEventListener('click', resetFilters);
 
-            function applyFilters() {
-                const fromMonth = document.getElementById('filterFromMonth').value;
-                const toMonth = document.getElementById('filterToMonth').value;
-                const dueDateFilter = document.getElementById('filterDueDate').value;
-                const statusFilter = document.getElementById('filterStatus').value;
-                const verifiedFilter = document.getElementById('filterVerified').value;
-                const paymentMethodFilter = document.getElementById('filterPaymentMethod').value;
-                const today = new Date().toISOString().split('T')[0];
+                function applyFilters() {
+                    const fromMonth = document.getElementById('filterFromMonth').value;
+                    const toMonth = document.getElementById('filterToMonth').value;
+                    const dueDateFilter = document.getElementById('filterDueDate').value;
+                    const statusFilter = document.getElementById('filterStatus').value;
+                    const verifiedFilter = document.getElementById('filterVerified').value;
+                    const paymentMethodFilter = document.getElementById('filterPaymentMethod').value;
+                    const today = new Date().toISOString().split('T')[0];
 
-                let visibleCount = 0;
+                    let visibleCount = 0;
 
-                invoiceRows.forEach(row => {
-                    const rowFromMonth = row.dataset.frommonth;
-                    const rowToMonth = row.dataset.tomonth;
-                    const rowDueDate = row.dataset.duedate;
-                    const rowStatus = row.dataset.status;
-                    const rowIsVerified = row.dataset.isverified;
-                    const rowPaymentMethod = row.dataset.paymentmethod;
+                    invoiceRows.forEach(row => {
+                        const rowFromMonth = row.dataset.frommonth;
+                        const rowToMonth = row.dataset.tomonth;
+                        const rowDueDate = row.dataset.duedate;
+                        const rowStatus = row.dataset.status;
+                        const rowIsVerified = row.dataset.isverified;
+                        const rowPaymentMethod = row.dataset.paymentmethod;
 
-                    const monthMatch =
-                        (fromMonth === '' || rowFromMonth >= fromMonth) &&
-                        (toMonth === '' || rowToMonth <= toMonth);
+                        const monthMatch =
+                            (fromMonth === '' || rowFromMonth >= fromMonth) &&
+                            (toMonth === '' || rowToMonth <= toMonth);
 
-                    let dueDateMatch = true;
-                    if (dueDateFilter === 'overdue') {
-                        dueDateMatch = rowDueDate < today;
-                    } else if (dueDateFilter === 'upcoming') {
-                        dueDateMatch = rowDueDate > today;
-                    } else if (dueDateFilter === 'today') {
-                        dueDateMatch = rowDueDate === today;
-                    }
+                        let dueDateMatch = true;
+                        if (dueDateFilter === 'overdue') {
+                            dueDateMatch = rowDueDate < today;
+                        } else if (dueDateFilter === 'upcoming') {
+                            dueDateMatch = rowDueDate > today;
+                        } else if (dueDateFilter === 'today') {
+                            dueDateMatch = rowDueDate === today;
+                        }
 
-                    // Status filter
-                    const statusMatch = statusFilter === 'all' || rowStatus === statusFilter;
+                        // Status filter
+                        const statusMatch = statusFilter === 'all' || rowStatus === statusFilter;
 
-                    // Verified filter
-                    const verifiedMatch = verifiedFilter === 'all' || rowIsVerified === verifiedFilter;
+                        // Verified filter
+                        const verifiedMatch = verifiedFilter === 'all' || rowIsVerified === verifiedFilter;
 
-                    // Payment method filter
-                    const paymentMethodMatch = paymentMethodFilter === 'all' || rowPaymentMethod === paymentMethodFilter;
+                        // Payment method filter
+                        const paymentMethodMatch = paymentMethodFilter === 'all' || rowPaymentMethod === paymentMethodFilter;
 
-                    // Show/hide row based on all filters
-                    if (monthMatch && dueDateMatch && statusMatch && verifiedMatch && paymentMethodMatch) {
-                        row.style.display = '';
-                        visibleCount++;
+                        // Show/hide row based on all filters
+                        if (monthMatch && dueDateMatch && statusMatch && verifiedMatch && paymentMethodMatch) {
+                            row.style.display = '';
+                            visibleCount++;
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+
+                    updateSerialNumbers();
+
+                    // Show/hide no results message
+                    if (visibleCount === 0 && hasData) {
+                        noResultsRow.style.display = '';
                     } else {
-                        row.style.display = 'none';
+                        noResultsRow.style.display = 'none';
                     }
-                });
+                }
 
-                updateSerialNumbers();
+                function resetFilters() {
+                    document.getElementById('filterFromMonth').value = '';
+                    document.getElementById('filterToMonth').value = '';
+                    document.getElementById('filterDueDate').value = 'all';
+                    document.getElementById('filterStatus').value = 'all';
+                    document.getElementById('filterVerified').value = 'all';
+                    document.getElementById('filterPaymentMethod').value = 'all';
 
-                // Show/hide no results message
-                if (visibleCount === 0 && hasData) {
-                    noResultsRow.style.display = '';
-                } else {
+                    invoiceRows.forEach(row => {
+                        row.style.display = '';
+                    });
+
+                    updateSerialNumbers();
                     noResultsRow.style.display = 'none';
                 }
-            }
 
-            function resetFilters() {
-                document.getElementById('filterFromMonth').value = '';
-                document.getElementById('filterToMonth').value = '';
-                document.getElementById('filterDueDate').value = 'all';
-                document.getElementById('filterStatus').value = 'all';
-                document.getElementById('filterVerified').value = 'all';
-                document.getElementById('filterPaymentMethod').value = 'all';
+                function updateSerialNumbers() {
+                    let visibleRows = document.querySelectorAll('#invoiceTableBody tr[data-frommonth]:not([style*="display: none"])');
+                    let counter = 1;
 
-                invoiceRows.forEach(row => {
-                    row.style.display = '';
-                });
-
-                updateSerialNumbers();
-                noResultsRow.style.display = 'none';
-            }
-
-            function updateSerialNumbers() {
-                let visibleRows = document.querySelectorAll('#invoiceTableBody tr[data-frommonth]:not([style*="display: none"])');
-                let counter = 1;
-
-                visibleRows.forEach(row => {
-                    const snCell = row.querySelector('td:first-child');
-                    if (snCell) {
-                        snCell.textContent = counter++;
-                    }
-                });
-            }
-        });
-    </script>
+                    visibleRows.forEach(row => {
+                        const snCell = row.querySelector('td:first-child');
+                        if (snCell) {
+                            snCell.textContent = counter++;
+                        }
+                    });
+                }
+            });
+        </script>
 }
