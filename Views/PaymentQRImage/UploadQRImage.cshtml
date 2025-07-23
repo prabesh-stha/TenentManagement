@@ -1,0 +1,26 @@
+﻿@model TenentManagement.Models.Payment.PaymentQRImageModel
+
+@{
+    ViewData["Title"] = "Upload QR Image";
+}
+
+<h3>Upload QR Image</h3>
+
+@if (ViewData["Message"] != null)
+{
+    <div class="alert @(ViewData["MessageType"])">
+        @ViewData["Message"]
+    </div>
+}
+
+<form asp-action="UploadQRImage" asp-controller="PaymentQRImage" method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="OwnerId" />
+    <input type="hidden" asp-for="PaymentMethodId"/>
+
+    <div class="form-group">
+        <label>Select QR Image</label>
+        <input type="file" name="imageFile" accept="image/*" class="form-control" required />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Upload</button>
+</form>

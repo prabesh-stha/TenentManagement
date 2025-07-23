@@ -153,36 +153,45 @@
                                     <td class="text-nowrap">
                                         @(invoice.UpdatedAt?.ToString("d MMM yyyy") ?? "-")
                                     </td>
-                                    <td class="text-truncate" style="max-width: 150px;" title="@invoice.Remark">
-                                        @invoice.Remark
+                                    <td class="text-truncate" style="max-width: 150px;" title="@invoice.OwnerRemark">
+                                        @invoice.OwnerRemark
                                     </td>
                                     <td class="text-end text-nowrap">
-                                        @if(invoice.Status == "PENDING")
+                                        @if (invoice.Status == "PENDING")
                                         {
-                                            <a asp-controller="PaymentInvoice" asp-action="ValidatePayment" asp-route-id="@invoice.Id" class="btn btn-outline-warning" title="Validate Payment">
-                                                <i class="bi bi-cash"></i>
+                                            <a asp-controller="PaymentInvoice"
+                                               asp-action="ValidatePayment"
+                                               asp-route-id="@invoice.Id"
+                                               class="btn btn-outline-warning"
+                                               title="Validate Payment"
+                                               aria-label="Validate Payment"
+                                               data-bs-toggle="tooltip">
+                                                <i class="bi bi-cash" aria-hidden="true"></i>
                                             </a>
                                         }
-                                        else
+                                        else if (!invoice.IsVerified)
                                         {
-                                            if (!invoice.IsVerified)
-                                            {
-                                                <div class="btn-group" role="group">
-                                                    <a asp-controller="PaymentInvoice"
-                                                       asp-action="Edit"
-                                                       asp-route-id="@invoice.Id"
-                                                       class="btn btn-outline-primary btn-sm"
-                                                       title="Edit Invoice">
-                                                        <i class="bi bi-pencil-square"></i>
-                                                    </a>
-                                                    <button type="button"
-                                                            class="btn btn-outline-danger btn-sm"
-                                                            onclick="confirmDeletion('PaymentInvoice', @invoice.Id, '/PaymentInvoice/Delete')"
-                                                            title="Delete Invoice">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                </div>
-                                            }
+                                            <div class="btn-group" role="group" aria-label="Invoice actions">
+         
+                                                <a asp-controller="PaymentInvoice"
+                                                   asp-action="Edit"
+                                                   asp-route-id="@invoice.Id"
+                                                   class="btn btn-outline-primary btn-sm"
+                                                   title="Edit Invoice"
+                                                   aria-label="Edit Invoice"
+                                                   data-bs-toggle="tooltip">
+                                                    <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                                                </a>
+
+                                                <button type="button"
+                                                        class="btn btn-outline-danger btn-sm"
+                                                        onclick="confirmDeletion('PaymentInvoice', @invoice.Id, '/PaymentInvoice/Delete')"
+                                                        title="Delete Invoice"
+                                                        aria-label="Delete Invoice"
+                                                        data-bs-toggle="tooltip">
+                                                    <i class="bi bi-trash" aria-hidden="true"></i>
+                                                </button>
+                                            </div>
                                         }
                                     </td>
                                 </tr>

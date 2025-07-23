@@ -30,63 +30,68 @@
 				<input type="hidden" asp-for="FromMonth" id="FromMonth" />
 
 
-				<div class="mb-3">
-					<label class="form-label small text-muted">From Month *</label>
-					<select class="form-control" disabled>
-						@{
+				<div class="row mb-3">
+					<div class="col-md-6">
+						<label class="form-label small text-muted">From Month *</label>
+						<select class="form-control" disabled>
+							@{
 
-							var month = Model.AvailableMonth.First();
-							<option value="@Model.FromMonth.ToString("yyyy-MM-01")" selected>@Model.FromMonth.ToString("yyyy MMMM")</option>
+								var month = Model.AvailableMonth.First();
+								<option value="@Model.FromMonth.ToString("yyyy-MM-01")" selected>@Model.FromMonth.ToString("yyyy MMMM")</option>
 
-						}
-
-
-					</select>
-				</div>
-
-				<div class="mb-3">
-					<label class="form-label small text-muted">To Month *</label>
-					<select asp-for="ToMonth" id="ToMonth" class="form-control">
-						@if (Model.AvailableMonth != null && Model.AvailableMonth.Any())
-						{
-							foreach (var m in Model.AvailableMonth.OrderBy(m => m))
-							{
-								<option value="@m.ToString("yyyy-MM-01")">@m.ToString("yyyy MMMM")</option>
 							}
-						}
-						else
-						{
-							<option disabled>No available months</option>
-						}
-					</select>
 
-				</div>
 
-				<div class="mb-3">
-					<label class="form-label small text-muted">Amount Per Month *</label>
-					<div class="input-group">
-						<span class="input-group-text">Rs.</span>
-						<input asp-for="AmountPerMonth" class="form-control" id="AmountPerMonth" placeholder="e.g. 10000" readonly />
+						</select>
 					</div>
-					@* <span asp-validation-for="AmountPerMonth" class="text-danger small"></span> *@
-				</div>
 
-				<div class="mb-3">
-					<label class="form-label small text-muted">Total Amount</label>
-					<div class="input-group">
-						<span class="input-group-text">Rs</span>
-						<input asp-for="AmountDue" type="text" class="form-control" id="TotalAmountDisplay" readonly />
+					<div class="col-md-6">
+						<label class="form-label small text-muted">To Month *</label>
+						<select asp-for="ToMonth" id="ToMonth" class="form-control">
+							@if (Model.AvailableMonth != null && Model.AvailableMonth.Any())
+							{
+								foreach (var m in Model.AvailableMonth.OrderBy(m => m))
+								{
+									<option value="@m.ToString("yyyy-MM-01")">@m.ToString("yyyy MMMM")</option>
+								}
+							}
+							else
+							{
+								<option disabled>No available months</option>
+							}
+						</select>
+
 					</div>
 				</div>
+
+				<div class="row mb-3">
+					<div class="col-md-6">
+						<label class="form-label small text-muted">Amount Per Month *</label>
+						<div class="input-group">
+							<span class="input-group-text">Rs.</span>
+							<input asp-for="AmountPerMonth" class="form-control" id="AmountPerMonth" placeholder="e.g. 10000" readonly />
+						</div>
+						@* <span asp-validation-for="AmountPerMonth" class="text-danger small"></span> *@
+					</div>
+
+					<div class="col-md-6">
+						<label class="form-label small text-muted">Total Amount</label>
+						<div class="input-group">
+							<span class="input-group-text">Rs</span>
+							<input asp-for="AmountDue" type="text" class="form-control" id="TotalAmountDisplay" readonly />
+						</div>
+					</div>
+				</div>
+				
 				<div class="mb-3">
 					<label asp-for="DueDate" class="form-label">Rent Due Date *</label>
 					<input asp-for="DueDate" id="DueDate" type="date" class="form-control" />
 				</div>
 
 				<div class="mb-3">
-					<label asp-for="Remark" class="form-label small text-muted">Remark</label>
-					<textarea asp-for="Remark" class="form-control" placeholder="Remark" rows="3"></textarea>
-					<span asp-validation-for="Remark" class="text-danger small"></span>
+					<label asp-for="OwnerRemark" class="form-label small text-muted">Owner Remark</label>
+					<textarea asp-for="OwnerRemark" class="form-control" placeholder="Anything to add?" rows="3"></textarea>
+					<span asp-validation-for="OwnerRemark" class="text-danger small"></span>
 				</div>
 
 				<div class="mb-3">

@@ -153,8 +153,8 @@
                                     <td class="text-nowrap">
                                         @(invoice.UpdatedAt?.ToString("d MMM yyyy") ?? "-")
                                     </td>
-                                    <td class="text-truncate" style="max-width: 150px;" title="@invoice.Remark">
-                                        @invoice.Remark
+                                    <td class="text-truncate" style="max-width: 150px;" title="@invoice.OwnerRemark">
+                                        @invoice.OwnerRemark
                                     </td>
                                     <td class="text-end text-nowrap">
                                         @if (invoice.Status == "UNPAID")

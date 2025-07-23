@@ -10,6 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddScoped<TenentManagement.Services.User.UserService>();
+
 builder.Services.AddSingleton<DatabaseConnection>();
 
 
@@ -26,6 +28,8 @@ builder.Services.AddScoped<TenentManagement.Services.Property.Unit.UnitService>(
 builder.Services.AddScoped<TenentManagement.Services.Payment.PaymentInvoiceService>();
 
 builder.Services.AddScoped<TenentManagement.Services.Payment.PaymentService>();
+
+builder.Services.AddScoped<TenentManagement.Services.Payment.PaymentQRImageService>();
 
 //BCrypt service for password hashing
 builder.Services.AddScoped<BCryptService>();

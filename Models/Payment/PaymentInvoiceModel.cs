@@ -1,4 +1,6 @@
-﻿namespace TenentManagement.Models.Payment
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace TenentManagement.Models.Payment
 {
     public class PaymentInvoiceModel
     {
@@ -7,7 +9,6 @@
         public string RenterName { get; set; } = string.Empty;
         public int UnitId { get; set; }
         public DateTime FromMonth { get; set; }
-
         public DateTime ToMonth { get; set; }
         public DateTime DueDate { get; set; }
         public float AmountDue { get; set; }
@@ -16,7 +17,17 @@
         public string OwnerName { get; set; } = string.Empty;
         public int PaymentMethodId { get; set; } = 1;
         public string PaymentMethod { get; set; } = string.Empty;
-        public string Remark { get; set; } = string.Empty;
+        [Display(Name = "Owner Remarks")]
+        [StringLength(250, ErrorMessage = "Remarks cannot exceed 250 characters")]
+        [Required(AllowEmptyStrings = true)]
+        [DataType(DataType.MultilineText)]
+        public string OwnerRemark { get; set; } = string.Empty;
+
+        [Display(Name = "Renter Remarks")]
+        [StringLength(250, ErrorMessage = "Remarks cannot exceed 250 characters")]
+        [DataType(DataType.MultilineText)]
+        [Required(AllowEmptyStrings = true)]
+        public string RenterRemark { get; set; } = string.Empty;
         public bool IsVerified { get; set; } = false;
         public DateTime? VerifiedAt { get; set; }
         public int StatusId { get; set; } = 3;

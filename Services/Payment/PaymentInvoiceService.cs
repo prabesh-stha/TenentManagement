@@ -25,7 +25,7 @@ namespace TenentManagement.Services.Payment
             parameters.Add("@AMOUNTDUE", payment.AmountDue);
             parameters.Add("@OWNERID", payment.OwnerId);
             parameters.Add("@PAYMENTMETHODID", payment.PaymentMethodId);
-            parameters.Add("@REMARK", payment.Remark);
+            parameters.Add("@OWNERREMARK", payment.OwnerRemark);
             parameters.Add("@ISVERIFIED", payment.IsVerified);
             parameters.Add("@VERIFIEDAT", payment.VerifiedAt);
             parameters.Add("@STATUSID", payment.StatusId);
@@ -57,7 +57,8 @@ namespace TenentManagement.Services.Payment
             parameters.Add("@DUEDATE", payment.DueDate);
             parameters.Add("@AMOUNTDUE", payment.AmountDue);
             parameters.Add("@PAYMENTMETHODID", payment.PaymentMethodId);
-            parameters.Add("@REMARK", payment.Remark);
+            parameters.Add("@OWNERREMARK", payment.OwnerRemark);
+            parameters.Add("@RENTERREMARK", payment.RenterRemark);
             parameters.Add("@ISVERIFIED", payment.IsVerified);
             if (payment.IsVerified)
             {
