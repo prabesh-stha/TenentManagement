@@ -95,7 +95,8 @@
                             <th class="align-middle text-center" rowspan="2">Verified</th>
                             <th class="align-middle" rowspan="2">Verified At</th>
                             <th class="align-middle" rowspan="2">Updated At</th>
-                            <th class="align-middle" rowspan="2">Remark</th>
+                            <th class="align-middle" rowspan="2">Owner Remark</th>
+                            <th class="align-middle" rowspan="2">Renter Remark</th>
                             <th class="align-middle text-end" rowspan="2">Actions</th>
                         </tr>
                         <tr>
@@ -155,6 +156,9 @@
                                     </td>
                                     <td class="text-truncate" style="max-width: 150px;" title="@invoice.OwnerRemark">
                                         @invoice.OwnerRemark
+                                    </td>
+                                    <td class="text-truncate" style="max-width: 150px;" title="@invoice.RenterRemark">
+                                        @invoice.RenterRemark
                                     </td>
                                     <td class="text-end text-nowrap">
                                         @if (invoice.Status == "PENDING")
@@ -260,7 +264,7 @@
             const invoiceRows = document.querySelectorAll('#invoiceTableBody tr[data-frommonth]');
 
             const noResultsRow = document.createElement('tr');
-            noResultsRow.innerHTML = '<td colspan="15" class="text-center py-4 text-muted"><i class="bi bi-file-earmark-excel me-2"></i> No invoices match the selected filters</td>';
+            noResultsRow.innerHTML = '<td colspan="16" class="text-center py-4 text-muted"><i class="bi bi-file-earmark-excel me-2"></i> No invoices match the selected filters</td>';
             noResultsRow.style.display = 'none';
             invoiceTableBody.appendChild(noResultsRow);
 

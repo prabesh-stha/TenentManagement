@@ -157,14 +157,8 @@
                     <div class="payment-actions">
                         <div class="section-title">Payment Information</div>
                         <div class="row g-2">
-                            <div class="col-md-4">
-                                <a asp-action="UploadQRImage" asp-controller="PaymentQRImage" asp-route-ownerId="@Model.Id" asp-route-paymentId="2" class="btn btn-primary w-100">Add Payment Method 1</a>
-                            </div>
-                            <div class="col-md-4">
-                                <a asp-action="GetImage" asp-controller="PaymentQRImage" asp-route-ownerId="@Model.Id" class="btn btn-primary w-100">Add Payment Method 2</a>
-                            </div>
-                            <div class="col-md-4">
-                                <a asp-action="AddPaymentsOption" asp-controller="PaymentQRImage" asp-route-ownerId="@Model.Id" class="btn btn-primary w-100">Add Payment Method 3</a>
+                            <div class="col-md-6">
+                                <a asp-action="ManageQRImage" asp-controller="PaymentQRImage" asp-route-ownerId="@Model.Id" class="btn btn-primary w-100">Manage Payment QR</a>
                             </div>
                         </div>
                     </div>

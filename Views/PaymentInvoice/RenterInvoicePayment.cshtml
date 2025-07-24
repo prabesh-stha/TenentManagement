@@ -1,4 +1,5 @@
 ﻿@model TenentManagement.Models.Payment.PaymentInvoiceModel
+@using TenentManagement.Services.Utilities
 @{
 	ViewData["Title"] = "Renter Payment Invoice";
 
@@ -19,13 +20,14 @@
 		</div>
 
 		<div class="card-body p-4">
-			<form method="post" asp-action="RenterInvoicePayment" asp-controller="PaymentInvoice" class="needs-validation" novalidate>
+			<form method="post" asp-action="RenterInvoicePayment" asp-controller="PaymentInvoice" class="needs-validation" novalidate method="post" enctype="multipart/form-data">
 				<input type="hidden" asp-for="UnitId" />
 				<input type="hidden" asp-for="RenterId" />
 				<input type="hidden" asp-for="OwnerId" />
 				<input type="hidden" asp-for="FromMonth" id="FromMonth" />
 				<input type="hidden" asp-for="ToMonth" id="ToMonth" />
 				<input type="hidden" asp-for="StatusId" />
+				<input type="hidden" asp-for="PaymentMethodId" />
 
 				<div class="row mb-3">
 
@@ -83,36 +85,55 @@
 					<textarea asp-for="RenterRemark" class="form-control" placeholder="Anything to add?" rows="3"></textarea>
 					<span asp-validation-for="RenterRemark" class="text-danger small"></span>
 				</div>
-
-
-
-				<div class="mb-3">
-					<label asp-for="Status" class="form-label small text-muted">Payment Status *</label>
-					<select asp-for="Status" class="form-select" disabled>
-						<option value="@Model.Status" selected>@Model.Status</option>
-					</select>
+				@if (Model.PaymentQRImage != null)
+				{
+					<div class="mb-3">
+						<label class="form-label small text-muted">
+							@Model.PaymentMethod.ToTitleCase() QR
+						</label>
+						<div class="text-center">
+							<img src="@Model.PaymentQRImage.Base64Image"
+								 width="250"
+								 height="250"
+								 alt="@Model.PaymentMethod QR image"
+								 class="img-thumbnail" />
+						</div>
+					</div>
+				}
+				
+				<div class="mb-4">
+					<label class="form-label small text-muted">Upload Payment Proof</label>
+					<div class="border rounded p-3 text-center" id="imageUploadArea">
+						<div id="imagePreviewContainer" class="mb-3 d-none">
+							<img id="imagePreview" class="img-fluid rounded" style="max-height: 500px;" />
+							<br />
+							<button type="button" class="btn btn-lg text-danger mt-2" id="removeImageBtn" title="Delete Payment Proof">
+								<i class="bi bi-x-lg"></i> 
+							</button>
+						</div>
+						<div id="uploadPrompt" class="py-4">
+							<i class="bi bi-cloud-upload display-4 text-muted"></i>
+							<p class="mt-2 mb-1">Drag & drop your payment proof image here or</p>
+							<input type="file" name="imageFile" id="imageFile" class="d-none" accept="image/*" required />
+							<label for="imageFile" class="btn btn-outline-primary">
+								<i class="bi bi-folder2-open"></i> Browse Files
+							</label>
+							<p class="small text-muted mt-2">Supports: JPG, PNG</p>
+						</div>
+					</div>
+					<span id="clientFileError" class="text-danger small d-none mt-2"></span>
 				</div>
 
-				<div class="mb-3">
-					<label asp-for="PaymentMethodId" class="form-label small text-muted">Payment Method *</label>
-					<select asp-for="PaymentMethodId" class="form-select" required>
-						@foreach (var method in Model.PaymentMethods)
-						{
-							<option value="@method.Id" selected="@(method.Id == Model.PaymentMethodId)">
-								@(method.PaymentMethod.Length > 0 ?
-															char.ToUpper(method.PaymentMethod[0]) + method.PaymentMethod.Substring(1).ToLower() :
-															method.PaymentMethod)
-							</option>
-						}
-					</select>
-					<span asp-validation-for="PaymentMethodId" class="text-danger small"></span>
+
+
+				@* <button type="submit" class="btn btn-primary w-100 py-2 mt-3 rounded-corner"> *@
+				@* 	<i class="bi bi-file-earmark-text-fill me-2"></i>Request Payment Invoice *@
+				@* </button> *@
+				<div class="d-grid gap-2">
+					<button type="submit" class="btn btn-primary btn-lg submit-btn" disabled>
+						<i class="bi bi-upload"></i> Request Payment Invoice
+					</button>
 				</div>
-
-
-
-				<button type="submit" class="btn btn-primary w-100 py-2 mt-3 rounded-corner">
-					<i class="bi bi-file-earmark-text-fill me-2"></i>Request Payment Invoice
-				</button>
 
 				<div class="text-center small mt-4">
 					<a asp-action="RenterInvoices" asp-controller="PaymentInvoice" asp-route-unitId="@Model.UnitId" asp-route-renterId="@Model.RenterId" class="text-muted text-decoration-none">← Back to Invoices</a>
@@ -122,7 +143,7 @@
 	</div>
 </div>
 
-@section Scripts {
+@* @section Scripts {
 	<script>
 		function calculateTotal() {
 			const from = new Date(document.getElementById("FromMonth").value);
@@ -163,10 +184,6 @@
 				dueDateElement.value = formattedMin;
 			}
 		}
-
-
-
-
 		document.getElementById("ToMonth").addEventListener("change", function() {
 			calculateTotal();
 			calculateDueDate();
@@ -185,5 +202,152 @@
 
 					document.getElementById("AmountPerMonth").addEventListener("input", calculateTotal);
 		 });
+	</script>
+} *@
+
+@section Scripts {
+	<script>
+		// ========== Invoice Calculation Script ==========
+		function calculateTotal() {
+			const from = new Date(document.getElementById("FromMonth").value);
+			const to = new Date(document.getElementById("ToMonth").value);
+			const amount = parseFloat(document.getElementById("AmountPerMonth").value);
+
+			if (!isNaN(from) && !isNaN(to) && !isNaN(amount)) {
+				const months = (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth());
+				if (months > 0) {
+					document.getElementById("TotalAmountDisplay").value = (months * amount).toFixed(2);
+				} else {
+					document.getElementById("TotalAmountDisplay").value = "0.00";
+				}
+			}
+		}
+
+		let initialDueDay = null;
+
+		function calculateDueDate(useInitialDay = false) {
+			const to = new Date(document.getElementById("ToMonth").value);
+			const dueDateElement = document.getElementById("DueDate");
+			let day;
+
+			if (useInitialDay && initialDueDay !== null) {
+				day = initialDueDay;
+			} else {
+				const currentDate = dueDateElement.value ? new Date(dueDateElement.value) : new Date();
+				day = currentDate.getDate();
+			}
+
+			const minDueDate = new Date(to.getFullYear(), to.getMonth(), day);
+
+			const year = minDueDate.getFullYear();
+			const month = String(minDueDate.getMonth() + 1).padStart(2, '0');
+			const dayFormatted = String(minDueDate.getDate()).padStart(2, '0');
+			const formattedMin = `${year}-${month}-${dayFormatted}`;
+
+			dueDateElement.min = formattedMin;
+
+			if (!dueDateElement.value || new Date(dueDateElement.value) < minDueDate) {
+				dueDateElement.value = formattedMin;
+			}
+		}
+
+		// ========== QR Image Upload Script ==========
+		document.addEventListener('DOMContentLoaded', function () {
+			// For Invoice Calculation
+			const initialDueDate = new Date(document.getElementById("DueDate").value);
+			initialDueDay = initialDueDate.getDate();
+			calculateTotal();
+			calculateDueDate(true);
+
+			document.getElementById("ToMonth").addEventListener("change", function () {
+				calculateTotal();
+				calculateDueDate();
+			});
+
+			document.getElementById("AmountPerMonth").addEventListener("input", calculateTotal);
+
+			// For QR Upload Preview and Validation
+			const imageFile = document.getElementById('imageFile');
+			const imagePreview = document.getElementById('imagePreview');
+			const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+			const uploadPrompt = document.getElementById('uploadPrompt');
+			const removeImageBtn = document.getElementById('removeImageBtn');
+			const imageUploadArea = document.getElementById('imageUploadArea');
+			const clientFileError = document.getElementById('clientFileError');
+			const submitBtn = document.querySelector('.submit-btn');
+
+			function checkFormValidity() {
+				const isFileSelected = imageFile.files && imageFile.files.length > 0;
+				submitBtn.disabled = !(isFileSelected);
+			}
+
+
+			imageFile.addEventListener('change', function (e) {
+				if (this.files && this.files[0]) {
+					const file = this.files[0];
+					clientFileError.classList.add('d-none');
+					clientFileError.textContent = '';
+
+
+					if (!file.type.match('image.*')) {
+						showClientError('Please select an image file (JPG or PNG)');
+						this.value = '';
+						checkFormValidity();
+						return;
+					}
+
+					const reader = new FileReader();
+					reader.onload = function (e) {
+						imagePreview.src = e.target.result;
+						imagePreviewContainer.classList.remove('d-none');
+						uploadPrompt.classList.add('d-none');
+						checkFormValidity();
+					}
+					reader.readAsDataURL(file);
+				} else {
+					checkFormValidity();
+				}
+			});
+
+			imageUploadArea.addEventListener('dragover', function (e) {
+				e.preventDefault();
+				this.classList.add('border-primary');
+			});
+
+			imageUploadArea.addEventListener('dragleave', function (e) {
+				e.preventDefault();
+				this.classList.remove('border-primary');
+			});
+
+			imageUploadArea.addEventListener('drop', function (e) {
+				e.preventDefault();
+				this.classList.remove('border-primary');
+
+				if (e.dataTransfer.files.length) {
+					imageFile.files = e.dataTransfer.files;
+					const event = new Event('change');
+					imageFile.dispatchEvent(event);
+				}
+			});
+
+			removeImageBtn.addEventListener('click', function () {
+				imageFile.value = '';
+				imagePreview.src = '';
+				imagePreviewContainer.classList.add('d-none');
+				uploadPrompt.classList.remove('d-none');
+				clientFileError.classList.add('d-none');
+				clientFileError.textContent = '';
+				checkFormValidity();
+			});
+
+			function showClientError(message) {
+				clientFileError.textContent = message;
+				clientFileError.classList.remove('d-none');
+				imageUploadArea.classList.add('border-danger');
+				setTimeout(() => {
+					imageUploadArea.classList.remove('border-danger');
+				}, 2000);
+			}
+		});
 	</script>
 }

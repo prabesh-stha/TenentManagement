@@ -1,0 +1,384 @@
+﻿@model TenentManagement.Models.Payment.PaymentInvoiceModel
+@using TenentManagement.Services.Utilities;
+@{
+    ViewData["Title"] = "Validate Invoice";
+}
+
+<div class="container py-5">
+    <div class="card shadow-lg mx-auto rounded-corner" style="max-width: 700px;">
+        <div class="card-header bg-primary text-white py-4 rounded-corner-top">
+            <h1 class="h4 mb-0 text-center d-flex flex-column align-items-center">
+                <span class="d-inline-flex align-items-center justify-content-center bg-opacity-25 bg-info text-white rounded-circle mb-2" style="width: 50px; height: 50px;">
+                    <i class="bi bi-receipt"></i>
+                </span>
+                <span>Tenant Management System</span>
+                <span class="mt-2 mb-0 text-center">
+                    <i class="bi bi-pencil-fill me-2"></i>Validate Invoice
+                </span>
+            </h1>
+        </div>
+
+        <div class="card-body p-4">
+            <form method="post" asp-action="ValidatePayment" asp-controller="PaymentInvoice" class="needs-validation" novalidate id="validationForm">
+                <input type="hidden" asp-for="UnitId" />
+                <input type="hidden" asp-for="RenterId" />
+                <input type="hidden" asp-for="OwnerId" />
+                <input type="hidden" asp-for="FromMonth" id="FromMonth" />
+                <input type="hidden" asp-for="ToMonth" id="ToMonth" />
+                <input type="hidden" asp-for="PaymentMethodId" />
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label small text-muted">From Month *</label>
+                        <select class="form-control" disabled>
+                            <option value="@Model.FromMonth.ToString("yyyy-MM-01")" selected>@Model.FromMonth.ToString("yyyy MMMM")</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small text-muted">To Month *</label>
+                        <select asp-for="ToMonth" id="ToMonth" class="form-control" disabled>
+                            <option value="@Model.ToMonth.ToString("yyyy-MM-01")" selected>@Model.ToMonth.ToString("yyyy MMMM")</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label small text-muted">Amount Per Month *</label>
+                        <div class="input-group">
+                            <span class="input-group-text">Rs.</span>
+                            <input asp-for="AmountPerMonth" class="form-control" id="AmountPerMonth" placeholder="e.g. 10000" readonly />
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small text-muted">Total Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">Rs</span>
+                            <input asp-for="AmountDue" type="text" class="form-control" id="TotalAmountDisplay" readonly />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="DueDate" class="form-label">Rent Due Date *</label>
+                    <input asp-for="DueDate" id="DueDate" type="date" class="form-control" disabled />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="RenterRemark" class="form-label small text-muted">Renter Remarks</label>
+                    <textarea asp-for="RenterRemark" class="form-control" placeholder="-" rows="3" disabled></textarea>
+                    <span asp-validation-for="RenterRemark" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="OwnerRemark" class="form-label small text-muted">Owner Remarks</label>
+                    <textarea asp-for="OwnerRemark" class="form-control" placeholder="Anything to add?" rows="3"></textarea>
+                    <span asp-validation-for="OwnerRemark" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="PaymentMethodId" class="form-label small text-muted">Payment Method *</label>
+                    <select asp-for="PaymentMethodId" class="form-select" disabled>
+                        <option value="@Model.PaymentMethod" selected>@Model.PaymentMethod.ToTitleCase()</option>
+                    </select>
+                    <span asp-validation-for="PaymentMethodId" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small text-muted">@Model.PaymentMethod.ToTitleCase() Payment Proof</label>
+                    <div class="border rounded p-3 bg-light">
+                        @if (Model.PaymentProof != null)
+                        {
+                            <div class="text-center mb-3">
+                                <img src="@Model.PaymentProof.Base64Image"
+                                     class="img-fluid rounded shadow-sm"
+                                     style="max-height: 300px;"
+                                     alt="@Model.PaymentMethod.ToTitleCase() Payment Proof" />
+                            </div>
+                            <div class="d-flex justify-content-center gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-primary"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#proofModal">
+                                    <i class="bi bi-zoom-in me-1"></i> View Larger
+                                </button>
+                                <a href="@Model.PaymentProof.Base64Image"
+                                   download="payment-proof-@DateTime.Now.ToString("yyyyMMdd")"
+                                   class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-download me-1"></i> Download
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-4">
+                                <i class="bi bi-image text-muted display-6"></i>
+                                <p class="text-muted mt-2">No payment proof provided</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="StatusId" class="form-label small text-muted">Payment Status *</label>
+                        <div class="input-group">
+                            <select asp-for="StatusId" class="form-select" id="statusSelect" required>
+                                @foreach (var status in Model.PaymentStatuses)
+                                {
+                                    <option value="@status.Id" selected="@(status.Id == Model.StatusId)">
+                                        @status.Status.ToTitleCase()
+                                    </option>
+                                }
+                            </select>
+                            <span class="input-group-text" id="statusIcon">
+                                <i class="bi bi-question-circle-fill text-warning"></i>
+                            </span>
+                        </div>
+                        <span asp-validation-for="StatusId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label class="form-label small text-muted" asp-for="IsVerified">Payment Verified by Owner?</label>
+                        <div class="mt-2">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" asp-for="IsVerified" value="true" id="verifiedYes" />
+                                <label class="form-check-label" for="verifiedYes">Yes</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" asp-for="IsVerified" value="false" id="verifiedNo" checked />
+                                <label class="form-check-label" for="verifiedNo">No</label>
+                            </div>
+                            <span class="ms-2" id="verifiedIcon">
+                                <i class="bi bi-question-circle-fill text-warning"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Validation Status Alert -->
+                <div class="alert mb-3 d-none" id="validationAlert">
+                    <i class="bi me-2" id="alertIcon"></i>
+                    <span id="alertMessage"></span>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-primary py-2 rounded-corner" id="submitButton" data-bs-toggle="modal" data-bs-target="#confirmationModal">
+                        <i class="bi bi-check me-2"></i>Validate Invoice
+                    </button>
+                    <a asp-action="AllInvoice" asp-controller="PaymentInvoice" asp-route-id="@Model.UnitId"
+                       class="btn btn-outline-secondary py-2 rounded-corner">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Invoices
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Proof Modal -->
+<div class="modal fade" id="proofModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-receipt me-2"></i> Payment Proof
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <div class="d-flex justify-content-center">
+                    <img src="@Model.PaymentProof?.Base64Image"
+                         class="img-fluid rounded"
+                         style="max-height: 70vh;"
+                         alt="Payment Proof" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="@Model.PaymentProof?.Base64Image"
+                   download="payment-proof-@DateTime.Now.ToString("yyyyMMdd")"
+                   class="btn btn-primary">
+                    <i class="bi bi-download me-1"></i> Download
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle me-2"></i> Confirm Validation
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="confirmationMessage">
+                <!-- Message will be inserted here by JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmSubmit">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function calculateTotal() {
+            const from = new Date(document.getElementById("FromMonth").value);
+            const to = new Date(document.getElementById("ToMonth").value);
+            const amount = parseFloat(document.getElementById("AmountPerMonth").value);
+
+            if (!isNaN(from) && !isNaN(to) && !isNaN(amount)) {
+                const months = (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth());
+                if (months > 0) {
+                    document.getElementById("TotalAmountDisplay").value = (months * amount).toFixed(2);
+                } else {
+                    document.getElementById("TotalAmountDisplay").value = "0.00";
+                }
+            }
+        }
+
+        let initialDueDay = null;
+        function calculateDueDate(useInitialDay = false) {
+            const to = new Date(document.getElementById("ToMonth").value);
+            const dueDateElement = document.getElementById("DueDate");
+            let day;
+
+            if (useInitialDay && initialDueDay !== null) {
+                day = initialDueDay;
+            } else {
+                const currentDate = dueDateElement.value ? new Date(dueDateElement.value) : new Date();
+                day = currentDate.getDate();
+            }
+
+            const minDueDate = new Date(to.getFullYear(), to.getMonth(), day);
+            const year = minDueDate.getFullYear();
+            const month = String(minDueDate.getMonth() + 1).padStart(2, '0');
+            const dayFormatted = String(minDueDate.getDate()).padStart(2, '0');
+            const formattedMin = `${year}-${month}-${dayFormatted}`;
+
+            dueDateElement.min = formattedMin;
+            if (!dueDateElement.value || new Date(dueDateElement.value) < minDueDate) {
+                dueDateElement.value = formattedMin;
+            }
+        }
+
+        function updateValidationStatus() {
+            const statusSelect = document.getElementById('statusSelect');
+            const isVerifiedYes = document.getElementById('verifiedYes').checked;
+            const statusIcon = document.getElementById('statusIcon');
+            const verifiedIcon = document.getElementById('verifiedIcon');
+            const validationAlert = document.getElementById('validationAlert');
+            const alertIcon = document.getElementById('alertIcon');
+            const alertMessage = document.getElementById('alertMessage');
+
+            // Get the selected status text
+            const selectedStatus = statusSelect.options[statusSelect.selectedIndex].text.toLowerCase();
+
+            // Update status icon
+            if (selectedStatus === 'paid') {
+                statusIcon.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i>';
+            } else if (selectedStatus === 'unpaid') {
+                statusIcon.innerHTML = '<i class="bi bi-x-circle-fill text-danger"></i>';
+            } else {
+                statusIcon.innerHTML = '<i class="bi bi-question-circle-fill text-warning"></i>';
+            }
+
+            // Update verified icon
+            if (isVerifiedYes) {
+                verifiedIcon.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i>';
+            } else {
+                verifiedIcon.innerHTML = '<i class="bi bi-x-circle-fill text-danger"></i>';
+            }
+
+            // Determine validation state and show appropriate message
+            if (selectedStatus === 'paid' && isVerifiedYes) {
+                validationAlert.className = 'alert alert-success mb-3';
+                alertIcon.className = 'bi bi-check-circle-fill me-2';
+                alertMessage.textContent = 'This payment is VALID (Paid and Verified)';
+                validationAlert.classList.remove('d-none');
+            }
+            else if (selectedStatus === 'unpaid' && !isVerifiedYes) {
+                validationAlert.className = 'alert alert-danger mb-3';
+                alertIcon.className = 'bi bi-x-circle-fill me-2';
+                alertMessage.textContent = 'This payment is INVALID (Unpaid and Not Verified)';
+                validationAlert.classList.remove('d-none');
+            }
+            else {
+                validationAlert.className = 'alert alert-warning mb-3';
+                alertIcon.className = 'bi bi-exclamation-triangle-fill me-2';
+                alertMessage.textContent = 'This combination doesn\'t match standard validation states';
+                validationAlert.classList.remove('d-none');
+            }
+        }
+
+        function prepareConfirmation() {
+            const statusSelect = document.getElementById('statusSelect');
+            const isVerifiedYes = document.getElementById('verifiedYes').checked;
+            const selectedStatus = statusSelect.options[statusSelect.selectedIndex].text.toLowerCase();
+            const messageDiv = document.getElementById('confirmationMessage');
+
+            if (selectedStatus === 'paid' && isVerifiedYes) {
+                messageDiv.innerHTML = `
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        You are marking this payment as <strong>VALID</strong> (Paid and Verified).
+                        This will approve the payment. Are you sure?
+                    </div>
+                `;
+            } else if (selectedStatus === 'unpaid' && !isVerifiedYes) {
+                messageDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-x-circle-fill me-2"></i>
+                        You are marking this payment as <strong>INVALID</strong> (Unpaid and Not Verified).
+                        This will reject the payment. Are you sure?
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Warning: This combination (<strong>${selectedStatus}</strong> and
+                        <strong>${isVerifiedYes ? 'Verified' : 'Not Verified'}</strong>)
+                        doesn't match standard validation states. Continue?
+                    </div>
+                `;
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const initialDueDate = new Date(document.getElementById("DueDate").value);
+            initialDueDay = initialDueDate.getDate();
+            calculateTotal();
+            calculateDueDate(true);
+
+            document.getElementById("ToMonth").addEventListener("change", function() {
+                calculateTotal();
+                calculateDueDate();
+            });
+
+            document.getElementById("AmountPerMonth").addEventListener("input", calculateTotal);
+
+            // Add event listeners for validation
+            document.getElementById('statusSelect').addEventListener('change', updateValidationStatus);
+            document.getElementById('verifiedYes').addEventListener('change', updateValidationStatus);
+            document.getElementById('verifiedNo').addEventListener('change', updateValidationStatus);
+
+            // Initialize validation status
+            updateValidationStatus();
+
+            // Confirmation modal handling
+            document.getElementById('submitButton').addEventListener('click', prepareConfirmation);
+            document.getElementById('confirmSubmit').addEventListener('click', function() {
+                document.getElementById('validationForm').submit();
+            });
+        });
+    </script>
+}

@@ -16,13 +16,15 @@ namespace TenentManagement.Controllers
         private readonly UnitService _unitService;
         private readonly PaymentInvoiceService _paymentInvoiceService;
         private readonly PaymentService _paymentService;
-        public PaymentInvoiceController(UnitService unitService, PaymentInvoiceService paymentInvoiceService, PaymentService paymentService)
+        private readonly PaymentQRImageService _paymentQRService;
+        private readonly PaymentProofService _paymentProofService;
+        public PaymentInvoiceController(UnitService unitService, PaymentInvoiceService paymentInvoiceService, PaymentService paymentService, PaymentQRImageService paymentQRService, PaymentProofService paymentProofService)
         {
             _unitService = unitService ?? throw new ArgumentNullException(nameof(unitService));
             _paymentInvoiceService = paymentInvoiceService ?? throw new ArgumentNullException(nameof(paymentInvoiceService));
             _paymentService = paymentService ?? throw new ArgumentNullException(nameof(paymentService));
-
-
+            _paymentQRService = paymentQRService ?? throw new ArgumentNullException(nameof(paymentQRService));
+            _paymentProofService = paymentProofService ?? throw new ArgumentNullException(nameof(paymentProofService));
         }
 
         [HttpGet]
@@ -372,37 +374,84 @@ namespace TenentManagement.Controllers
             var payMethods = _paymentInvoiceService.GetAllPaymentMethod();
             payInvoice.AmountPerMonth = unit?.RentAmount ?? 0;
             payInvoice.PaymentMethods = payMethods;
+            payInvoice.PaymentQRImage = _paymentQRService.GetPaymentQRByOwnerIdAndPaymentId(payInvoice.OwnerId, payInvoice.PaymentMethodId);
             return View(payInvoice);
         }
         [HttpPost]
-        public IActionResult RenterInvoicePayment(PaymentInvoiceModel model)
+        public IActionResult RenterInvoicePayment(PaymentInvoiceModel model, IFormFile imageFile)
         {
-            try
+            if (imageFile != null && imageFile.Length > 0)
             {
-                model.StatusId = 1;
-                int row = _paymentInvoiceService.UpdatePaymentInvoice(model);
-                if (row > 0)
+                var image = new PaymentProofModel();
+                image.ImageType = imageFile.ContentType;
+
+                using (var ms = new MemoryStream())
                 {
-                    TempData["Message"] = "Payment Invoice sent for verification!";
-                    TempData["MessageType"] = "success";
-                    return RedirectToAction("RenterInvoices", "PaymentInvoice", new { unitId = model.UnitId, renterId = model.RenterId });
+                    imageFile.CopyTo(ms);
+                    image.ImageData = ms.ToArray();
                 }
-                else
+                image.InvoiceId = model.Id;
+                image.OwnerId = model.OwnerId;
+                image.PaymentMethodId = model.PaymentMethodId;
+                try
                 {
-                    ViewData["Message"] = "An error occurred while updating the payment invoice.";
+                    int row = _paymentProofService.CreatePaymentProofImage(image);
+                    if (row < 0)
+                    {
+                        ViewData["Message"] = "Error while uploading payment proof";
+                        ViewData["MessageType"] = "error";
+                        return View(model);
+                    }
+                }
+                catch
+                {
+                    ViewData["Message"] = "Error while uploading payment proof";
                     ViewData["MessageType"] = "error";
-                    model.PaymentMethods = _paymentInvoiceService.GetAllPaymentMethod();
                     return View(model);
                 }
             }
-            catch
+            else
             {
-                ViewData["Message"] = "An error occurred while updating the payment invoice.";
+                ViewData["Message"] = "Please upload valid payment proof!";
                 ViewData["MessageType"] = "error";
-                model.PaymentMethods = _paymentInvoiceService.GetAllPaymentMethod();
                 return View(model);
             }
+                try
+                {
+                    model.StatusId = 1;
+                    int row = _paymentInvoiceService.UpdatePaymentInvoice(model);
+                    if (row > 0)
+                    {
+                        TempData["Message"] = "Payment Invoice sent for verification!";
+                        TempData["MessageType"] = "success";
+                        return RedirectToAction("RenterInvoices", "PaymentInvoice", new { unitId = model.UnitId, renterId = model.RenterId });
+                    }
+                    else
+                    {
+                        ViewData["Message"] = "An error occurred while updating the payment invoice.";
+                        ViewData["MessageType"] = "error";
+                        return View(model);
+                    }
+                }
+                catch
+                {
+                    ViewData["Message"] = "An error occurred while updating the payment invoice.";
+                    ViewData["MessageType"] = "error";
+                    return View(model);
+                }
         }
 
+        [HttpGet]
+        public IActionResult ValidatePayment(int id)
+        {
+            var payInvoice = _paymentInvoiceService.GetPaymentInvoiceById(id);
+            if (payInvoice == null) return NotFound();
+            var unit = _unitService.GetUnitById(payInvoice.UnitId);
+            var paymentStatuses = _paymentInvoiceService.GetAllPaymentStatus();
+            payInvoice.AmountPerMonth = unit?.RentAmount ?? 0;
+            payInvoice.PaymentStatuses = paymentStatuses;
+            payInvoice.PaymentProof = _paymentProofService.GetPaymentProofImage(id);
+            return View(payInvoice);
+        }
         }
     }

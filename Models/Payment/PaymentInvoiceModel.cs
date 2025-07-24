@@ -39,6 +39,8 @@ namespace TenentManagement.Models.Payment
 
         public IEnumerable<PaymentMethodModel> PaymentMethods { get; set; } = new List<PaymentMethodModel>();
         public IEnumerable<PaymentStatusModel> PaymentStatuses { get; set; } = new List<PaymentStatusModel>();
+        public PaymentQRImageModel? PaymentQRImage { get; set; }
+        public PaymentProofModel? PaymentProof { get; set; }
 
     }
 }
