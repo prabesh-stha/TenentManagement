@@ -1,4 +1,5 @@
 ﻿@model TenentManagement.Models.Payment.PaymentInvoiceModel
+@using TenentManagement.Services.Utilities;
 @{
 	ViewData["Title"] = "Edit Invoice";
 
@@ -93,40 +94,131 @@
 					<span asp-validation-for="PaymentMethodId" class="text-danger small"></span>
 				</div>
 
-				<div class="mb-3">
-					<label asp-for="StatusId" class="form-label small text-muted">Payment Status *</label>
-					<select asp-for="StatusId" class="form-select" required>
-						@foreach (var status in Model.PaymentStatuses)
-						{
-							<option value="@status.Id" selected="@(status.Id == Model.StatusId)">
-								@(status.Status.Length > 0 ?
-															char.ToUpper(status.Status[0]) + status.Status.Substring(1).ToLower() :
-															status.Status)
-							</option>
-						}
-					</select>
-					<span asp-validation-for="StatusId" class="text-danger small"></span>
+				@if (Model.PaymentProof != null)
+				{
+					<div class="mb-4">
+						<label class="form-label small text-muted">@Model.PaymentMethod.ToTitleCase() Payment Proof</label>
+						<div class="border rounded p-3 bg-light">
+							<div class="text-center mb-3">
+								<img src="@Model.PaymentProof.Base64Image"
+									 class="img-fluid rounded shadow-sm"
+									 style="max-height: 300px;"
+									 alt="@Model.PaymentMethod.ToTitleCase() Payment Proof" />
+							</div>
+							<div class="d-flex justify-content-center gap-2">
+								<button type="button" class="btn btn-sm btn-outline-primary"
+										data-bs-toggle="modal"
+										data-bs-target="#proofModal">
+									<i class="bi bi-zoom-in me-1"></i> View Larger
+								</button>
+								<a href="@Model.PaymentProof.Base64Image"
+								   download="payment-proof-@DateTime.Now.ToString("yyyyMMdd")"
+								   class="btn btn-sm btn-outline-secondary">
+									<i class="bi bi-download me-1"></i> Download
+								</a>
+							</div>
+						</div>
+					</div>
+				}
+				<div class="row mb-3">
+					<div class="col-md-6">
+						<label asp-for="StatusId" class="form-label small text-muted">Payment Status *</label>
+						<div class="input-group">
+							<select asp-for="StatusId" class="form-select" id="statusSelect" required>
+								@foreach (var status in Model.PaymentStatuses)
+								{
+									<option value="@status.Id" selected="@(status.Id == Model.StatusId)">
+										@status.Status.ToTitleCase()
+									</option>
+								}
+							</select>
+							<span class="input-group-text" id="statusIcon">
+								<i class="bi bi-question-circle-fill text-warning"></i>
+							</span>
+						</div>
+						<span asp-validation-for="StatusId" class="text-danger small"></span>
+					</div>
+
+					<div class="form-group col-md-6">
+						<label class="form-label small text-muted" asp-for="IsVerified">Valid Payment?</label>
+						<div class="mt-2">
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" asp-for="IsVerified" value="true" id="verifiedYes" />
+								<label class="form-check-label" for="verifiedYes">Yes</label>
+							</div>
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" asp-for="IsVerified" value="false" id="verifiedNo" checked />
+								<label class="form-check-label" for="verifiedNo">No</label>
+							</div>
+							<span class="ms-2" id="verifiedIcon">
+								<i class="bi bi-question-circle-fill text-warning"></i>
+							</span>
+						</div>
+					</div>
 				</div>
-				<div class="form-group mb-3">
-					<label class="form-label small text-muted" asp-for="IsVerified">Payment Verified by Owner?</label><br>
 
-					<label>
-						<input type="radio" asp-for="IsVerified" value="true" /> Yes
-					</label>
 
-					<label class="ms-3">
-						<input type="radio" asp-for="IsVerified" value="false" /> No
-					</label>
+				<div class="alert alert-info mb-3 d-flex align-items-start" id="validationAlert" style="border-left: 4px solid #0dcaf0;">
+					<div class="pe-3">
+						<i class="bi bi-info-circle-fill alert-info fs-4"></i>
+					</div>
+					<div>
+						<p class="mb-1 fw-bold">Payment Validation Guide</p>
+						<ul class="mb-0" style="list-style-type: none; padding-left: 0;">
+							<li class="d-flex align-items-baseline">
+								<span class="me-2">•</span>
+								<span>Select <span class="badge bg-success">Paid</span> & <span class="badge bg-success">Yes</span> for valid payment</span>
+							</li>
+							<li class="d-flex align-items-baseline">
+								<span class="me-2">•</span>
+								<span>Select <span class="badge bg-danger">Unpaid</span> & <span class="badge bg-danger">No</span> for invalid payment</span>
+							</li>
+						</ul>
+					</div>
 				</div>
 
-				<button type="submit" class="btn btn-primary w-100 py-2 mt-3 rounded-corner">
+				<div class="d-grid gap-2">
+				<button type="submit" class="btn btn-primary w-100 py-2 mt-3 rounded-corner" id="submitButton">
 					<i class="bi bi-file-earmark-text-fill me-2"></i>Update Invoice
 				</button>
-
-				<div class="text-center small mt-4">
-				    <a asp-action="AllInvoice" asp-controller="PaymentInvoice" asp-route-id="@Model.UnitId" class="text-muted text-decoration-none">← Back to Invoices</a>
+				    <a asp-action="AllInvoice"
+					asp-controller="PaymentInvoice"
+					asp-route-id="@Model.UnitId"
+					   class="btn btn-outline-secondary py-2 rounded-corner">
+						<i class="bi bi-arrow-left me-2"></i>Back to Invoices
+				</a>
 				</div>
 			</form>
+		</div>
+	</div>
+</div>
+
+<!-- Payment Proof Modal -->
+<div class="modal fade" id="proofModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered modal-lg">
+		<div class="modal-content border-0 shadow">
+			<div class="modal-header bg-primary text-white">
+				<h5 class="modal-title">
+					<i class="bi bi-receipt me-2"></i> Payment Proof
+				</h5>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body text-center p-4">
+				<div class="d-flex justify-content-center">
+					<img src="@Model.PaymentProof?.Base64Image"
+						 class="img-fluid rounded"
+						 style="max-height: 70vh;"
+						 alt="Payment Proof" />
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				<a href="@Model.PaymentProof?.Base64Image"
+				   download="payment-proof-@DateTime.Now.ToString("yyyyMMdd")"
+				   class="btn btn-primary">
+					<i class="bi bi-download me-1"></i> Download
+				</a>
+			</div>
 		</div>
 	</div>
 </div>
@@ -173,7 +265,46 @@
 			}
 		}
 
+						function updateValidationStatus() {
+			const statusSelect = document.getElementById('statusSelect');
+			const isVerifiedYes = document.getElementById('verifiedYes').checked;
+			const statusIcon = document.getElementById('statusIcon');
+			const verifiedIcon = document.getElementById('verifiedIcon');
+			const button = document.getElementById('submitButton');
 
+			const selectedStatus = statusSelect.options[statusSelect.selectedIndex].text.toLowerCase();
+
+			// Reset icons
+			statusIcon.innerHTML = '<i class="bi bi-question-circle-fill text-warning"></i>';
+			verifiedIcon.innerHTML = '';
+
+			// Default to disabled
+			button.disabled = true;
+
+			if (selectedStatus === 'paid') {
+					statusIcon.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i>';
+				if (isVerifiedYes) {
+					verifiedIcon.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i>';
+					button.disabled = false;
+				} else {
+					verifiedIcon.innerHTML = '<i class="bi bi-x-circle-fill text-danger"></i>';
+					button.disabled = true;
+				}
+			}
+			else if (selectedStatus === 'unpaid') {
+				statusIcon.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i>';
+				if (!isVerifiedYes) {
+					verifiedIcon.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i>';
+					button.disabled = false;
+				} else {
+					verifiedIcon.innerHTML = '<i class="bi bi-x-circle-fill text-danger"></i>';
+					button.disabled = true;
+				}
+			}
+			else if (selectedStatus === 'pending') {
+				button.disabled = true;
+			}
+		}
 
 
 		document.getElementById("ToMonth").addEventListener("change", function() {
@@ -193,6 +324,12 @@
 					});
 
 					document.getElementById("AmountPerMonth").addEventListener("input", calculateTotal);
+					 document.getElementById('statusSelect').addEventListener('change', updateValidationStatus);
+			document.getElementById('verifiedYes').addEventListener('change', updateValidationStatus);
+			document.getElementById('verifiedNo').addEventListener('change', updateValidationStatus);
+
+			// Initialize validation status
+			updateValidationStatus();
 		 });
 	</script>
 }

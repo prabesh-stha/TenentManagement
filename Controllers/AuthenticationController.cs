@@ -8,6 +8,10 @@ using TenentManagement.Services.Authentication;
 using TenentManagement.Models.Authentication.EmailVerification;
 using TenentManagement.Services.Mail;
 using Microsoft.AspNetCore.Authorization;
+using TenentManagement.Models.Payment;
+using TenentManagement.Services.Payment;
+using TenentManagement.Models.User;
+using TenentManagement.Services.User;
 
 namespace TenentManagement.Controllers
 {
@@ -16,11 +20,12 @@ namespace TenentManagement.Controllers
 
         private readonly AuthenticationService _authenticationService;
         private readonly MailService _mailService;
-
-        public AuthenticationController(AuthenticationService authenticationService, MailService mailService)
+        private readonly UserImageService _userImageService;
+        public AuthenticationController(AuthenticationService authenticationService, MailService mailService, UserImageService userImageService)
         {
             _authenticationService = authenticationService;
             _mailService = mailService ?? throw new ArgumentNullException(nameof(mailService));
+            _userImageService = userImageService ?? throw new ArgumentNullException(nameof(userImageService));
         }
 
         [HttpGet]
@@ -29,12 +34,43 @@ namespace TenentManagement.Controllers
             return View();
         }
         [HttpPost]
-        public IActionResult Register(RegisterModel model)
+        public IActionResult Register(RegisterModel model, IFormFile imageFile)
         {
+            // Validate image first
+            if (imageFile == null || imageFile.Length == 0)
+            {
+                ViewData["Message"] = "Please upload a valid user image";
+                ViewData["MessageType"] = "error";
+                return View(model);
+            }
+
+            // Process image
+            byte[] imageData;
+            string imageType;
+            try
+            {
+                using (var ms = new MemoryStream())
+                {
+                    imageFile.CopyTo(ms);
+                    imageData = ms.ToArray();
+                }
+                imageType = imageFile.ContentType;
+            }
+            catch (Exception ex)
+            {
+                ViewData["Message"] = "Error processing image: " + ex.Message;
+                ViewData["MessageType"] = "error";
+                return View(model);
+            }
             if (ModelState.IsValid)
             {
                 try
                 {
+                    model.UserImage = new UserImageModel
+                    {
+                        ImageData = imageData,
+                        ImageType = imageType
+                    };
                     var registrationResult = _authenticationService.RegisterUser(model);
                     if (registrationResult.STATUS == "SUCCESS")
                     {
@@ -46,7 +82,6 @@ namespace TenentManagement.Controllers
 
                                 var verificationLink = Url.Action("VerifyEmail", "Authentication", new { token = emailVerificationModel.Token, email = model.Email.ToLower() }, Request.Scheme);
                                 _mailService.Send(model.Email.ToLower(), "Verify your email.", $"Click here: {verificationLink}");
-
                                 TempData["Message"] = $"{registrationResult.MSG} Check your {model.Email.ToLower()} email for verification.";
                                 TempData["MessageType"] = "success";
                                 return RedirectToAction("Login");
@@ -158,6 +193,10 @@ namespace TenentManagement.Controllers
                         HttpContext.Session.SetInt32("UserId", loginResult.UserId);
                         HttpContext.Session.SetString("Username", loginResult.UserName);
                         HttpContext.Session.SetString("Role", loginResult.Role);
+                        if(loginResult.UserImage != null)
+                        {
+                            HttpContext.Session.SetString("UserImage", loginResult.UserImage.Base64Image);
+                        }
 
                         return RedirectToAction("Index", "Home");
                     }
@@ -285,6 +324,48 @@ namespace TenentManagement.Controllers
 
         }
 
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(ChangePasswordModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var authId = HttpContext.Session.GetInt32("Id");
+                    if (authId.HasValue)
+                    {
+                        model.AuthId = authId ?? 0;
+                        AuthResponse authResponse = _authenticationService.ChangePassword(model);
+                        if (authResponse.STATUS == "success")
+                        {
+                            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                            HttpContext.Session.Clear();
+                            TempData["Message"] = authResponse.MSG;
+                            TempData["MessageType"] = "success";
+                            return RedirectToAction("Login", "Authentication");
+                        }
+                        else
+                        {
+                            ViewData["Message"] = authResponse.MSG;
+                            ViewData["MessageType"] = "error";
+                            return View(model);
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    ViewData["Message"] = "Error while changing password." + e.Message.ToString();
+                    ViewData["MessageType"] = "error";
+                    return View(model);
+                }
+            }
+            return View(model);
+        }
         [HttpGet]
         public JsonResult ValidateUsername(string username)
         {

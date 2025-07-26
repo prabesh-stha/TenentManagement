@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using TenentManagement.Models.User;
 
 namespace TenentManagement.Models.Authentication
 {

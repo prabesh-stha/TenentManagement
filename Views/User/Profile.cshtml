@@ -1,0 +1,268 @@
+﻿@model TenentManagement.Models.User.UserModel
+@using TenentManagement.Services.Utilities
+
+@{
+    ViewData["Title"] = "User Profile";
+}
+
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="profile-container row">
+
+                <div class="col-md-4 d-flex flex-column align-items-center mb-4 mb-md-0 position-relative">
+                    <div class="profile-img-wrapper" onclick="document.getElementById('imageUploadModal').style.display='flex';">
+                        @if (Model.UserImage != null && Model.UserImage.Base64Image != null)
+                        {
+                            <img id="profileImage" src="@Model.UserImage.Base64Image" class="profile-img" alt="Profile Image" />
+                        }
+                        else
+                        {
+                            <img id="profileImage" src="~/house.jpeg" class="profile-img" alt="Default Profile Image" />
+                        }
+                    </div>
+                    <small class="img-upload-hint text-muted">Click on image to upload new photo</small>
+
+                    <div class="mt-3 text-center">
+                        <h4>@Model.FirstName.ToTitleCase() @Model.LastName.ToTitleCase()</h4>
+                        <p class="text-muted">@Model.Email</p>
+
+                        <div class="d-flex justify-content-center gap-2 mt-2">
+                            <a asp-action="ChangeEmail" asp-controller="Authentication" asp-route-id="@Model.Id" class="btn btn-sm btn-primary">
+                                Change Email
+                            </a>
+                            <a asp-action="ChangePassword" asp-controller="Authentication" class="btn btn-sm btn-primary">
+                                Change Password
+                            </a>
+                        </div>
+
+                        <button id="updateImgBtn" class="btn btn-success update-img-btn">
+                            <i class="bi bi-check-circle"></i> Update Profile Picture
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="section-title d-flex align-items-center">
+                        <h1 class="m-0">User Information</h1>
+                        <a href="#" class="btn btn-lg btn-toolbar" title="Edit Profile"><i class="bi bi-pencil"></i></a>
+                    </div>
+
+                    <div class="profile-section">
+                        <span class="profile-label">Full Name:</span><br />
+                        <span class="profile-value">
+                            @Model.FirstName.ToTitleCase()
+                            @if (!string.IsNullOrWhiteSpace(Model.MiddleName))
+                            {
+                                @Model.MiddleName.ToTitleCase()
+                            }
+                            @Model.LastName.ToTitleCase()
+                        </span>
+                    </div>
+
+                    <div class="profile-section">
+                        <span class="profile-label">Phone:</span><br />
+                        <span class="profile-value">@Model.Phone</span>
+                    </div>
+
+                    <div class="profile-section">
+                        <span class="profile-label">Email:</span><br />
+                        <span class="profile-value">@Model.Email</span>
+                    </div>
+
+                    <div class="profile-section">
+                        <span class="profile-label">Owned Properties:</span><br />
+                        <span class="profile-value">@Model.TotalOwnedProperties</span>
+                    </div>
+
+                    <div class="profile-section">
+                        <span class="profile-label">Owned Units:</span><br />
+                        <span class="profile-value">@Model.TotalOwnedUnits</span>
+                    </div>
+
+                    <div class="profile-section">
+                        <span class="profile-label">Rented Properties:</span><br />
+                        <span class="profile-value">@Model.TotalRentedProperties</span>
+                    </div>
+
+                    <div class="profile-section">
+                        <span class="profile-label">Rented Units:</span><br />
+                        <span class="profile-value">@Model.TotalRentedUnits</span>
+                    </div>
+
+                    <div class="profile-section">
+                        <span class="profile-label">Joined:</span><br />
+                        <span class="profile-value">@Model.CreatedAt.ToString("yyyy-MM-dd hh:mm tt")</span>
+                    </div>
+
+                    <div class="payment-actions">
+                        <div class="section-title">Payment Information</div>
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <a asp-action="ManageQRImage" asp-controller="PaymentQRImage" asp-route-ownerId="@Model.Id" class="btn btn-primary w-100">Manage Payment QR</a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Image Upload Modal -->
+<div class="modal justify-content-center" id="imageUploadModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title mb-0">Update Profile Picture</h5>
+                <button type="button" class="btn-close btn-close-white" onclick="hideModal()"></button>
+            </div>
+            <form asp-action="UpdateProfileImage" asp-controller="User" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-4">
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="UserImage.UserId" />
+                        <label class="form-label fw-bold">Profile Image</label>
+                        <div class="border rounded p-3 text-center" id="imageUploadArea">
+                            <div id="imagePreviewContainer" class="mb-3 d-none">
+                                <img id="imagePreview" class="img-fluid rounded" style="max-height: 200px;" />
+                                <br />
+                                <button type="button" class="btn btn-lg text-danger mt-2" id="removeImageBtn" title="Remove ">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+                            <div id="uploadPrompt" class="py-4">
+                                <i class="bi bi-cloud-upload display-4 text-muted"></i>
+                                <p class="mt-2 mb-1">Drag & drop your profile image here or</p>
+                                <input type="file" name="profileImage" id="imageFile" class="d-none" accept="image/*" required />
+                                <label for="imageFile" class="btn btn-outline-primary">
+                                    <i class="bi bi-folder2-open"></i> Browse Files
+                                </label>
+                                <p class="small text-muted mt-2">Supports: JPG, PNG (Max 5MB)</p>
+                            </div>
+                        </div>
+                        <span id="clientFileError" class="text-danger small d-none mt-2"></span>
+                    </div>
+                    @Html.AntiForgeryToken()
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal()">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary submit-btn" disabled>
+                        <i class="bi bi-upload"></i> Upload Image
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageFile = document.getElementById('imageFile');
+            const imagePreview = document.getElementById('imagePreview');
+            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+            const uploadPrompt = document.getElementById('uploadPrompt');
+            const removeImageBtn = document.getElementById('removeImageBtn');
+            const imageUploadArea = document.getElementById('imageUploadArea');
+            const clientFileError = document.getElementById('clientFileError');
+            const submitBtn = document.querySelector('.submit-btn');
+
+            function checkFormValidity() {
+                submitBtn.disabled = !(imageFile.files && imageFile.files.length > 0);
+            }
+
+            // Handle file selection
+            imageFile.addEventListener('change', function(e) {
+                if (this.files && this.files[0]) {
+                    const file = this.files[0];
+
+                    // Reset previous errors
+                    clientFileError.classList.add('d-none');
+                    clientFileError.textContent = '';
+
+                    // Validate file size (5MB max)
+                    if (file.size > 5 * 1024 * 1024) {
+                        showClientError('File size exceeds 5MB limit');
+                        this.value = '';
+                        checkFormValidity();
+                        return;
+                    }
+
+                    // Validate file type
+                    if (!file.type.match('image.*')) {
+                        showClientError('Please select an image file (JPG or PNG)');
+                        this.value = '';
+                        checkFormValidity();
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                        imagePreviewContainer.classList.remove('d-none');
+                        uploadPrompt.classList.add('d-none');
+                        checkFormValidity();
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    checkFormValidity();
+                }
+            });
+
+            // Handle drag and drop
+            imageUploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('border-primary');
+            });
+
+            imageUploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('border-primary');
+            });
+
+            imageUploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('border-primary');
+
+                if (e.dataTransfer.files.length) {
+                    imageFile.files = e.dataTransfer.files;
+                    const event = new Event('change');
+                    imageFile.dispatchEvent(event);
+                }
+            });
+
+            // Remove image
+            removeImageBtn.addEventListener('click', function() {
+                imageFile.value = '';
+                imagePreview.src = '';
+                imagePreviewContainer.classList.add('d-none');
+                uploadPrompt.classList.remove('d-none');
+                clientFileError.classList.add('d-none');
+                clientFileError.textContent = '';
+                checkFormValidity();
+            });
+
+            function showClientError(message) {
+                clientFileError.textContent = message;
+                clientFileError.classList.remove('d-none');
+                imageUploadArea.classList.add('border-danger');
+                setTimeout(() => {
+                    imageUploadArea.classList.remove('border-danger');
+                }, 2000);
+            }
+        });
+
+        function showModal() {
+            document.getElementById('imageUploadModal').style.display = 'flex';
+        }
+
+        function hideModal() {
+            document.getElementById('imageUploadModal').style.display = 'none';
+        }
+    </script>
+}

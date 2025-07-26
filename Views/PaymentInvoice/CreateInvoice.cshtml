@@ -124,17 +124,19 @@
 					<span asp-validation-for="StatusId" class="text-danger small"></span>
 				</div>
 
-				<button type="submit" class="btn btn-primary w-100 py-2 mt-3 rounded-corner">
-					<i class="bi bi-file-earmark-text-fill me-2"></i>Create Invoice
-				</button>
 
-				@* <div class="text-center small mt-4"> *@
-				@*     <a asp-action="Index" asp-controller="PaymentInvoice" class="text-muted text-decoration-none">← Back to Invoices</a> *@
-				@* </div> *@
+
+				<div class="d-grid gap-2">
+					<button type="submit" class="btn btn-primary w-100 py-2 mt-3 rounded-corner">
+						<i class="bi bi-file-earmark-text-fill me-2"></i>Create Invoice
+					</button>
+					<a asp-action="RenterInvoices" asp-controller="PaymentInvoice" asp-route-unitId="@Model.UnitId" asp-route-renterId="@Model.RenterId" class="btn btn-outline-secondary py-2 rounded-corner"><i class="bi bi-arrow-left me-2"></i>Back to Invoices</a>
+				</div>
 			</form>
 		</div>
 	</div>
 </div>
+
 
 @section Scripts {
 	<script>

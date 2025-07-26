@@ -14,5 +14,7 @@
         public int TotalRentedUnits { get; set; } = 0;
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        public UserImageModel? UserImage { get; set; }
     }
 }

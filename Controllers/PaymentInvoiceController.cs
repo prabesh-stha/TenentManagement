@@ -290,6 +290,7 @@ namespace TenentManagement.Controllers
             payInvoice.AmountPerMonth = unit?.RentAmount ?? 0;
             payInvoice.PaymentMethods = paymentMethods;
             payInvoice.PaymentStatuses = paymentStatuses;
+            payInvoice.PaymentProof = _paymentProofService.GetPaymentProofImage(id);
             return View(payInvoice);
         }
 
@@ -375,6 +376,7 @@ namespace TenentManagement.Controllers
             payInvoice.AmountPerMonth = unit?.RentAmount ?? 0;
             payInvoice.PaymentMethods = payMethods;
             payInvoice.PaymentQRImage = _paymentQRService.GetPaymentQRByOwnerIdAndPaymentId(payInvoice.OwnerId, payInvoice.PaymentMethodId);
+            payInvoice.PaymentProof = _paymentProofService.GetPaymentProofImage(payInvoice.Id);
             return View(payInvoice);
         }
         [HttpPost]
@@ -453,5 +455,43 @@ namespace TenentManagement.Controllers
             payInvoice.PaymentProof = _paymentProofService.GetPaymentProofImage(id);
             return View(payInvoice);
         }
+
+        [HttpPost]
+        public IActionResult ValidatePayment(PaymentInvoiceModel payInvoice)
+        {
+            try
+            {
+                int row = _paymentInvoiceService.UpdatePaymentInvoice(payInvoice);
+                if(row > 0)
+                {
+                    if (payInvoice.IsVerified)
+                    {
+                        TempData["Message"] = "Payment validated successfully!";
+                        TempData["MessageType"] = "success";
+                    }
+                    else
+                    {
+                        TempData["Message"] = "Payment rejected successfully!";
+                        TempData["MessageType"] = "success";
+                    }
+                        return RedirectToAction("AllInvoice", "PaymentInvoice", new { id = payInvoice.UnitId });
+                }
+                else
+                {
+                    ViewData["Message"] = "Failed while updating payment invoice!";
+                    ViewData["MessageType"] = "error";
+                    payInvoice.PaymentStatuses = _paymentInvoiceService.GetAllPaymentStatus();
+                    return View(payInvoice);
+                }
+            }
+            catch
+            {
+                ViewData["Message"] = "Failed while updating payment invoice!";
+                ViewData["MessageType"] = "error";
+                payInvoice.PaymentStatuses = _paymentInvoiceService.GetAllPaymentStatus();
+                return View(payInvoice);
+            }
         }
+
     }
+}

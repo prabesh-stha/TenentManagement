@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using TenentManagement.Models.User;
 
 namespace TenentManagement.Models.Authentication
 {
@@ -39,5 +40,7 @@ namespace TenentManagement.Models.Authentication
         [Required(ErrorMessage = "Phone number is required")]
         public string PhoneNumber { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
+
+        public UserImageModel? UserImage { get; set; }
     }
 }

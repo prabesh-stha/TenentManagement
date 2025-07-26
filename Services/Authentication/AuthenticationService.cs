@@ -4,6 +4,7 @@ using Dapper;
 using Microsoft.Data.SqlClient;
 using TenentManagement.Models.Authentication;
 using TenentManagement.Models.Authentication.EmailVerification;
+using TenentManagement.Models.User;
 using TenentManagement.Services.Bcrypt;
 using TenentManagement.Services.Database;
 using static Azure.Core.HttpHeader;
@@ -36,6 +37,8 @@ namespace TenentManagement.Services.Authentication
             parameters.Add("@MIDDLENAME", register.MiddleName == null ? null : register.MiddleName.ToLower());
             parameters.Add("@LASTNAME", register.LastName.ToLower());
             parameters.Add("@PHONENUMBER", register.PhoneNumber);
+            parameters.Add("@IMAGEDATA", register.UserImage.ImageData);
+            parameters.Add("@IMAGETYPE", register.UserImage.ImageType);
 
             var result = connection.QueryFirstOrDefault<AuthResponse>(
                 "SP_AUTHENTICATION",
@@ -70,6 +73,16 @@ namespace TenentManagement.Services.Authentication
             {
                 throw new Exception("Invalid email or password.");
             }
+            var imageParameters = new DynamicParameters();
+            imageParameters.Add("@FLAG", 'G');
+            imageParameters.Add("@USERID", result.UserId);
+            var image = connection.QueryFirstOrDefault<UserImageModel>(
+                "SP_USERIMAGE",
+                imageParameters,
+                commandType: CommandType.StoredProcedure
+            );
+            connection.Close();
+            result.UserImage = image ?? null;
 
             var isPasswordValid = _bcryptService.VerifyPassword(login.Password.Trim(), result.Password.Trim());
 
@@ -187,6 +200,48 @@ namespace TenentManagement.Services.Authentication
             {
                 return "error";
             }
+        }
+
+
+        public AuthResponse ChangePassword(ChangePasswordModel model)
+        {
+            using var connection = _databaseConnection.GetConnection();
+            var parameters = new DynamicParameters();
+            parameters.Add("@FLAG", 'L');
+            parameters.Add("@ID", model.AuthId);
+            var result = connection.QueryFirstOrDefault<AuthenticationModel>(
+                "SP_AUTHENTICATION",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            );
+            connection.Close();
+            AuthResponse authResponse = new AuthResponse();
+            if (result == null || result.Password == null)
+            {
+                authResponse.STATUS = "error";
+                authResponse.MSG = "User not found or password is not set.";
+                return authResponse; // User not found or password is not set
+            }
+            var isPasswordValid = _bcryptService.VerifyPassword(model.CurrentPassword.Trim(), result.Password.Trim());
+            if (!isPasswordValid)
+            {
+                authResponse.STATUS = "error";
+                authResponse.MSG = "Password is incorrect.";
+                return authResponse;
+            }
+            var hashedPassword = _bcryptService.HashPassword(model.Password.Trim());
+            var passwordParameters = new DynamicParameters();
+            passwordParameters.Add("@FLAG", 'P');
+            passwordParameters.Add("@ID", model.AuthId);
+            passwordParameters.Add("@PASSWORD", hashedPassword);
+            connection.Open();
+            int row = connection.Execute("SP_AUTHENTICATION", passwordParameters, commandType: CommandType.StoredProcedure);
+            connection.Close();
+            authResponse.STATUS = row > 0 ? "success" : "error";
+            authResponse.MSG = row > 0 ? "Password changed successfully." : "Failed to change password.";
+            return authResponse;
+
+
         }
 
         public int? GetIdByUsername(string username)

@@ -1,4 +1,6 @@
-﻿namespace TenentManagement.Models.Authentication
+﻿using TenentManagement.Models.User;
+
+namespace TenentManagement.Models.Authentication
 {
     public class AuthenticationModel
     {
@@ -12,5 +14,7 @@
         public string? Role { get; set; } = string.Empty;
 
         public bool IsVerified { get; set; } = false;
+
+        public UserImageModel? UserImage { get; set; }
     }
 }

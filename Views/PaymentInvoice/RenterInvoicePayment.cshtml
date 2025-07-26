@@ -93,13 +93,40 @@
 						</label>
 						<div class="text-center">
 							<img src="@Model.PaymentQRImage.Base64Image"
-								 width="250"
-								 height="250"
-								 alt="@Model.PaymentMethod QR image"
-								 class="img-thumbnail" />
+							width="250"
+							height="250"
+							alt="@Model.PaymentMethod QR image"
+							class="img-thumbnail" />
 						</div>
 					</div>
 				}
+				@if (Model.PaymentProof != null)
+				{
+					<div class="mb-4">
+						<label class="form-label small text-muted">@Model.PaymentMethod.ToTitleCase() Payment Proof</label>
+						<div class="border rounded p-3 bg-light">
+								<div class="text-center mb-3">
+									<img src="@Model.PaymentProof.Base64Image"
+										 class="img-fluid rounded shadow-sm"
+										 style="max-height: 300px;"
+										 alt="@Model.PaymentMethod.ToTitleCase() Payment Proof" />
+								</div>
+								<div class="d-flex justify-content-center gap-2">
+									<button type="button" class="btn btn-sm btn-outline-primary"
+											data-bs-toggle="modal"
+											data-bs-target="#proofModal">
+										<i class="bi bi-zoom-in me-1"></i> View Larger
+									</button>
+									<a href="@Model.PaymentProof.Base64Image"
+									   download="payment-proof-@DateTime.Now.ToString("yyyyMMdd")"
+									   class="btn btn-sm btn-outline-secondary">
+										<i class="bi bi-download me-1"></i> Download
+									</a>
+								</div>
+						</div>
+					</div>
+				}
+				
 				
 				<div class="mb-4">
 					<label class="form-label small text-muted">Upload Payment Proof</label>
@@ -124,90 +151,50 @@
 					<span id="clientFileError" class="text-danger small d-none mt-2"></span>
 				</div>
 
-
-
-				@* <button type="submit" class="btn btn-primary w-100 py-2 mt-3 rounded-corner"> *@
-				@* 	<i class="bi bi-file-earmark-text-fill me-2"></i>Request Payment Invoice *@
-				@* </button> *@
 				<div class="d-grid gap-2">
 					<button type="submit" class="btn btn-primary btn-lg submit-btn" disabled>
 						<i class="bi bi-upload"></i> Request Payment Invoice
 					</button>
-				</div>
-
-				<div class="text-center small mt-4">
-					<a asp-action="RenterInvoices" asp-controller="PaymentInvoice" asp-route-unitId="@Model.UnitId" asp-route-renterId="@Model.RenterId" class="text-muted text-decoration-none">← Back to Invoices</a>
+					<a asp-action="RenterInvoices" asp-controller="PaymentInvoice" asp-route-unitId="@Model.UnitId" asp-route-renterId="@Model.RenterId" class="btn btn-outline-secondary py-2 rounded-corner"><i class="bi bi-arrow-left me-2"></i>Back to Invoices</a>
 				</div>
 			</form>
 		</div>
 	</div>
 </div>
 
-@* @section Scripts {
-	<script>
-		function calculateTotal() {
-			const from = new Date(document.getElementById("FromMonth").value);
-			const to = new Date(document.getElementById("ToMonth").value);
-			const amount = parseFloat(document.getElementById("AmountPerMonth").value);
 
-			if (!isNaN(from) && !isNaN(to) && !isNaN(amount)) {
-				const months = (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth());
-				if (months > 0) {
-					document.getElementById("TotalAmountDisplay").value = (months * amount).toFixed(2);
-				} else {
-					document.getElementById("TotalAmountDisplay").value = "0.00";
-				}
-			}
-		}
-		let initialDueDay = null;
-		function calculateDueDate(useInitialDay = false) {
-		const to = new Date(document.getElementById("ToMonth").value);
-		const dueDateElement = document.getElementById("DueDate");
-		let day;
-		if (useInitialDay && initialDueDay !== null) {
-			day = initialDueDay;
-		} else {
-			const currentDate = dueDateElement.value ? new Date(dueDateElement.value) : new Date();
-			day = currentDate.getDate();
-		}
-
-		const minDueDate = new Date(to.getFullYear(), to.getMonth(), day);
-
-		const year = minDueDate.getFullYear();
-		const month = String(minDueDate.getMonth() + 1).padStart(2, '0');
-		const dayFormatted = String(minDueDate.getDate()).padStart(2, '0');
-		const formattedMin = `${year}-${month}-${dayFormatted}`;
-
-			dueDateElement.min = formattedMin;
-			console.log(formattedMin);
-			if (!dueDateElement.value || new Date(dueDateElement.value) < minDueDate) {
-				dueDateElement.value = formattedMin;
-			}
-		}
-		document.getElementById("ToMonth").addEventListener("change", function() {
-			calculateTotal();
-			calculateDueDate();
-		});
-		document.getElementById("AmountPerMonth").addEventListener("input", calculateTotal);
-		window.addEventListener("DOMContentLoaded", function() {
-					const initialDueDate = new Date(document.getElementById("DueDate").value);
-					initialDueDay = initialDueDate.getDate();
-					calculateTotal();
-					calculateDueDate(true);
-
-					document.getElementById("ToMonth").addEventListener("change", function() {
-						calculateTotal();
-						calculateDueDate();
-					});
-
-					document.getElementById("AmountPerMonth").addEventListener("input", calculateTotal);
-		 });
-	</script>
-} *@
+<!-- Payment Proof Modal -->
+<div class="modal fade" id="proofModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered modal-lg">
+		<div class="modal-content border-0 shadow">
+			<div class="modal-header bg-primary text-white">
+				<h5 class="modal-title">
+					<i class="bi bi-receipt me-2"></i> Payment Proof
+				</h5>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body text-center p-4">
+				<div class="d-flex justify-content-center">
+					<img src="@Model.PaymentProof?.Base64Image"
+						 class="img-fluid rounded"
+						 style="max-height: 70vh;"
+						 alt="Payment Proof" />
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				<a href="@Model.PaymentProof?.Base64Image"
+				   download="payment-proof-@DateTime.Now.ToString("yyyyMMdd")"
+				   class="btn btn-primary">
+					<i class="bi bi-download me-1"></i> Download
+				</a>
+			</div>
+		</div>
+	</div>
+</div>
 
 @section Scripts {
 	<script>
-		// ========== Invoice Calculation Script ==========
 		function calculateTotal() {
 			const from = new Date(document.getElementById("FromMonth").value);
 			const to = new Date(document.getElementById("ToMonth").value);

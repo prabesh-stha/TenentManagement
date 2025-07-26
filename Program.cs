@@ -33,6 +33,8 @@ builder.Services.AddScoped<TenentManagement.Services.Payment.PaymentQRImageServi
 
 builder.Services.AddScoped<TenentManagement.Services.Payment.PaymentProofService>();
 
+builder.Services.AddScoped<TenentManagement.Services.User.UserImageService>();
+
 //BCrypt service for password hashing
 builder.Services.AddScoped<BCryptService>();
 

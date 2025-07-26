@@ -1,0 +1,32 @@
+﻿@using TenentManagement.Models.Authentication
+@model ChangeEmailModel
+@{
+    ViewData["Title"] = "Change Email";
+}
+
+<div class="container py-5">
+    <div class="card shadow-lg mx-auto" style="max-width: 500px;">
+        <div class="card-header bg-primary text-white py-4">
+            <h2 class="h4 mb-0 text-center">
+                <i class="bi bi-envelope-arrow-up me-2"></i>Change Email
+            </h2>
+        </div>
+
+        <div class="card-body p-4">
+            <form asp-action="ChangeEmail" method="post" class="needs-validation" novalidate data-enable-spinner="true">
+                <div class="mb-4">
+                    <label class="form-label small text-muted">Email Address *</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
+                        <input asp-for="NewEmail" type="email" class="form-control" placeholder="your@email.com" required />
+                    </div>
+                         <span asp-validation-for="NewEmail" class="text-danger small"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2" data-loading-text="Sending...">
+                    <i class="bi bi-send-fill me-2"></i>Send Verification Link
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
