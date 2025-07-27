@@ -15,7 +15,8 @@
         <div class="card-body p-4">
             <form asp-action="ChangeEmail" method="post" class="needs-validation" novalidate data-enable-spinner="true">
                 <div class="mb-4">
-                    <label class="form-label small text-muted">Email Address *</label>
+                    <input type="hidden" asp-for="OldEmail" />
+                    <label class="form-label small text-muted">New Email Address *</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
                         <input asp-for="NewEmail" type="email" class="form-control" placeholder="your@email.com" required />

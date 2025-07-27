@@ -313,7 +313,7 @@ namespace TenentManagement.Controllers
                     ? "Password reset complete."
                     : "Couldn't reset password at the moment.";
                 TempData["MessageType"] = status;
-                return RedirectToAction("Login", "Authentication");
+                return RedirectToAction("Logout", "Authentication");
             }
             catch (Exception e)
             {
@@ -323,6 +323,111 @@ namespace TenentManagement.Controllers
             return View();
 
         }
+
+        [HttpGet]
+        public IActionResult ChangeEmail()
+        {
+            var authId = HttpContext.Session.GetInt32("Id");
+            if (!authId.HasValue)
+            {
+                TempData["Message"] = "You need to login first.";
+                TempData["MessageType"] = "error";
+                return RedirectToAction("Login", "Authentication");
+            }
+            var email = _authenticationService.GetEmail(authId.Value);
+            if(email.Equals(string.Empty))
+            {
+                TempData["Message"] = "Couldn't find your email.";
+                TempData["MessageType"] = "error";
+                return RedirectToAction("Profile", "User");
+            }
+            var model = new ChangeEmailModel
+            {
+                OldEmail = email
+            };
+            return View(model);
+        }
+
+        [HttpPost]
+        public IActionResult ChangeEmail(ChangeEmailModel model)
+        {
+            int row = _authenticationService.CheckExistingEmail(model.NewEmail);
+            if(row > 0)
+            {
+                ViewData["Message"] = "Email already existed.";
+                ViewData["MessageType"] = "error";
+                return View(model);
+            }
+            try
+            {
+                TokenModel? tokenModel = _authenticationService.GenerateAndStoreEmailVerificationToken(model.OldEmail);
+                if (tokenModel != null)
+                {
+
+                    var verificationLink = Url.Action("VerifyNewEmail", "Authentication", new {newEmail = model.NewEmail, token = tokenModel.Token }, Request.Scheme);
+                    _mailService.Send(model.NewEmail, "Verify your email", $"Please verify your new email by clicking this link: {verificationLink}");
+
+                    TempData["Message"] = "Verification email sent. Please check your inbox.";
+                    TempData["MessageType"] = "success";
+                    return RedirectToAction("Profile", "User");
+                }
+                else
+                {
+                    ViewData["Message"] = "Invalid email.";
+                    ViewData["MessageType"] = "error";
+                    return View(model);
+                }
+            }
+            catch (Exception e)
+            {
+                ViewData["Message"] = "Error while sending email." + e.Message.ToString();
+                ViewData["MessageType"] = "error";
+                return View(model);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> VerifyNewEmail(string newEmail, string token)
+        {
+            try
+            {
+                var tokenModel = _authenticationService.ValidateToken(token);
+                if (tokenModel == null)
+                {
+                    TempData["Message"] = "Invalid or expired token.";
+                    TempData["MessageType"] = "error";
+                    await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    HttpContext.Session.Clear();
+                    return RedirectToAction("Login", "Authentication");
+                }
+                int row = _authenticationService.ChangeEmail(newEmail, token);
+                if(row > 0)
+                {
+                    TempData["Message"] = "Email changed successfully.";
+                    TempData["MessageType"] = "success";
+                    await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    HttpContext.Session.Clear();
+                    return RedirectToAction("Login", "Authentication");
+                }
+                else
+                {
+                    TempData["Message"] = "Couldn't change email at the moment.";
+                    TempData["MessageType"] = "error";
+                    await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    HttpContext.Session.Clear();
+                    return RedirectToAction("Login", "Authentication");
+                }
+            }
+            catch
+            {
+                ViewData["Message"] = "Error while changing email.";
+                ViewData["MessageType"] = "error";
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                HttpContext.Session.Clear();
+                return RedirectToAction("Login", "Authentication");
+            }
+        }
+
 
         [HttpGet]
         public IActionResult ChangePassword()
@@ -366,6 +471,9 @@ namespace TenentManagement.Controllers
             }
             return View(model);
         }
+
+
+
         [HttpGet]
         public JsonResult ValidateUsername(string username)
         {

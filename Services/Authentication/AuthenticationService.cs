@@ -244,6 +244,19 @@ namespace TenentManagement.Services.Authentication
 
         }
 
+        public int ChangeEmail(string newEmail, string token)
+        {
+            using var connection = _databaseConnection.GetConnection();
+            connection.Open();
+            var parameters = new DynamicParameters();
+            parameters.Add("@FLAG", "U");
+            parameters.Add("@TOKEN", token);
+            parameters.Add("@EMAIL", newEmail.ToLower().Trim());
+            int row = connection.Execute("SP_AUTHENTICATION", parameters, commandType: CommandType.StoredProcedure);
+            connection.Close();
+            return row;
+        }
+
         public int? GetIdByUsername(string username)
         {
             using var connection = _databaseConnection.GetConnection();
@@ -254,6 +267,35 @@ namespace TenentManagement.Services.Authentication
             var result = connection.QueryFirstOrDefault<int?>("SP_AUTHENTICATION", parameters, commandType: CommandType.StoredProcedure);
             connection.Close();
             return result;
+        }
+
+        public string GetEmail(int authid)
+        {
+            using var connection = _databaseConnection.GetConnection();
+            using var cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT EMAIL FROM TBL_AUTHENTICATION WHERE ID = @ID";
+            cmd.Parameters.Add(new SqlParameter("@ID", authid));
+            connection.Open();
+            var email = cmd.ExecuteScalar();
+            connection.Close();
+            if (email == null)
+            {
+                throw new Exception("Email not found for the given authentication ID.");
+            }
+            return email.ToString() ?? string.Empty;
+        }
+
+        public int CheckExistingEmail(string email)
+        {
+            using var connection = _databaseConnection.GetConnection();
+            using var cmd = connection.CreateCommand();
+
+            cmd.CommandText = "SELECT COUNT(1) FROM TBL_AUTHENTICATION WHERE EMAIL = @EMAIL";
+            cmd.Parameters.Add(new SqlParameter("@EMAIL", email));
+
+            connection.Open();
+            var result = cmd.ExecuteScalar();
+            return Convert.ToInt32(result);
         }
     }
 }
