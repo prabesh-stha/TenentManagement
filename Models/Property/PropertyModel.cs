@@ -25,5 +25,6 @@ namespace TenentManagement.Models.Property
         public string TypeName { get; set; } = string.Empty;
 
         public IEnumerable<PropertyTypeModel> PropertyTypes { get; set; } = new List<PropertyTypeModel>();
+        public PropertyImageModel? PropertyImage { get; set; }
     }
 }

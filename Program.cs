@@ -23,6 +23,9 @@ builder.Services.AddScoped<MailService>();
 // Register the PropertyService
 builder.Services.AddScoped<TenentManagement.Services.Property.PropertyService>();
 
+builder.Services.AddScoped<TenentManagement.Services.Property.PropertyImageService>();
+
+
 builder.Services.AddScoped<TenentManagement.Services.Property.Unit.UnitService>();
 
 builder.Services.AddScoped<TenentManagement.Services.Payment.PaymentInvoiceService>();

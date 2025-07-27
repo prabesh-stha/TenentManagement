@@ -16,14 +16,17 @@ namespace TenentManagement.Controllers
     {
         private readonly PropertyService _propertyService;
         private readonly UnitService _unitService;
+        private readonly PropertyImageService _propertyImageService;
         public PropertyController
             (
             PropertyService propertyService
             , UnitService unitService
+            , PropertyImageService propertyImageService
             )
         {
             _propertyService = propertyService ?? throw new ArgumentNullException(nameof(propertyService));
-            _unitService = unitService ?? throw new ArgumentNullException(nameof(unitService)); 
+            _unitService = unitService ?? throw new ArgumentNullException(nameof(unitService));
+            _propertyImageService = propertyImageService ?? throw new ArgumentNullException(nameof(propertyImageService));
         }
         [HttpGet]
         public IActionResult Create(int id)
@@ -40,12 +43,25 @@ namespace TenentManagement.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(PropertyModel property)
+        public IActionResult Create(PropertyModel property, IFormFile? imageFile)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
+                    if (imageFile != null && imageFile.Length > 0)
+                    {
+                        PropertyImageModel propertyImageModel = new PropertyImageModel
+                        {
+                            ImageType = imageFile.ContentType,
+                        };
+                        using (var ms = new MemoryStream())
+                        {
+                            imageFile.CopyTo(ms);
+                            propertyImageModel.ImageData = ms.ToArray();
+                        }
+                        property.PropertyImage = propertyImageModel;
+                    }
                     string result = _propertyService.CreateProperty(property);
                     if (result == "success")
                     {
@@ -57,7 +73,7 @@ namespace TenentManagement.Controllers
                     {
                         ViewData["Message"] = result;
                         ViewData["MessageType"] = "error";
-                        var propertyTypes = _propertyService.GetAllPropertyTypes();
+                        property.PropertyTypes = _propertyService.GetAllPropertyTypes();
                         return View(property);
                     }
                 }
@@ -65,13 +81,13 @@ namespace TenentManagement.Controllers
                 {
                     ViewData["Message"] = "An error occurred while creating the property.";
                     ViewData["MessageType"] = "error";
-                    var propertyTypes = _propertyService.GetAllPropertyTypes();
+                    property.PropertyTypes = _propertyService.GetAllPropertyTypes();
                     return View(property);
                 }
             }
             else
             {
-                var propertyTypes = _propertyService.GetAllPropertyTypes();
+                property.PropertyTypes = _propertyService.GetAllPropertyTypes();
                 return View(property);
             }
         }
@@ -100,49 +116,6 @@ namespace TenentManagement.Controllers
                 return RedirectToAction("Index", "Home");
             }
         }
-
-        //[HttpGet]
-        //public IActionResult Detail(int id)
-        //{
-        //    try
-        //    {
-        //        var userId = HttpContext.Session.GetInt32("UserId");
-        //        if (userId == null)
-        //        {
-        //            TempData["Message"] = "Please log in to view property details.";
-        //            TempData["MessageType"] = "error";
-        //            return RedirectToAction("Login", "Authentication");
-        //        }
-
-        //        PropertyDetailViewModel result = _propertyService.GetPropertyDetail(id);
-
-        //        if (result == null)
-        //        {
-        //            TempData["Message"] = "Couldn't get the property detail.";
-        //            TempData["MessageType"] = "error";
-        //            return RedirectToAction("Index", "Home");
-        //        }
-
-        //        // 🚫 Ownership check
-        //        if (result.Property.UserId != userId)
-        //        {
-        //            TempData["Message"] = "You are not authorized to view this property.";
-        //            TempData["MessageType"] = "error";
-        //            return RedirectToAction("Index", "Home");
-        //        }
-
-        //        return View(result);
-        //    }
-        //    catch
-        //    {
-        //        TempData["Message"] = "An error occurred while getting the property detail.";
-        //        TempData["MessageType"] = "error";
-        //        return RedirectToAction("Index", "Home");
-        //    }
-        //}
-
-
-
 
         [HttpGet]
         public IActionResult Edit(int id)

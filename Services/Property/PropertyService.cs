@@ -12,11 +12,14 @@ namespace TenentManagement.Services.Property
     public class PropertyService
     {
         private readonly DatabaseConnection _databaseConnection;
+        private readonly PropertyImageService _propertyImageService;
         
-        public PropertyService(DatabaseConnection databaseConnection)
+        public PropertyService(DatabaseConnection databaseConnection, PropertyImageService propertyImageService)
         {
             _databaseConnection = databaseConnection ?? throw new ArgumentNullException(nameof(databaseConnection));
-            
+            _propertyImageService = propertyImageService ?? throw new ArgumentNullException(nameof(propertyImageService));
+
+
         }
 
         public List<PropertyTypeModel> GetAllPropertyTypes()
@@ -44,9 +47,17 @@ namespace TenentManagement.Services.Property
             parameters.Add("@DESCRIPTION", property.Description);
             parameters.Add("@USERID", property.UserId);
             parameters.Add("@TYPE", property.Type);
-            var row = connection.Execute("SP_PROPERTY", parameters, commandType: System.Data.CommandType.StoredProcedure);
+            if (property.PropertyImage != null)
+            {
+                parameters.Add("@IMAGEDATA", property.PropertyImage.ImageData);
+                parameters.Add("@IMAGETYPE", property.PropertyImage.ImageType);
+            }
+            parameters.Add("@STATUS", dbType: System.Data.DbType.Int32, direction: System.Data.ParameterDirection.Output);
+
+            connection.Execute("SP_PROPERTY", parameters, commandType: System.Data.CommandType.StoredProcedure);
             connection.Close();
-            if (row >= 1)
+            int row = parameters.Get<int>("@STATUS");
+            if (row == 1)
             {
                 return "success";
             }
@@ -65,6 +76,17 @@ namespace TenentManagement.Services.Property
             parameters.Add("@USERID", userId);
 
             var result = connection.Query<PropertyModel>("SP_PROPERTY", parameters, commandType: CommandType.StoredProcedure);
+
+            if(result.Count() != 0)
+            {
+                foreach (var property in result)
+                {
+
+
+                    var images = _propertyImageService.GetPropertyImage(property.Id);
+                    property.PropertyImage = images;
+                }
+            }
 
             return [.. result];
         }
