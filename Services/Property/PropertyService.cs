@@ -67,7 +67,7 @@ namespace TenentManagement.Services.Property
             }
         }
 
-        public List<PropertyModel> GetAllProperty(int userId)
+        public async Task<List<PropertyModel>> GetAllProperty(int userId)
         {
             using var connection = _databaseConnection.GetConnection();
 
@@ -75,9 +75,9 @@ namespace TenentManagement.Services.Property
             parameters.Add("@FLAG", 'R');
             parameters.Add("@USERID", userId);
 
-            var result = connection.Query<PropertyModel>("SP_PROPERTY", parameters, commandType: CommandType.StoredProcedure);
+            var result = await connection.QueryAsync<PropertyModel>("SP_PROPERTY", parameters, commandType: CommandType.StoredProcedure);
 
-            if(result.Count() != 0)
+            if (result.Count() != 0)
             {
                 foreach (var property in result)
                 {
@@ -91,7 +91,7 @@ namespace TenentManagement.Services.Property
             return [.. result];
         }
 
-        public List<PropertyModel> GetAllRentedProperty(int userId)
+        public async Task<List<PropertyModel>> GetAllRentedProperty(int userId)
         {
             using var connection = _databaseConnection.GetConnection();
 
@@ -99,7 +99,17 @@ namespace TenentManagement.Services.Property
             parameters.Add("@FLAG", 'T');
             parameters.Add("@USERID", userId);
 
-            var result = connection.Query<PropertyModel>("SP_PROPERTY", parameters, commandType: CommandType.StoredProcedure);
+            var result = await connection.QueryAsync<PropertyModel>("SP_PROPERTY", parameters, commandType: CommandType.StoredProcedure);
+            if (result.Count() != 0)
+            {
+                foreach (var property in result)
+                {
+
+
+                    var images = _propertyImageService.GetPropertyImage(property.Id);
+                    property.PropertyImage = images;
+                }
+            }
 
             return [.. result];
         }
@@ -110,6 +120,7 @@ namespace TenentManagement.Services.Property
             connection.Open();
             var parametersProperty = new DynamicParameters();
             var parametersUnit = new DynamicParameters();
+            var parametersImage = new DynamicParameters();
             parametersProperty.Add("@FLAG", 'S');
             parametersProperty.Add("@ID", propertyId);
             parametersUnit.Add("@PROPERTYID", propertyId);
@@ -122,8 +133,12 @@ namespace TenentManagement.Services.Property
                 parametersUnit.Add("@FLAG", 'M');
                 parametersUnit.Add("@RENTERID", renterId);
             }
+            parametersImage.Add("@FLAG", 'G');
+            parametersImage.Add("@PROPERTYID", propertyId);
             var property = connection.QueryFirstOrDefault<PropertyModel>("SP_PROPERTY", parametersProperty, commandType: CommandType.StoredProcedure);
             var units = connection.Query<UnitModel>("SP_UNITS", parametersUnit, commandType: CommandType.StoredProcedure).ToList();
+            var propertyImage = connection.QueryFirstOrDefault<PropertyImageModel>("SP_PROPERTYIMAGE", parametersImage, commandType: CommandType.StoredProcedure);
+                property.PropertyImage = propertyImage;
             connection.Close();
             PropertyDetailViewModel propertyDetailViewModel = new()
             {
@@ -152,9 +167,10 @@ namespace TenentManagement.Services.Property
             var parameter = new DynamicParameters();
             parameter.Add("@FLAG", 'D');
             parameter.Add("@ID", propertyId);
-            int row = connection.Execute("SP_PROPERTY", parameter, commandType: CommandType.StoredProcedure);
+            parameter.Add("@STATUS", dbType: System.Data.DbType.Int32, direction: System.Data.ParameterDirection.Output);
+            connection.Execute("SP_PROPERTY", parameter, commandType: CommandType.StoredProcedure);
             connection.Close();
-            return row;
+            return parameter.Get<int>("@STATUS");
         }
 
         public int UpdateProperty(PropertyModel property)
@@ -169,9 +185,16 @@ namespace TenentManagement.Services.Property
             parameter.Add("@LATITUDE", property.Latitude);
             parameter.Add("@LONGITUDE", property.Longitude);
             parameter.Add("@DESCRIPTION", property.Description);
-            int row = connection.Execute("SP_PROPERTY", parameter, commandType: CommandType.StoredProcedure);
+            if(property.PropertyImage != null)
+            {
+                parameter.Add("@IMAGEDATA", property.PropertyImage.ImageData);
+                parameter.Add("@IMAGETYPE", property.PropertyImage.ImageType);
+            }
+            parameter.Add("@STATUS", dbType: System.Data.DbType.Int32, direction: System.Data.ParameterDirection.Output);
+     
+            connection.Execute("SP_PROPERTY", parameter, commandType: CommandType.StoredProcedure);
             connection.Close();
-            return row;
+            return parameter.Get<int>("@STATUS");
         }
     }
 }

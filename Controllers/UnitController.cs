@@ -2,15 +2,19 @@
 using TenentManagement.Models.Property.Unit;
 using TenentManagement.Services.Property;
 using TenentManagement.Services.Property.Unit;
+using TenentManagement.Services.User;
 
 namespace TenentManagement.Controllers
 {
     public class UnitController : Controller
     {
         private readonly UnitService _unitService;
-        public UnitController(UnitService unitService)
+        private readonly UserImageService _userImageService;
+        public UnitController(UnitService unitService, UserImageService userImageService)
         {
             _unitService = unitService ?? throw new ArgumentNullException(nameof(unitService));
+            _userImageService = userImageService ?? throw new ArgumentNullException(nameof(userImageService));
+
         }
         [HttpGet]
         public IActionResult Create(int id)
@@ -67,6 +71,8 @@ namespace TenentManagement.Controllers
                 var result = _unitService.GetRentalDetail(id);
                 if (result != null)
                 {
+                    var userImage = _userImageService.GetUserImage(result.OwnerId);
+                    result.UserImage = userImage;
                     return View(result);
                 }
                 else
@@ -91,6 +97,8 @@ namespace TenentManagement.Controllers
                 var result = _unitService.GetOwnerUnitDetail(id);
                 if (result != null)
                 {
+                    var userImage = _userImageService.GetUserImage(result.RenterId ?? 0);
+                    result.UserImage = userImage;
                     return View(result);
                 }
                 else

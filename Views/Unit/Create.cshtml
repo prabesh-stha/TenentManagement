@@ -91,9 +91,10 @@
                 <input type="hidden" asp-for="PropertyId" />
                 <input type = "hidden" asp-for= "RentEndDate" />
 
-                <button type="submit" class="btn btn-primary w-100 mt-3">
+                <button type="submit" class="btn rounded-corner btn-primary w-100 mt-3">
                     <i class="bi bi-plus-circle me-2"></i>Create Unit
                 </button>
+                <a asp-controller="Property" asp-action="Detail" asp-route-id="@Model.PropertyId" class="btn btn-outline-secondary w-100 rounded-corner mt-2">Back to Property</a>
             </form>
         </div>
     </div>

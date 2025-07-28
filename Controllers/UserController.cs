@@ -14,6 +14,7 @@ namespace TenentManagement.Controllers
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
+        [HttpGet]
         public IActionResult Profile()
         {
             var userId = HttpContext.Session.GetInt32("UserId");
@@ -102,6 +103,47 @@ namespace TenentManagement.Controllers
                 TempData["Message"] = "Failed to update profile image in database";
                 TempData["MessageType"] = "error";
                 return RedirectToAction("Profile", "User");
+            }
+        }
+
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            var user = _userService.GetProfile(id);
+            return View(user);
+        }
+
+        [HttpPost]
+        public IActionResult Edit(UserModel model)
+        {
+            if(ModelState.IsValid)
+            {
+                try
+                {
+                    int row = _userService.UpdateProfile(model);
+                    if (row > 0)
+                    {
+                        TempData["Message"] = "Profile updated successfully";
+                        TempData["MessageType"] = "success";
+                        return RedirectToAction("Profile", "User");
+                    }
+                    else
+                    {
+                        ViewData["Message"] = "Failed to update profile";
+                        ViewData["MessageType"] = "error";
+                        return View(model);
+                    }
+                }
+                catch
+                {
+                    ViewData["Message"] = "Failed to update profile";
+                    ViewData["MessageType"] = "error";
+                    return View(model);
+                }
+            }
+            else
+            {
+                return View(model);
             }
         }
     }

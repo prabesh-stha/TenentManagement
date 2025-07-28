@@ -1,4 +1,6 @@
-﻿namespace TenentManagement.ViewModel
+﻿using TenentManagement.Models.User;
+
+namespace TenentManagement.ViewModel
 {
     public class OwnerUnitDetailViewModel
     {
@@ -15,10 +17,13 @@
         public double PropertyLatitude { get; set; }
         public double PropertyLongitude { get; set; }
         public string PropertyType { get; set; } = string.Empty;
+        public string TypeName { get; set; } = string.Empty;
         public string PropertyDescription { get; set; } = string.Empty;
         public string? RenterFirstName { get; set; }
         public string? RenterLastName { get; set; }
         public string? RenterPhoneNumber { get; set; }
         public string? RenterEmail { get; set; }
+
+        public UserImageModel? UserImage { get; set; }
     }
 }

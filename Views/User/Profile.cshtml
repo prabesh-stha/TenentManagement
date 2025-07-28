@@ -19,7 +19,7 @@
                         }
                         else
                         {
-                            <img id="profileImage" src="~/house.jpeg" class="profile-img" alt="Default Profile Image" />
+                            <img id="profileImage" src="/default_profile.jpg" class="profile-img" alt="Default Profile Image" />
                         }
                     </div>
                     <small class="img-upload-hint text-muted">Click on image to upload new photo</small>
@@ -46,7 +46,7 @@
                 <div class="col-md-8">
                     <div class="section-title d-flex align-items-center">
                         <h1 class="m-0">User Information</h1>
-                        <a href="#" class="btn btn-lg btn-toolbar" title="Edit Profile"><i class="bi bi-pencil"></i></a>
+                        <a asp-action="Edit" asp-controller="User" asp-route-id="@Model.Id" class="btn btn-lg btn-toolbar" title="Edit Profile"><i class="bi bi-pencil"></i></a>
                     </div>
 
                     <div class="profile-section">
@@ -63,7 +63,7 @@
 
                     <div class="profile-section">
                         <span class="profile-label">Phone:</span><br />
-                        <span class="profile-value">@Model.Phone</span>
+                        <span class="profile-value">@Model.PhoneNumber</span>
                     </div>
 
                     <div class="profile-section">

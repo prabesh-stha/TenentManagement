@@ -122,19 +122,33 @@ namespace TenentManagement.Controllers
         {
             var property = _propertyService.GetPropertyDetail(id);
             if (property == null) return NotFound();
+            property.PropertyImage = _propertyImageService.GetPropertyImage(id);
             return View(property);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(PropertyModel model)
+        public IActionResult Edit(PropertyModel model, IFormFile? imageFile)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
+                    if (imageFile != null && imageFile.Length > 0)
+                    {
+                        PropertyImageModel propertyImageModel = new PropertyImageModel
+                        {
+                            ImageType = imageFile.ContentType,
+                        };
+                        using (var ms = new MemoryStream())
+                        {
+                            imageFile.CopyTo(ms);
+                            propertyImageModel.ImageData = ms.ToArray();
+                        }
+                        model.PropertyImage = propertyImageModel;
+                    }
                     int row = _propertyService.UpdateProperty(model);
-                    if (row > 0)
+                    if (row == 1)
                     {
                         TempData["Message"] = "Property detail updated successfully!";
                         TempData["MessageType"] = "success";
@@ -169,7 +183,7 @@ namespace TenentManagement.Controllers
             try
             {
                 int row = _propertyService.DeleteProperty(id);
-                if (row > 0)
+                if (row == 1)
                 {
                     TempData["Message"] = "Property deleted successfully!";
                     TempData["MessageType"] = "success";

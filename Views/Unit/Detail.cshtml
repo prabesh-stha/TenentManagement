@@ -1,4 +1,5 @@
 ﻿@model TenentManagement.ViewModel.OwnerUnitDetailViewModel
+@using TenentManagement.Services.Utilities
 
 @{
     ViewData["Title"] = "Unit Detail";
@@ -10,7 +11,7 @@
         <div class="card-header bg-success bg-gradient text-white py-3">
             <div class="d-flex justify-content-between align-items-center">
                 <h3 class="mb-0">
-                    <i class="bi bi-house-heart-fill me-2"></i>@Model.UnitName
+                    <i class="bi bi-house-heart-fill me-2"></i>@Model.UnitName.ToTitleCase()
                 </h3>
                 <div class="d-inline-flex gap-3">
                     <div>
@@ -21,86 +22,93 @@
                             </a>
                         }
                         <a asp-action="AllInvoice" asp-controller="PaymentInvoice" asp-route-id="@Model.Id" class="btn btn-outline-light">
-                                All Invoice
-                            </a>
-                        </div>
+                            All Invoice
+                        </a>
+                    </div>
                     <span class="badge bg-white text-success fs-6 py-2 px-3 shadow-sm">
                         Rs. @Model.RentAmount.ToString() / month
                     </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card Body -->
+    <div class="card-body">
+        <!-- Unit Description -->
+        <div class="mb-4">
+            <h5 class="text-uppercase text-muted mb-3 fw-bold">
+                <i class="bi bi-card-text me-2"></i>Unit Description
+            </h5>
+            <div class="p-3 bg-light rounded">
+                <p class="mb-0">@Model.UnitDescription</p>
+            </div>
+        </div>
+        <hr class="my-4">
+
+        <!-- Property Information Section -->
+        <div class="mb-4">
+            <h5 class="text-uppercase text-muted mb-3 fw-bold">
+                <i class="bi bi-building me-2"></i>Property Information
+            </h5>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="p-3 bg-light rounded">
+                        <h6 class="text-success">Property Details</h6>
+                        <dl class="mb-0">
+                            <dt>Name</dt>
+                            <dd>@Model.PropertyName.ToTitleCase()</dd>
+
+                            <dt>Type</dt>
+                            <dd>@Model.TypeName.ToTitleCase()</dd>
+
+                            <dt>Description</dt>
+                            <dd>@Model.PropertyDescription</dd>
+                        </dl>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 bg-light rounded h-100">
+                        <h6 class="text-success">Location</h6>
+                        <dl class="mb-3">
+                            <dt>Address</dt>
+                            <dd>@Model.PropertyAddress</dd>
+                        </dl>
+                        <a href="https://www.openstreetmap.org/?mlat=@Model.PropertyLatitude&mlon=@Model.PropertyLongitude&zoom=18"
+                        target="_blank"
+                        class="btn btn-outline-success btn-sm">
+                            <i class="bi bi-geo-alt-fill me-1"></i>View on Map
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Card Body -->
-        <div class="card-body">
-            <!-- Unit Description -->
-            <div class="mb-4">
+        <hr class="my-4">
+
+
+        <!-- Owner Information Section -->
+        @if (Model.RenterFirstName != null && Model.RenterLastName != null && Model.RenterEmail != null && Model.RenterPhoneNumber != null)
+        {
+            <div class="mb-3">
                 <h5 class="text-uppercase text-muted mb-3 fw-bold">
-                    <i class="bi bi-card-text me-2"></i>Unit Description
+                    <i class="bi bi-person-badge me-2"></i>Renter Information
                 </h5>
-                <div class="p-3 bg-light rounded">
-                    <p class="mb-0">@Model.UnitDescription</p>
-                </div>
-            </div>
-            <hr class="my-4">
-
-            <!-- Property Information Section -->
-            <div class="mb-4">
-                <h5 class="text-uppercase text-muted mb-3 fw-bold">
-                    <i class="bi bi-building me-2"></i>Property Information
-                </h5>
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="p-3 bg-light rounded">
-                            <h6 class="text-success">Property Details</h6>
-                            <dl class="mb-0">
-                                <dt>Name</dt>
-                                <dd>@Model.PropertyName</dd>
-
-                                <dt>Type</dt>
-                                <dd>@Model.PropertyType</dd>
-
-                                <dt>Description</dt>
-                                <dd>@Model.PropertyDescription</dd>
-                            </dl>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="p-3 bg-light rounded h-100">
-                            <h6 class="text-success">Location</h6>
-                            <dl class="mb-3">
-                                <dt>Address</dt>
-                                <dd>@Model.PropertyAddress</dd>
-                            </dl>
-                            <a href="https://www.openstreetmap.org/?mlat=@Model.PropertyLatitude&mlon=@Model.PropertyLongitude&zoom=18"
-                            target="_blank"
-                            class="btn btn-outline-success btn-sm">
-                                <i class="bi bi-geo-alt-fill me-1"></i>View on Map
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <hr class="my-4">
-
-
-            <!-- Owner Information Section -->
-            @if (Model.RenterFirstName != null && Model.RenterLastName != null && Model.RenterEmail != null && Model.RenterPhoneNumber != null)
-            {
-                <div class="mb-3">
-                    <h5 class="text-uppercase text-muted mb-3 fw-bold">
-                        <i class="bi bi-person-badge me-2"></i>Renter Information
-                    </h5>
-                    <div class="card border-success">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="flex-shrink-0">
+                <div class="card border-success">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-shrink-0">
+                                @if(Model.UserImage != null)
+                                {
+                                    <img src="@Model.UserImage.Base64Image" class="profile-img-small" alt="Renter's Image" />
+                                }
+                                else
+                                {
                                     <i class="bi bi-person-circle fs-1 text-success"></i>
-                                </div>
+                                }
+                            </div>
                                 <div class="flex-grow-1 ms-3">
-                                    <h5 class="card-title mb-1">@Model.RenterFirstName @Model.RenterLastName</h5>
+                                    <h5 class="card-title mb-1">@Model.RenterFirstName.ToTitleCase() @Model.RenterLastName.ToTitleCase()</h5>
                                     <p class="text-muted mb-2">Renter</p>
                                 </div>
                             </div>

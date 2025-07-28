@@ -24,9 +24,10 @@
                          <span asp-validation-for="NewEmail" class="text-danger small"></span>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100 py-2" data-loading-text="Sending...">
+                <button type="submit" class="btn btn-primary rounded-corner w-100 py-2" data-loading-text="Sending...">
                     <i class="bi bi-send-fill me-2"></i>Send Verification Link
                 </button>
+                <a asp-action="Profile" asp-controller="User" class="btn w-100 btn-outline-secondary mt-2 rounded-corner"><i class="bi bi-arrow-left me-2"></i>Back to Profile</a>
             </form>
         </div>
     </div>

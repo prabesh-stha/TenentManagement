@@ -29,7 +29,7 @@ namespace TenentManagement.Controllers
             
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             var userId = HttpContext.Session.GetInt32("UserId");
             if (!userId.HasValue)
@@ -37,8 +37,8 @@ namespace TenentManagement.Controllers
                 _logger.LogWarning("Unauthorized access attempt - no user ID in session");
                 return RedirectToAction("Login", "Authentication");
             }
-            var owned = _propertyService.GetAllProperty(userId.Value);
-            var rented = _propertyService.GetAllRentedProperty(userId.Value);
+            var owned = await _propertyService.GetAllProperty(userId.Value);
+            var rented = await _propertyService.GetAllRentedProperty(userId.Value);
             return View(Tuple.Create(owned, rented));
         }
 

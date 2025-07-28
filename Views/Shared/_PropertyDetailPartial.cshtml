@@ -1,5 +1,6 @@
 ﻿@using TenentManagement.Services.Utilities
 @using TenentManagement.Models.Property
+@model TenentManagement.Models.Property.PropertyModel
 @{
 	var isOwner = ViewData["IsOwner"] as bool? ?? false;
 }
@@ -7,7 +8,14 @@
 <div class="row g-4">
 	<!-- Left side image -->
 	<div class="col-md-5">
+		@if (Model.PropertyImage != null)
+		{
+			<img src="@Model.PropertyImage.Base64Image" class="img-fluid rounded shadow" alt="Property Image" />
+		}
+		else
+		{
 		<img src="/house.jpeg" class="img-fluid rounded shadow" alt="Property Image" />
+		}
 	</div>
 
 	<!-- Right side details -->
@@ -18,7 +26,7 @@
 				@{
 					if (!isOwner)
 					{
-						<p><strong>Owner name: </strong>@Model.OwnerName</p>
+						<p><strong>Owner name: </strong>@Model.OwnerName.ToTitleCase()</p>
 					}
 				}
 				<p><strong>Address:</strong> @Model.Address</p>
