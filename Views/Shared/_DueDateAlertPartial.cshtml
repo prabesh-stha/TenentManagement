@@ -1,0 +1,123 @@
+﻿@model List<TenentManagement.Models.Payment.DueDateAlertModel>
+
+<div class="dropdown position-relative d-inline-block ms-3">
+    <!-- Notification Bell with Badge -->
+    <button class="btn btn-light position-relative"
+            type="button"
+            id="renterNotificationDropdown"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            >
+        <i class="bi bi-bell-fill"></i>
+        @if (Model != null && Model.Count > 0)
+        {
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                  style="font-size: 0.6rem; min-width: 1.25rem;">
+                @Model.Count
+                <span class="visually-hidden">unread notifications</span>
+            </span>
+        }
+    </button>
+
+    <!-- Notification Dropdown -->
+    <div class="dropdown-menu dropdown-menu-end p-0"
+         aria-labelledby="renterNotificationDropdown"
+         style="width: 350px; max-height: 400px; overflow-y: auto;">
+
+        <!-- Dropdown Header -->
+        <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+            <h6 class="mb-0 fw-bold">
+                <i class="bi bi-bell-fill text-primary me-2"></i>
+                Payment Reminders
+            </h6>
+            @if (Model != null && Model.Count > 0)
+            {
+                <span class="badge bg-primary">@Model.Count</span>
+            }
+        </div>
+
+        <!-- Notification List -->
+        @if (Model == null || Model.Count == 0)
+        {
+            <div class="text-center p-4">
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 2rem;"></i>
+                <p class="mt-2 mb-0 text-muted">No payment reminders</p>
+            </div>
+        }
+        else
+        {
+            <div class="list-group list-group-flush">
+                @foreach (var alert in Model.OrderByDescending(a => a.IsExpired).ThenBy(a => a.DueDate))
+                {
+                    <div class="list-group-item border-0 @(alert.IsExpired ? "bg-light-warning" : "")">
+                        <div class="d-flex gap-3">
+                            <div class="flex-shrink-0">
+                                <i class="bi @(alert.IsExpired ? "bi-exclamation-triangle-fill text-danger" : "bi-calendar-check text-warning") fs-4"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between">
+                                    <h6 class="mb-1 fw-bold">@alert.UnitName</h6>
+                                    <small class="@(alert.IsExpired ? "text-danger" : "text-muted")">
+                                        @alert.DueDate.ToString("MMM dd, yyyy")
+                                    </small>
+                                </div>
+                                <p class="mb-1 small">Owner: @alert.OwnerName</p>
+                                <p class="small @(alert.IsExpired ? "text-danger fw-bold" : "text-muted") mb-2">
+                                    @(alert.IsExpired ? "PAYMENT OVERDUE" : "Payment due soon")
+                                </p>
+                                <div class="d-flex gap-2">
+                                    <a asp-controller="PaymentInvoice"
+                                       asp-action="RenterInvoicePayment"
+                                       asp-route-id="@alert.InvoiceId"
+                                       asp-route-all="true"
+                                       class="btn btn-sm @(alert.IsExpired ? "btn-danger" : "btn-primary")">
+                                        <i class="bi bi-credit-card"></i> Pay Now
+                                    </a>
+                                    <a asp-controller="PaymentInvoice"
+                                       asp-action="RenterInvoices"
+                                       asp-route-unitId="@alert.UnitId"
+                                       asp-route-renterId="@alert.RenterId"
+                                       class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-receipt"></i> View Invoices
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    #renterNotificationDropdown {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+    }
+
+    .dropdown-menu {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+
+    .list-group-item {
+        border-left: 0;
+        border-right: 0;
+    }
+
+        .list-group-item:first-child {
+            border-top: 0;
+        }
+    .bg-light-warning {
+        background-color: rgba(255, 193, 7, 0.1);
+    }
+
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+    }
+</style>

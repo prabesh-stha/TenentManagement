@@ -8,7 +8,6 @@
 }
 
 <div class="container mt-4">
-
     <!-- Tabs -->
     <ul class="nav nav-pills mb-4" id="propertyTabs" role="tablist">
         <li class="nav-item" role="presentation">
@@ -33,10 +32,14 @@
                 <h2 class="fw-semibold mb-0">
                     <i class="bi bi-house-door-fill me-2 text-primary"></i>Owned Properties
                 </h2>
-                <a asp-controller="Property" asp-action="Create" asp-route-id="@Context.Session.GetInt32("UserId")"
-                class="btn btn-primary d-flex align-items-center">
-                    <i class="bi bi-plus-circle me-2"></i> Add Property
-                </a>
+                <div class="d-flex align-items-center">
+                    <a asp-controller="Property" asp-action="Create" asp-route-id="@Context.Session.GetInt32("UserId")"
+                       class="btn btn-primary d-flex align-items-center">
+                        <i class="bi bi-plus-circle me-2"></i> Add Property
+                    </a>
+                    <partial name="_InvoiceAlertPartial" model="ViewBag.InvoiceAlerts" />
+                </div>
+
             </div>
 
             @if (ownedProperties == null || !ownedProperties.Any())
@@ -61,6 +64,7 @@
                 <h2 class="fw-semibold mb-0">
                     <i class="bi bi-building me-2 text-success"></i>Rented Properties
                 </h2>
+                <partial name="_DueDateAlertPartial" model="ViewBag.DueDateAlerts" />
             </div>
 
             @if (rentedProperties == null || !rentedProperties.Any())

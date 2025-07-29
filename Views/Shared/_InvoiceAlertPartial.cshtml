@@ -1,0 +1,97 @@
+﻿@model List<TenentManagement.Models.Payment.InvoiceCreationAlertModel>
+
+<div class="dropdown position-relative d-inline-block ms-3">
+    <button class="btn btn-light position-relative" type="button" id="notificationDropdown"
+            data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-bell-fill"></i>
+        @if (Model != null && Model.Any())
+        {
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                @Model.Count
+                <span class="visually-hidden">unread notifications</span>
+            </span>
+        }
+    </button>
+
+    <div class="dropdown-menu dropdown-menu-end p-0" aria-labelledby="notificationDropdown"
+         style="width: 350px; max-height: 400px; overflow-y: auto;">
+
+        <div class="p-3 border-bottom">
+            <h6 class="mb-0 d-flex align-items-center">
+                <i class="bi bi-bell-fill text-primary me-2"></i>
+                Notifications
+                @if (Model != null && Model.Any())
+                {
+                    <span class="badge bg-primary ms-2">@Model.Count New</span>
+                }
+            </h6>
+        </div>
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="p-3 text-center text-muted">
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 1.5rem;"></i>
+                <p class="mt-2 mb-0">No new notifications</p>
+            </div>
+        }
+        else
+        {
+            <div class="list-group list-group-flush">
+                @foreach (var alert in Model)
+                {
+                    <div class="list-group-item list-group-item-action">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="me-3">
+                                <div class="fw-bold">@alert.UnitName</div>
+                                <small class="text-muted">Rented by @alert.RenterName</small>
+                            </div>
+                            <small class="text-nowrap">@alert.PaidTo.ToString("MMM dd")</small>
+                        </div>
+                        <div class="mt-2 small">
+                            Payment period ending soon
+                        </div>
+                        <div class="mt-2 d-flex gap-2">
+                            <a asp-controller="PaymentInvoice"
+                               asp-action="CreateInvoice"
+                               asp-route-unitId="@alert.UnitId"
+                               asp-route-userId="@alert.OwnerId"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-file-earmark-plus"></i> Create Invoice
+                            </a>
+                            <a asp-controller="PaymentInvoice"
+                               asp-action="UnitInvoices"
+                               asp-route-id="@alert.UnitId"
+                               class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-list-ul"></i> View All
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    #notificationDropdown {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+
+    .dropdown-menu {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+
+    .list-group-item {
+        border-left: 0;
+        border-right: 0;
+    }
+
+        .list-group-item:first-child {
+            border-top: 0;
+        }
+</style>

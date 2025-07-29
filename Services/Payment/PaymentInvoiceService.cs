@@ -162,5 +162,29 @@ namespace TenentManagement.Services.Payment
             connection.Close();
             return [.. result];
         }
+
+        public List<InvoiceCreationAlertModel> GetInvoiceCreationAlert(int ownerId)
+        {
+            var connection = _dbConnection.GetConnection();
+            var parameters = new DynamicParameters();
+            parameters.Add("@FLAG", 'M');
+            parameters.Add("@OWNERID", ownerId);
+            connection.Open();
+            var result = connection.Query<InvoiceCreationAlertModel>("SP_PAYMENTINVOICES", parameters, commandType: System.Data.CommandType.StoredProcedure);
+            connection.Close();
+            return [.. result];
+        }
+
+        public List<DueDateAlertModel> GetDueDateAlert(int renterId)
+        {
+            var connection = _dbConnection.GetConnection();
+            var parameters = new DynamicParameters();
+            parameters.Add("@FLAG", 'N');
+            parameters.Add("@RENTERID", renterId);
+            connection.Open();
+            var result = connection.Query<DueDateAlertModel>("SP_PAYMENTINVOICES", parameters, commandType: System.Data.CommandType.StoredProcedure);
+            connection.Close();
+            return [.. result];
+        }
     }
 }
