@@ -54,6 +54,11 @@ body {
     color: #6c757d;
 }
 
+.navbar-logo {
+    height: 50px;
+    max-width: 100%;
+    object-fit: contain;
+}
 
 
 .profile-container {
