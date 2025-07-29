@@ -20,7 +20,7 @@ namespace TenentManagement.Models.Property
         public double Longitude { get; set; }
         public string Description { get; set; } = string.Empty;
         public int UserId { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public int Type { get; set; }
         public string TypeName { get; set; } = string.Empty;
 

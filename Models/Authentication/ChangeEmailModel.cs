@@ -6,7 +6,7 @@ namespace TenentManagement.Models.Authentication
     {
         public string Token { get; set; } = string.Empty;
 
-        public DateTime Expiry { get; set; } = DateTime.Now;
+        public DateTime Expiry { get; set; } = DateTime.UtcNow;
 
         [Required(ErrorMessage = "New email is required.")]
         [EmailAddress(ErrorMessage = "Invalid email format.")]

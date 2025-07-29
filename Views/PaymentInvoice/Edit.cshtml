@@ -2,7 +2,7 @@
 @using TenentManagement.Services.Utilities;
 @{
 	ViewData["Title"] = "Edit Invoice";
-
+	bool all = ViewData["All"] as bool? ?? false;
 }
 
 <div class="container py-5">
@@ -26,6 +26,7 @@
 				<input type="hidden" asp-for="OwnerId" />
 				<input type="hidden" asp-for="FromMonth" id="FromMonth" />
 				<input type="hidden" asp-for="ToMonth" id="ToMonth" />
+				<input type="hidden" name="all" value="@all.ToString()" />
 
 
 				<div class="row mb-3">
@@ -86,8 +87,8 @@
 						{
 							<option value="@method.Id" selected="@(method.Id == Model.PaymentMethodId)">
 								@(method.PaymentMethod.Length > 0 ?
-															char.ToUpper(method.PaymentMethod[0]) + method.PaymentMethod.Substring(1).ToLower() :
-															method.PaymentMethod)
+																						char.ToUpper(method.PaymentMethod[0]) + method.PaymentMethod.Substring(1).ToLower() :
+																						method.PaymentMethod)
 							</option>
 						}
 					</select>
@@ -101,19 +102,19 @@
 						<div class="border rounded p-3 bg-light">
 							<div class="text-center mb-3">
 								<img src="@Model.PaymentProof.Base64Image"
-									 class="img-fluid rounded shadow-sm"
-									 style="max-height: 300px;"
-									 alt="@Model.PaymentMethod.ToTitleCase() Payment Proof" />
+								class="img-fluid rounded shadow-sm"
+								style="max-height: 300px;"
+								alt="@Model.PaymentMethod.ToTitleCase() Payment Proof" />
 							</div>
 							<div class="d-flex justify-content-center gap-2">
 								<button type="button" class="btn btn-sm btn-outline-primary"
-										data-bs-toggle="modal"
-										data-bs-target="#proofModal">
+								data-bs-toggle="modal"
+								data-bs-target="#proofModal">
 									<i class="bi bi-zoom-in me-1"></i> View Larger
 								</button>
 								<a href="@Model.PaymentProof.Base64Image"
-								   download="payment-proof-@DateTime.Now.ToString("yyyyMMdd")"
-								   class="btn btn-sm btn-outline-secondary">
+								download="payment-proof-@DateTime.UtcNow.ToString("yyyyMMdd")"
+								class="btn btn-sm btn-outline-secondary">
 									<i class="bi bi-download me-1"></i> Download
 								</a>
 							</div>
@@ -178,15 +179,24 @@
 				</div>
 
 				<div class="d-grid gap-2">
-				<button type="submit" class="btn btn-primary w-100 py-2 mt-3 rounded-corner" id="submitButton">
-					<i class="bi bi-file-earmark-text-fill me-2"></i>Update Invoice
-				</button>
-				    <a asp-action="AllInvoice"
+					<button type="submit" class="btn btn-primary w-100 py-2 mt-3 rounded-corner" id="submitButton">
+						<i class="bi bi-file-earmark-text-fill me-2"></i>Update Invoice
+					</button>
+					@if (all)
+					{
+						<a asp-action="AllInvoice" asp-route-id="@Context.Session.GetInt32("UserId")" class="btn btn-outline-secondary py-2 rounded-corner">
+							<i class="bi bi-arrow-left me-2"></i>Back to Invoices
+						</a>
+					}
+					else
+					{
+					<a asp-action="UnitInvoices"
 					asp-controller="PaymentInvoice"
 					asp-route-id="@Model.UnitId"
 					   class="btn btn-outline-secondary py-2 rounded-corner">
 						<i class="bi bi-arrow-left me-2"></i>Back to Invoices
-				</a>
+				</a>						
+					}
 				</div>
 			</form>
 		</div>
@@ -214,7 +224,7 @@
 			<div class="modal-footer">
 				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 				<a href="@Model.PaymentProof?.Base64Image"
-				   download="payment-proof-@DateTime.Now.ToString("yyyyMMdd")"
+				   download="payment-proof-@DateTime.UtcNow.ToString("yyyyMMdd")"
 				   class="btn btn-primary">
 					<i class="bi bi-download me-1"></i> Download
 				</a>

@@ -2,6 +2,7 @@
 @using TenentManagement.Services.Utilities;
 @{
     ViewData["Title"] = "Validate Invoice";
+    bool all = ViewData["All"] as bool? ?? false;
 }
 
 <div class="container py-5">
@@ -27,6 +28,7 @@
                 <input type="hidden" asp-for="ToMonth" id="ToMonth" />
                 <input type="hidden" asp-for="PaymentMethodId" />
                 <input type="hidden" asp-for="DueDate">
+                <input type="hidden" name="all" value="@all.ToString()" />
 
                 <div class="row mb-3">
                     <div class="col-md-6">
@@ -94,19 +96,19 @@
                         {
                             <div class="text-center mb-3">
                                 <img src="@Model.PaymentProof.Base64Image"
-                                     class="img-fluid rounded shadow-sm"
-                                     style="max-height: 300px;"
-                                     alt="@Model.PaymentMethod.ToTitleCase() Payment Proof" />
+                                class="img-fluid rounded shadow-sm"
+                                style="max-height: 300px;"
+                                alt="@Model.PaymentMethod.ToTitleCase() Payment Proof" />
                             </div>
                             <div class="d-flex justify-content-center gap-2">
                                 <button type="button" class="btn btn-sm btn-outline-primary"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#proofModal">
+                                data-bs-toggle="modal"
+                                data-bs-target="#proofModal">
                                     <i class="bi bi-zoom-in me-1"></i> View Larger
                                 </button>
                                 <a href="@Model.PaymentProof.Base64Image"
-                                   download="payment-proof-@DateTime.Now.ToString("yyyyMMdd")"
-                                   class="btn btn-sm btn-outline-secondary">
+                                download="payment-proof-@DateTime.UtcNow.ToString("yyyyMMdd")"
+                                class="btn btn-sm btn-outline-secondary">
                                     <i class="bi bi-download me-1"></i> Download
                                 </a>
                             </div>
@@ -181,10 +183,19 @@
                     <button type="button" class="btn btn-primary py-2 rounded-corner" id="submitButton" data-bs-toggle="modal" data-bs-target="#confirmationModal" disabled>
                         <i class="bi bi-check me-2"></i>Validate Invoice
                     </button>
-                    <a asp-action="AllInvoice" asp-controller="PaymentInvoice" asp-route-id="@Model.UnitId"
-                       class="btn btn-outline-secondary py-2 rounded-corner">
-                        <i class="bi bi-arrow-left me-2"></i>Back to Invoices
-                    </a>
+                    @if (all)
+                    {
+                        <a asp-action="AllInvoice" asp-route-id="@Model.OwnerId" asp-route-tab="owned" class="btn btn-outline-secondary py-2 rounded-corner">
+                            <i class="bi bi-arrow-left me-2"></i>Back to Invoices
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-action="UnitInvoices" asp-controller="PaymentInvoice" asp-route-id="@Model.UnitId"
+                        class="btn btn-outline-secondary py-2 rounded-corner">
+                            <i class="bi bi-arrow-left me-2"></i>Back to Invoices
+                        </a>
+                    }
                 </div>
             </form>
         </div>
@@ -212,7 +223,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 <a href="@Model.PaymentProof?.Base64Image"
-                   download="payment-proof-@DateTime.Now.ToString("yyyyMMdd")"
+                   download="payment-proof-@DateTime.UtcNow.ToString("yyyyMMdd")"
                    class="btn btn-primary">
                     <i class="bi bi-download me-1"></i> Download
                 </a>

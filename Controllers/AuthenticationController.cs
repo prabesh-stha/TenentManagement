@@ -164,6 +164,15 @@ namespace TenentManagement.Controllers
                 {
                     var loginResult = _authenticationService.Login(model);
 
+                    if(loginResult!= null && loginResult.PasswordChangingDate < DateTime.UtcNow.AddDays(-90) && loginResult.IsVerified)
+                    {
+                        ViewData["Message"] = "Your password is older than 90 days. Please change your password.";
+                        ViewData["MessageType"] = "warning";
+                        HttpContext.Session.SetInt32("Id", loginResult.Id);
+
+                        return RedirectToAction("ChangePassword", "Authentication");
+                    }
+
                     if (loginResult != null && loginResult.Role != null)
                     {
                         if (!loginResult.IsVerified)
@@ -471,8 +480,6 @@ namespace TenentManagement.Controllers
             }
             return View(model);
         }
-
-
 
         [HttpGet]
         public JsonResult ValidateUsername(string username)

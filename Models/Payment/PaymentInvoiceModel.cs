@@ -32,7 +32,7 @@ namespace TenentManagement.Models.Payment
         public DateTime? VerifiedAt { get; set; }
         public int StatusId { get; set; } = 3;
         public string Status { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
 
         public List<DateTime> AvailableMonth { get; set; } = new List<DateTime>();

@@ -165,7 +165,7 @@ namespace TenentManagement.Controllers
                 if (model.PaymentMethodId == 1 && model.StatusId == 2)
                 {
                     model.IsVerified = true;
-                    model.VerifiedAt = DateTime.Now;
+                    model.VerifiedAt = DateTime.UtcNow;
                 }
                     int row = _paymentInvoiceService.CreatePaymentInvoice(model);
                     if (row > 0)
@@ -186,7 +186,7 @@ namespace TenentManagement.Controllers
                             _paymentService.CreatePayment(new PaymentModel
                             {
                                 UnitId = model.UnitId,
-                                PaymentDate = DateTime.Now,
+                                PaymentDate = DateTime.UtcNow,
                                 PaidMonth = month,
                                 Amount = model.AmountDue / months.Count,
                                 InvoiceId = row
@@ -215,14 +215,14 @@ namespace TenentManagement.Controllers
         }
 
         [HttpGet]
-        public IActionResult AllInvoice(int id, int page = 1)
+        public IActionResult UnitInvoices(int id, int page = 1)
         {
             //var paymentInvoice = _paymentInvoiceService.GetAllInvoiceOfUnit(id);
             const int pageSize = 10;
 
             var allInvoices = _paymentInvoiceService.GetAllInvoiceOfUnit(id);
             var totalInvoices = allInvoices.Count;
-
+            var unitName = _unitService.GetUnitName(id);
             var invoices = allInvoices
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -230,6 +230,7 @@ namespace TenentManagement.Controllers
             var model = new PaymentInvoiceListViewModel
             {
                 UnitId = id,
+                UnitName = unitName ?? "",
                 PaymentInvoices = invoices,
                 CurrentPage = page,
                 TotalPages = (int)Math.Ceiling(totalInvoices / (double)pageSize)
@@ -242,6 +243,7 @@ namespace TenentManagement.Controllers
         {
 
             var paymentInvoice = _paymentInvoiceService.GetPaymentInvoiceById(id);
+            var paymentProof = _paymentProofService.GetPaymentProofImage(id);
             if(paymentInvoice == null)
             {
                 return NotFound();
@@ -253,6 +255,10 @@ namespace TenentManagement.Controllers
                 {
                     return BadRequest("Cannot delete this invoice before deleting the latest invoice.");
                 }
+            }
+            if(paymentProof != null)
+            {
+                return BadRequest("Cannot delete this invoice once payment proof is uploaded.");
             }
             try
             {
@@ -279,7 +285,7 @@ namespace TenentManagement.Controllers
         }
 
         [HttpGet]
-        public IActionResult Edit(int id)
+        public IActionResult Edit(int id, bool all = false)
         {
 
             var payInvoice = _paymentInvoiceService.GetPaymentInvoiceById(id);
@@ -291,11 +297,12 @@ namespace TenentManagement.Controllers
             payInvoice.PaymentMethods = paymentMethods;
             payInvoice.PaymentStatuses = paymentStatuses;
             payInvoice.PaymentProof = _paymentProofService.GetPaymentProofImage(id);
+            ViewData["All"] = all;
             return View(payInvoice);
         }
 
         [HttpPost]
-        public IActionResult Edit(PaymentInvoiceModel model)
+        public IActionResult Edit(PaymentInvoiceModel model, bool all = false)
         {
                 try
                 {
@@ -315,7 +322,7 @@ namespace TenentManagement.Controllers
                                 _paymentService.CreatePayment(new PaymentModel
                                 {
                                     UnitId = model.UnitId,
-                                    PaymentDate = DateTime.Now,
+                                    PaymentDate = DateTime.UtcNow,
                                     PaidMonth = month,
                                     Amount = model.AmountDue / months.Count,
                                     InvoiceId = model.Id
@@ -324,7 +331,14 @@ namespace TenentManagement.Controllers
                         }
                         TempData["Message"] = "Invoice updated successfully!";
                         TempData["MessageType"] = "success";
-                        return RedirectToAction("AllInvoice", "PaymentInvoice", new { id = model.UnitId });
+                        if (all)
+                        {
+                        return RedirectToAction("AllInvoice", "PaymentInvoice", new { id = model.OwnerId });
+                        }
+                        else
+                        {
+                        return RedirectToAction("UnitInvoices", "PaymentInvoice", new { id = model.UnitId });
+                        }
                     }
                     else
                     {
@@ -332,6 +346,7 @@ namespace TenentManagement.Controllers
                         ViewData["MessageType"] = "error";
                         model.PaymentStatuses = _paymentInvoiceService.GetAllPaymentStatus();
                         model.PaymentMethods = _paymentInvoiceService.GetAllPaymentMethod();
+                        ViewData["All"] = all;
                         return View(model);
                     }
                 }
@@ -341,6 +356,7 @@ namespace TenentManagement.Controllers
                     ViewData["MessageType"] = "error";
                 model.PaymentStatuses = _paymentInvoiceService.GetAllPaymentStatus();
                 model.PaymentMethods = _paymentInvoiceService.GetAllPaymentMethod();
+                ViewData["All"] = all;
                 return View(model);
                 }
             }
@@ -351,6 +367,7 @@ namespace TenentManagement.Controllers
             const int pageSize = 10;
             var allInvoices = _paymentInvoiceService.GetAllInvoiceOfRenter(unitId, renterId);
             var totalInvoices = allInvoices.Count;
+            var unitName = _unitService.GetUnitName(unitId);
             var invoices = allInvoices
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -358,6 +375,7 @@ namespace TenentManagement.Controllers
             var model = new RenterPaymentInvoiceListViewModel
             {
                 UnitId = unitId,
+                UnitName = unitName ?? "",
                 RenterId = renterId,
                 PaymentInvoices = invoices,
                 CurrentPage = page,
@@ -367,7 +385,7 @@ namespace TenentManagement.Controllers
         }
 
         [HttpGet]
-        public IActionResult RenterInvoicePayment(int id)
+        public IActionResult RenterInvoicePayment(int id, bool all = false)
         {
             var payInvoice = _paymentInvoiceService.GetPaymentInvoiceById(id);
             if (payInvoice == null) return NotFound();
@@ -377,10 +395,11 @@ namespace TenentManagement.Controllers
             payInvoice.PaymentMethods = payMethods;
             payInvoice.PaymentQRImage = _paymentQRService.GetPaymentQRByOwnerIdAndPaymentId(payInvoice.OwnerId, payInvoice.PaymentMethodId);
             payInvoice.PaymentProof = _paymentProofService.GetPaymentProofImage(payInvoice.Id);
+            ViewData["All"] = all;
             return View(payInvoice);
         }
         [HttpPost]
-        public IActionResult RenterInvoicePayment(PaymentInvoiceModel model, IFormFile imageFile)
+        public IActionResult RenterInvoicePayment(PaymentInvoiceModel model, IFormFile imageFile, bool all = false)
         {
             if (imageFile != null && imageFile.Length > 0)
             {
@@ -402,6 +421,7 @@ namespace TenentManagement.Controllers
                     {
                         ViewData["Message"] = "Error while uploading payment proof";
                         ViewData["MessageType"] = "error";
+                        ViewData["All"] = all;
                         return View(model);
                     }
                 }
@@ -409,6 +429,7 @@ namespace TenentManagement.Controllers
                 {
                     ViewData["Message"] = "Error while uploading payment proof";
                     ViewData["MessageType"] = "error";
+                    ViewData["All"] = all;
                     return View(model);
                 }
             }
@@ -416,6 +437,7 @@ namespace TenentManagement.Controllers
             {
                 ViewData["Message"] = "Please upload valid payment proof!";
                 ViewData["MessageType"] = "error";
+                ViewData["All"] = all;
                 return View(model);
             }
                 try
@@ -426,7 +448,15 @@ namespace TenentManagement.Controllers
                     {
                         TempData["Message"] = "Payment Invoice sent for verification!";
                         TempData["MessageType"] = "success";
+                    if (all)
+                    {
+                        return RedirectToAction("AllInvoice", "PaymentInvoice", new { id = model.RenterId, tab = "rented" });
+
+                    }
+                    else
+                    {
                         return RedirectToAction("RenterInvoices", "PaymentInvoice", new { unitId = model.UnitId, renterId = model.RenterId });
+                    }
                     }
                     else
                     {
@@ -444,7 +474,7 @@ namespace TenentManagement.Controllers
         }
 
         [HttpGet]
-        public IActionResult ValidatePayment(int id)
+        public IActionResult ValidatePayment(int id, bool all = false)
         {
             var payInvoice = _paymentInvoiceService.GetPaymentInvoiceById(id);
             if (payInvoice == null) return NotFound();
@@ -453,11 +483,12 @@ namespace TenentManagement.Controllers
             payInvoice.AmountPerMonth = unit?.RentAmount ?? 0;
             payInvoice.PaymentStatuses = paymentStatuses;
             payInvoice.PaymentProof = _paymentProofService.GetPaymentProofImage(id);
+            ViewData["All"] = all;
             return View(payInvoice);
         }
 
         [HttpPost]
-        public IActionResult ValidatePayment(PaymentInvoiceModel payInvoice)
+        public IActionResult ValidatePayment(PaymentInvoiceModel payInvoice, bool all = false)
         {
             try
             {
@@ -474,13 +505,22 @@ namespace TenentManagement.Controllers
                         TempData["Message"] = "Payment rejected successfully!";
                         TempData["MessageType"] = "success";
                     }
-                        return RedirectToAction("AllInvoice", "PaymentInvoice", new { id = payInvoice.UnitId });
+                    if (all)
+                    {
+                        return RedirectToAction("AllInvoice", "PaymentInvoice", new { id = payInvoice.OwnerId, tab = "owned" });
+
+                    }
+                    else
+                    {
+                        return RedirectToAction("UnitInvoices", "PaymentInvoice", new { id = payInvoice.UnitId });
+                    }
                 }
                 else
                 {
                     ViewData["Message"] = "Failed while updating payment invoice!";
                     ViewData["MessageType"] = "error";
                     payInvoice.PaymentStatuses = _paymentInvoiceService.GetAllPaymentStatus();
+                    ViewData["All"] = all;
                     return View(payInvoice);
                 }
             }
@@ -489,9 +529,62 @@ namespace TenentManagement.Controllers
                 ViewData["Message"] = "Failed while updating payment invoice!";
                 ViewData["MessageType"] = "error";
                 payInvoice.PaymentStatuses = _paymentInvoiceService.GetAllPaymentStatus();
+                ViewData["All"] = all;
                 return View(payInvoice);
             }
         }
 
+        [HttpGet]
+        public IActionResult Detail(int id, bool all = false)
+        {
+            var payInvoice = _paymentInvoiceService.GetPaymentInvoiceById(id);
+            if (payInvoice == null) return NotFound();
+            payInvoice.PaymentProof = _paymentProofService.GetPaymentProofImage(id);
+            ViewData["All"] = all;
+            return View(payInvoice);
+        }
+
+
+        public IActionResult AllInvoice(int id, int page = 1, string tab = "owned")
+        {
+            const int pageSize = 10;
+            bool isOwner = false;
+
+            List<PaymentInvoiceModel> invoiceQuery;
+
+            switch (tab.ToLowerInvariant())
+            {
+                case "owned":
+                    invoiceQuery = _paymentInvoiceService.GetAllOwnedPropertyInvoice(id);
+                    isOwner = true;
+                    break;
+
+                case "rented":
+                    invoiceQuery = _paymentInvoiceService.GetAllRentedPropertyInvoice(id);
+                    isOwner = false;
+                    break;
+
+                default:
+                    invoiceQuery = new List<PaymentInvoiceModel>();
+                    break;
+            }
+
+            var totalInvoices = invoiceQuery.Count();
+            var invoices = invoiceQuery
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var model = new PaymentInvoiceListViewModel
+            {
+                PaymentInvoices = invoices,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalInvoices / (double)pageSize),
+                IsOwner = isOwner
+            };
+
+            ViewBag.ActiveTab = tab;
+            return View(model);
+        }
     }
 }

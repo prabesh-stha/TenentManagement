@@ -62,9 +62,9 @@ namespace TenentManagement.Services.Payment
             parameters.Add("@ISVERIFIED", payment.IsVerified);
             if (payment.IsVerified)
             {
-                parameters.Add("@VERIFIEDAT", DateTime.Now);
+                parameters.Add("@VERIFIEDAT", DateTime.UtcNow);
             }
-            parameters.Add("@UPDATEDAT", DateTime.Now);
+            parameters.Add("@UPDATEDAT", DateTime.UtcNow);
             parameters.Add("@STATUSID", payment.StatusId);
             connection.Open();
             int row = connection.Execute("SP_PAYMENTINVOICES", parameters, commandType: CommandType.StoredProcedure);
@@ -133,6 +133,29 @@ namespace TenentManagement.Services.Payment
             var parameters = new DynamicParameters();
             parameters.Add("@FLAG", 'R');
             parameters.Add("@UNITID", unitId);
+            parameters.Add("@RENTERID", renterId);
+            connection.Open();
+            var result = connection.Query<PaymentInvoiceModel>("SP_PAYMENTINVOICES", parameters, commandType: System.Data.CommandType.StoredProcedure);
+            connection.Close();
+            return [.. result];
+        }
+
+        public List<PaymentInvoiceModel> GetAllOwnedPropertyInvoice(int ownerId)
+        {
+            var connection = _dbConnection.GetConnection();
+            var parameters = new DynamicParameters();
+            parameters.Add("@FLAG", 'O');
+            parameters.Add("@OWNERID", ownerId);
+            connection.Open();
+            var result = connection.Query<PaymentInvoiceModel>("SP_PAYMENTINVOICES", parameters, commandType: System.Data.CommandType.StoredProcedure);
+            connection.Close();
+            return [.. result];
+        }
+        public List<PaymentInvoiceModel> GetAllRentedPropertyInvoice(int renterId)
+        {
+            var connection = _dbConnection.GetConnection();
+            var parameters = new DynamicParameters();
+            parameters.Add("@FLAG", 'P');
             parameters.Add("@RENTERID", renterId);
             connection.Open();
             var result = connection.Query<PaymentInvoiceModel>("SP_PAYMENTINVOICES", parameters, commandType: System.Data.CommandType.StoredProcedure);

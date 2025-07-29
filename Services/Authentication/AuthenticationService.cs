@@ -95,7 +95,7 @@ namespace TenentManagement.Services.Authentication
         public TokenModel? GenerateAndStoreEmailVerificationToken(string email)
         {
             var token = Guid.NewGuid().ToString();
-            var expiry = DateTime.Now.AddHours(168); // Token valid for 7 days
+            var expiry = DateTime.UtcNow.AddHours(168); // Token valid for 7 days
             return StoreToken(token, expiry, email.ToLower());
         }
 
@@ -176,7 +176,7 @@ namespace TenentManagement.Services.Authentication
         public TokenModel? GenerateAndStorePasswordToken(string email)
         {
             var token = Guid.NewGuid().ToString();
-            var expiry = DateTime.Now.AddHours(1); // Token valid for 1 days
+            var expiry = DateTime.UtcNow.AddHours(1); // Token valid for 1 days
             return StoreToken(token, expiry, email.ToLower());
         }
 

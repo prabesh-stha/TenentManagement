@@ -19,7 +19,7 @@ namespace TenentManagement.Models.User
         public int TotalRentedProperties { get; set; } = 0;
         public int TotalRentedUnits { get; set; } = 0;
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public UserImageModel? UserImage { get; set; }
     }

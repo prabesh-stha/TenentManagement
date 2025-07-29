@@ -130,7 +130,7 @@
 					<button type="submit" class="btn btn-primary w-100 py-2 mt-3 rounded-corner">
 						<i class="bi bi-file-earmark-text-fill me-2"></i>Create Invoice
 					</button>
-					<a asp-action="RenterInvoices" asp-controller="PaymentInvoice" asp-route-unitId="@Model.UnitId" asp-route-renterId="@Model.RenterId" class="btn btn-outline-secondary py-2 rounded-corner"><i class="bi bi-arrow-left me-2"></i>Back to Invoices</a>
+					<a asp-action="Detail" asp-controller="Unit" asp-route-id="@Model.UnitId" class="btn btn-outline-secondary py-2 rounded-corner"><i class="bi bi-arrow-left me-2"></i>Back to Unit</a>
 				</div>
 			</form>
 		</div>

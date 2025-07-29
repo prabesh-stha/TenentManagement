@@ -13,11 +13,11 @@ namespace TenentManagement.Models.Property.Unit
         public string Description { get; set; } = string.Empty;
         public bool IsVacant { get; set; } = true;
         public float? RentAmount { get; set; } = 1000;
-        public DateTime? RentStartDate { get; set; } = DateTime.Now;
+        public DateTime? RentStartDate { get; set; } = DateTime.UtcNow;
         [Display(Name = "Rent Duration (Months)")]
         public int RentDurationMonths { get; set; } = 0; 
 
-        public DateTime? RentEndDate { get; set; } = DateTime.Now.AddMonths(1);
+        public DateTime? RentEndDate { get; set; } = DateTime.UtcNow.AddMonths(1);
 
         public string? RenterUsername { get; set; }
         public int? RenterId { get; set; } = null;

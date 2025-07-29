@@ -121,5 +121,18 @@ namespace TenentManagement.Services.Property.Unit
             connection.Close();
             return result;
         }
+
+        public string? GetUnitName(int id)
+        {
+            using var connection = _databaseConnection.GetConnection();
+            using var cmd = connection.CreateCommand();
+
+            cmd.CommandText = "SELECT NAME FROM TBL_UNITS WHERE ID = @ID";
+            cmd.Parameters.Add(new SqlParameter("@ID", id));
+
+            connection.Open();
+            var result = cmd.ExecuteScalar();
+            return result.ToString();
+        }
     }
 }

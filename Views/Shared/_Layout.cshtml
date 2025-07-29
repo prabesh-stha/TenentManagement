@@ -28,11 +28,14 @@
 				</button>
 				<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
 					<ul class="navbar-nav flex-grow-1">
+						@if (!string.IsNullOrEmpty(Context.Session.GetString("Username")))
+						{
 						<li class="nav-item">
 							<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
 						</li>
-						@if (!string.IsNullOrEmpty(Context.Session.GetString("Username")))
-						{
+						<li class="nav-item">
+							<a class="nav-link text-dark" asp-controller="PaymentInvoice" asp-action="AllInvoice" asp-route-id="@Context.Session.GetInt32("UserId")">All Invoice</a>
+						</li>
 							<li class="nav-item dropdown ms-auto">
 								<a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 									@if (Context.Session.GetString("UserImage") != null)
@@ -112,7 +115,7 @@
 {
 	public int GetYear()
 	{
-		var year = DateTime.Now.Year;
+		var year = DateTime.UtcNow.Year;
 		return year;
 	}
 }

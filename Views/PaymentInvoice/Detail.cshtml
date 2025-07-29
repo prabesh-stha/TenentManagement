@@ -1,0 +1,162 @@
+﻿@model TenentManagement.Models.Payment.PaymentInvoiceModel
+@using TenentManagement.Services.Utilities;
+@{
+    ViewData["Title"] = "Invoice Detail";
+    var all = ViewData["All"] as bool? ?? false;
+}
+
+<div class="container py-5">
+    <div class="card shadow-lg mx-auto rounded-corner" style="max-width: 700px;">
+        <div class="card-header bg-primary text-white py-4 rounded-corner-top">
+            <h1 class="h4 mb-0 text-center d-flex flex-column align-items-center">
+                <span class="d-inline-flex align-items-center justify-content-center bg-opacity-25 bg-info text-white rounded-circle mb-2" style="width: 50px; height: 50px;">
+                    <i class="bi bi-receipt"></i>
+                </span>
+                <span>Tenant Management System</span>
+                <span class="mt-2 mb-0 text-center">
+                    <i class="bi bi-ticket-detailed me-2"></i>Invoice Detail
+                </span>
+            </h1>
+        </div>
+
+        <div class="card-body p-4">
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label small text-muted">From Month</label>
+                    <select class="form-control" disabled>
+                        <option value="@Model.FromMonth.ToString("yyyy-MM-01")" selected>@Model.FromMonth.ToString("yyyy MMMM")</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label small text-muted">To Month</label>
+                    <select asp-for="ToMonth" id="ToMonth" class="form-control" disabled>
+                        <option value="@Model.ToMonth.ToString("yyyy-MM-01")" selected>@Model.ToMonth.ToString("yyyy MMMM")</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label asp-for="DueDate" class="form-label">Rent Due Date</label>
+                    <input asp-for="DueDate" type="date" class="form-control" disabled />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label small text-muted">Total Amount</label>
+                    <div class="input-group">
+                        <span class="input-group-text">Rs</span>
+                        <input asp-for="AmountDue" type="text" class="form-control" id="TotalAmountDisplay" readonly />
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="mb-3">
+                <label asp-for="RenterRemark" class="form-label small text-muted">Renter Remarks</label>
+                <textarea asp-for="RenterRemark" class="form-control" placeholder="-" rows="3" disabled></textarea>
+                <span asp-validation-for="RenterRemark" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="OwnerRemark" class="form-label small text-muted">Owner Remarks</label>
+                <textarea asp-for="OwnerRemark" class="form-control" placeholder="-" rows="3" disabled></textarea>
+                <span asp-validation-for="OwnerRemark" class="text-danger small"></span>
+            </div>
+
+
+            <div class="mb-4">
+                <label class="form-label small text-muted">@Model.PaymentMethod.ToTitleCase() Payment Proof</label>
+                <div class="border rounded p-3 bg-light">
+                    @if (Model.PaymentProof != null)
+                    {
+                        <div class="text-center mb-3">
+                            <img src="@Model.PaymentProof.Base64Image"
+                            class="img-fluid rounded shadow-sm"
+                            style="max-height: 300px;"
+                            alt="@Model.PaymentMethod.ToTitleCase() Payment Proof" />
+                        </div>
+                        <div class="d-flex justify-content-center gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary"
+                            data-bs-toggle="modal"
+                            data-bs-target="#proofModal">
+                                <i class="bi bi-zoom-in me-1"></i> View Larger
+                            </button>
+                            <a href="@Model.PaymentProof.Base64Image"
+                            download="payment-proof-@DateTime.UtcNow.ToString("yyyyMMdd")"
+                            class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-download me-1"></i> Download
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="bi bi-image text-muted display-6"></i>
+                            <p class="text-muted mt-2">No payment proof provided</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+
+
+            <div class="d-grid gap-2">
+                @if (all)
+                {
+                    <a asp-action="AllInvoice" asp-route-id="@Context.Session.GetInt32("UserId")" class="btn btn-outline-secondary py-2 rounded-corner">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Invoices
+                    </a>
+                }
+                else
+                {
+                    if (Context.Session.GetInt32("UserId") != null && Context.Session.GetInt32("UserId") == Model.OwnerId)
+                    {
+                        <a asp-action="UnitInvoices" asp-controller="PaymentInvoice" asp-route-id="@Model.UnitId"
+                           class="btn btn-outline-secondary py-2 rounded-corner">
+                            <i class="bi bi-arrow-left me-2"></i>Back to Invoices
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-action="RenterInvoices" asp-controller="PaymentInvoice" asp-route-unitId="@Model.UnitId" asp-route-renterId="@Model.RenterId" class="btn  btn-outline-secondary py-2 rounded-corner">
+                            <i class="bi bi-arrow-left me-2"></i>Back to Invoices
+                        </a>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Proof Modal -->
+<div class="modal fade" id="proofModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-receipt me-2"></i> Payment Proof
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <div class="d-flex justify-content-center">
+                    <img src="@Model.PaymentProof?.Base64Image"
+                         class="img-fluid rounded"
+                         style="max-height: 70vh;"
+                         alt="Payment Proof" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="@Model.PaymentProof?.Base64Image"
+                   download="payment-proof-@DateTime.UtcNow.ToString("yyyyMMdd")"
+                   class="btn btn-primary">
+                    <i class="bi bi-download me-1"></i> Download
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+

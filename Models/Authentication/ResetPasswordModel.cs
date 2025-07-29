@@ -6,7 +6,7 @@ namespace TenentManagement.Models.Authentication
     {
         public string Token { get; set; } = string.Empty;
 
-        public DateTime Expiry { get; set; } = DateTime.Now;
+        public DateTime Expiry { get; set; } = DateTime.UtcNow;
 
         [Required(ErrorMessage = "Password is required")]
         [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters.")]

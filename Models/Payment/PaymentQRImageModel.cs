@@ -11,7 +11,7 @@ namespace TenentManagement.Models.Payment
         public int PaymentMethodId { get; set; }
         public string PaymentMethod { get; set; } = string.Empty;
         public int OwnerId { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
         public string Base64Image => $"data:{ImageType};base64,{Convert.ToBase64String(ImageData)}";
     }

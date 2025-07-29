@@ -15,6 +15,7 @@ namespace TenentManagement.Models.Authentication
 
         public bool IsVerified { get; set; } = false;
 
+        public DateTime PasswordChangingDate = DateTime.UtcNow;
         public UserImageModel? UserImage { get; set; }
     }
 }
