@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SkiaSharp;
 using TenentManagement.Models.Property;
 using TenentManagement.Services.Property;
 using TenentManagement.Services.Property.Unit;

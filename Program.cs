@@ -38,6 +38,10 @@ builder.Services.AddScoped<TenentManagement.Services.Payment.PaymentProofService
 
 builder.Services.AddScoped<TenentManagement.Services.User.UserImageService>();
 
+builder.Services.AddScoped<TenentManagement.Services.Property.UtilityBill.UtilityBillService>();
+
+builder.Services.AddScoped<TenentManagement.Services.Property.UtilityBill.UtilityBillImageService>();
+
 //BCrypt service for password hashing
 builder.Services.AddScoped<BCryptService>();
 

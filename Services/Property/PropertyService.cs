@@ -81,8 +81,6 @@ namespace TenentManagement.Services.Property
             {
                 foreach (var property in result)
                 {
-
-
                     var images = _propertyImageService.GetPropertyImage(property.Id);
                     property.PropertyImage = images;
                 }
@@ -195,6 +193,18 @@ namespace TenentManagement.Services.Property
             connection.Execute("SP_PROPERTY", parameter, commandType: CommandType.StoredProcedure);
             connection.Close();
             return parameter.Get<int>("@STATUS");
+        }
+
+        public List<OwnerPropertiesNameModel> GetPropertiesOfUser(int userId)
+        {
+            using var connection = _databaseConnection.GetConnection();
+            connection.Open();
+            var parameters = new DynamicParameters();
+            parameters.Add("@FLAG", 'O');
+            parameters.Add("@USERID", userId);
+            var result = connection.Query<OwnerPropertiesNameModel>("SP_PROPERTY", parameters, commandType: CommandType.StoredProcedure).ToList();
+            connection.Close();
+            return result;
         }
     }
 }

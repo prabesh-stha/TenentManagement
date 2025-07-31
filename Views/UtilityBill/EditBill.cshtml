@@ -1,0 +1,256 @@
+﻿@using TenentManagement.Models.Property.Utility
+@using TenentManagement.Services.Utilities
+@model UtilityBillModel
+
+@{
+    ViewData["Title"] = "Edit Utility Bill";
+}
+
+<div class="container py-5">
+    <div class="card shadow-lg mx-auto rounded-corner" style="max-width: 700px;">
+        <div class="card-header bg-primary text-white py-4 rounded-corner-top">
+            <h1 class="h4 mb-0 text-center d-flex flex-column align-items-center">
+                <span class="d-inline-flex align-items-center justify-content-center bg-opacity-25 bg-info text-white rounded-circle mb-2" style="width: 50px; height: 50px;">
+                    <i class="bi bi-lightning-charge-fill fa-lg"></i>
+                </span>
+                <span>Tenant Management System</span>
+                <span class="mt-2 mb-0 text-center">
+                    <i class="bi bi-pencil-square me-2"></i>Edit Utility Bill
+                </span>
+            </h1>
+        </div>
+
+        <div class="card-body p-4">
+            <form asp-action="EditBill" asp-controller="UtilityBill" method="post" enctype="multipart/form-data" class="needs-validation" novalidate data-enable-spinner="true">
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="UserId" />
+                <input type="hidden" asp-for="PropertyId" />
+                <input type="hidden" asp-for="UtilityTypeId" />
+
+
+                <div class="mb-3">
+                    <label asp-for="UtilityTypeId" class="form-label small text-muted">Utility Type *</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-tools"></i></span>
+                        <select asp-for="UtilityTypeId" class="form-select" disabled>
+                            @{
+                                <option value="@Model.UtilityTypeId" selected=>@Model.UtilityType.ToTitleCase()</option>
+                            }
+                        </select>
+                    </div>
+                    <span asp-validation-for="UtilityTypeId" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="PropertyId" class="form-label small text-muted">Property *</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-building"></i></span>
+                        <select asp-for="PropertyId" class="form-select" id="propertySelect" disabled>
+                            @{
+                                <option value="@Model.PropertyId" selected>@Model.PropertyName.ToTitleCase()</option>
+                            }
+                        </select>
+                    </div>
+                    <span asp-validation-for="PropertyId" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small text-muted">Month *</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                        <input asp-for="Month" type="month" class="form-control" required
+                               id="monthInput"
+                               value="@Model.Month.ToString("yyyy-MM")" disabled/>
+                    </div>
+                    <span asp-validation-for="Month" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3 total-unit-group">
+                    <label asp-for="TotalUnit" class="form-label small text-muted">Total Units<span class="text-muted small"> (Optional)</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-speedometer2"></i></span>
+                        <input asp-for="TotalUnit" type="number" class="form-control" placeholder="Enter total units" min="0" oninput="this.value = Math.max(this.value, 0)" />
+                        <span class="input-group-text unit-type-display">units</span>
+                    </div>
+                    <span asp-validation-for="TotalUnit" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3 consumed-unit-group">
+                    <label asp-for="ConsumedUnit" class="form-label small text-muted">Consumed Units *</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-speedometer2"></i></span>
+                        <input asp-for="ConsumedUnit" type="number" class="form-control" placeholder="Enter consumed units" />
+                        <span class="input-group-text unit-type-display">units</span>
+                    </div>
+                    <span asp-validation-for="ConsumedUnit" class="text-danger small"></span>
+                </div>
+
+                <div class="row mb-3">
+                <div class="col-md-6">
+                    <label asp-for="Amount" class="form-label small text-muted">Amount *</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
+                        <input asp-for="Amount" type="number" step="1000" class="form-control" placeholder="Amount" />
+                    </div>
+                    <span asp-validation-for="Amount" class="text-danger small"></span>
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label class="form-label small text-muted" asp-for="IsPaid">Bill Paid?</label>
+                    <div class="mt-2">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" asp-for="IsPaid" value="true" id="paid" />
+                            <label class="form-check-label" for="paid">Yes</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" asp-for="IsPaid" value="false" id="unpadi" checked />
+                            <label class="form-check-label" for="unpaid">No</label>
+                        </div>
+                    </div>
+                </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small text-muted">Bill Receipt</label>
+                    <div class="border rounded p-3 text-center" id="billUploadArea">
+                        <div id="currentBillContainer" class="@(Model.UtilityBillImage == null ? "d-none" : "")">
+                            <img id="currentBill" src="@(Model.UtilityBillImage != null ? Model.UtilityBillImage.Base64Image : "")"
+                                 class="img-fluid rounded cursor-pointer" style="max-height: 200px; cursor: pointer;"
+                                 onclick="document.getElementById('billImage').click()" />
+                            <p class="small text-muted mt-2">Click image to change</p>
+                        </div>
+
+                        <div id="billUploadPrompt" class="py-4 @(Model.UtilityBillImage != null ? "d-none" : "")">
+                            <i class="bi bi-receipt display-4 text-muted"></i>
+                            <p class="mt-2 mb-1">Upload bill (optional)</p>
+                            <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('billImage').click()">
+                                <i class="bi bi-folder2-open"></i> Browse Files
+                            </button>
+                            <p class="small text-muted mt-2">Supports: JPG, PNG (Max 5MB)</p>
+                        </div>
+                        <div id="billPreviewContainer" class="mb-3 d-none">
+                            <img id="billPreview" class="img-fluid rounded" style="max-height: 200px;" />
+                            <br />
+                            <button type="button" class="btn btn-lg text-danger mt-2" id="removeBillBtn" title="Remove image">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+
+                        <input type="file" name="billImage" id="billImage" class="d-none" accept="image/*" />
+                    </div>
+                    <span id="billFileError" class="text-danger small d-none mt-2"></span>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary w-100 py-2 mt-4 rounded-corner">
+                        <i class="bi bi-save me-2"></i>Update Utility Bill
+                    </button>
+                    <a asp-action="UtilityBills" asp-controller="UtilityBill" class="btn btn-outline-secondary py-2 rounded-corner">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Utility Bills
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeUtilityTypeDisplay();
+            const billImage = document.getElementById('billImage');
+            const billPreview = document.getElementById('billPreview');
+            const billPreviewContainer = document.getElementById('billPreviewContainer');
+            const billUploadPrompt = document.getElementById('billUploadPrompt');
+            const currentBillContainer = document.getElementById('currentBillContainer');
+            const removeBillBtn = document.getElementById('removeBillBtn');
+            const billFileError = document.getElementById('billFileError');
+             function initializeUtilityTypeDisplay() {
+                const utilityTypeSelect = document.getElementById('UtilityTypeId');
+                if (utilityTypeSelect) {
+                    updateUtilityTypeDisplay.call(utilityTypeSelect);
+                }
+            }
+
+            function updateUtilityTypeDisplay() {
+                const totalUnitGroup = document.querySelector('.total-unit-group');
+                const consumedUnitGroup = document.querySelector('.consumed-unit-group');
+                const unitTypeDisplays = document.querySelectorAll('.unit-type-display');
+                const utilityTypeId = this.value;
+
+                let unitTypeText = 'units';
+                let showUnitFields = true;
+
+                switch (utilityTypeId) {
+                    case '1':
+                        unitTypeText = 'kWh';
+                        break;
+                    case '2': 
+                        unitTypeText = 'm³';
+                        break;
+                    case '3':
+                        showUnitFields = false;
+                        break;
+                }
+
+                unitTypeDisplays.forEach(display => {
+                    display.textContent = unitTypeText;
+                });
+
+                totalUnitGroup.style.display = showUnitFields ? '' : 'none';
+                consumedUnitGroup.style.display = showUnitFields ? '' : 'none';
+            }
+
+            billImage.addEventListener('change', function(e) {
+                if (this.files && this.files[0]) {
+                    const file = this.files[0];
+
+                    billFileError.classList.add('d-none');
+                    billFileError.textContent = '';
+
+                    if (file.size > 5 * 1024 * 1024) {
+                        showBillError('File size exceeds 5MB limit');
+                        this.value = '';
+                        return;
+                    }
+
+                    if (!file.type.match('image.*')) {
+                        showBillError('Please select an image file (JPG or PNG)');
+                        this.value = '';
+                        return;
+                    }
+
+                    currentBillContainer?.classList.add('d-none');
+                    billUploadPrompt?.classList.add('d-none');
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        billPreview.src = e.target.result;
+                        billPreviewContainer.classList.remove('d-none');
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            removeBillBtn?.addEventListener('click', function() {
+                billImage.value = '';
+                billPreviewContainer.classList.add('d-none');
+                currentBillContainer.classList.remove('d-none');
+
+                if (currentBillContainer && !currentBillContainer.classList.contains('d-none')) {
+                    currentBillContainer.classList.remove('d-none');
+                } else {
+                    billUploadPrompt.classList.remove('d-none');
+                }
+            });
+
+            function showBillError(message) {
+                billFileError.textContent = message;
+                billFileError.classList.remove('d-none');
+                setTimeout(() => {
+                    billFileError.classList.add('d-none');
+                }, 5000);
+            }
+        });
+    </script>
+}
