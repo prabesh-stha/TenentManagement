@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
+using Microsoft.IdentityModel.Tokens;
 using TenentManagement.Models.Property.Unit;
 using TenentManagement.Services.Database;
 using TenentManagement.ViewModel;
@@ -74,8 +75,8 @@ namespace TenentManagement.Services.Property.Unit
             var parameters = new DynamicParameters();
             parameters.Add("@FLAG", 'U');
             parameters.Add("@ID", model.Id);
-            parameters.Add("@NAME", model.Name);
-            parameters.Add("@DESCRIPTION", model.Description);
+            parameters.Add("@NAME", model.Name.IsNullOrEmpty() ? null: model.Name);
+            parameters.Add("@DESCRIPTION", model.Description.IsNullOrEmpty() ? null : model.Description);
             parameters.Add("@ISVACANT", model.IsVacant);
             parameters.Add("@RENTAMOUNT", model.RentAmount);
             parameters.Add("@RENTSTARTDATE", model.RentStartDate);

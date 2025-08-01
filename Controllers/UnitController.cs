@@ -199,5 +199,55 @@ namespace TenentManagement.Controllers
                 return View();
             }
         }
+
+        [HttpPost]
+        public IActionResult RemoveTenent(int id)
+        {
+            var unit = _unitService.GetUnitById(id);
+            if (unit == null) return NotFound();
+            try
+            {
+                var updatedUnit = new UnitModel
+                {
+                    Id = id,
+                    RentStartDate = null,
+                    RentEndDate = null,
+                    RenterId = null,
+                    IsVacant = true
+                };
+                int row = _unitService.UpdateUnit(updatedUnit);
+                if (row > 0)
+                {
+                    TempData["Message"] = "Tenent removed successfully!";
+                    TempData["MessageType"] = "success";
+                    return Ok();
+                }
+                else
+                {
+                    ViewData["Message"] = "An error occurred while removing tenent.";
+                    ViewData["MessageType"] = "error";
+                    return View();
+                }
+            }
+            catch
+            {
+                ViewData["Message"] = "An error occurred while removing tenent.";
+                ViewData["MessageType"] = "error";
+                return View();
+            }
+        }
+
+
+        [HttpGet]
+        public JsonResult UnitSelection(int propertyId)
+        {
+            var units = _unitService.GetAllUnits(propertyId)
+                .Select(u => new {
+                    id = u.Id,
+                    unitName = u.Name
+                }).ToList();
+
+            return Json(units);
+        }
     }
 }

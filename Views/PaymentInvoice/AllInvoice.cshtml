@@ -8,6 +8,7 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="me-1">All Invoices</h2>
+        <a class="btn btn-outline-primary" asp-action="PropertySelection" asp-controller="Property"><i class="bi bi-plus"></i> Create New Invoice</a>
     </div>
 
     <!-- Filter Section -->
@@ -278,7 +279,7 @@
             <ul class="pagination justify-content-center">
                 <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
                     <a class="page-link"
-                       asp-action="AllInvoices"
+                       asp-action="AllInvoice"
                        asp-route-id="@Context.Session.GetInt32("UserId")"
                        asp-route-tab="@activeTab"
                        asp-route-page="@(Model.CurrentPage - 1)">

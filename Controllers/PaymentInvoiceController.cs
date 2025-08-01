@@ -1,9 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SkiaSharp;
 using TenentManagement.Models.Payment;
+using TenentManagement.Models.Property.Utility;
 using TenentManagement.Services.Database;
 using TenentManagement.Services.Payment;
+using TenentManagement.Services.Property;
 using TenentManagement.Services.Property.Unit;
+using TenentManagement.Services.Property.UtilityBill;
 using TenentManagement.Services.Utilities;
 using TenentManagement.ViewModel;
 
@@ -18,13 +22,21 @@ namespace TenentManagement.Controllers
         private readonly PaymentService _paymentService;
         private readonly PaymentQRImageService _paymentQRService;
         private readonly PaymentProofService _paymentProofService;
-        public PaymentInvoiceController(UnitService unitService, PaymentInvoiceService paymentInvoiceService, PaymentService paymentService, PaymentQRImageService paymentQRService, PaymentProofService paymentProofService)
+        private readonly UtilityBillInvoiceService _utilityBillInvoiceService;
+        public PaymentInvoiceController
+            (UnitService unitService
+            , PaymentInvoiceService paymentInvoiceService
+            , PaymentService paymentService
+            , PaymentQRImageService paymentQRService
+            , PaymentProofService paymentProofService
+            , UtilityBillInvoiceService utilityBillInvoiceService)
         {
             _unitService = unitService ?? throw new ArgumentNullException(nameof(unitService));
             _paymentInvoiceService = paymentInvoiceService ?? throw new ArgumentNullException(nameof(paymentInvoiceService));
             _paymentService = paymentService ?? throw new ArgumentNullException(nameof(paymentService));
             _paymentQRService = paymentQRService ?? throw new ArgumentNullException(nameof(paymentQRService));
             _paymentProofService = paymentProofService ?? throw new ArgumentNullException(nameof(paymentProofService));
+            _utilityBillInvoiceService = utilityBillInvoiceService;
         }
 
         [HttpGet]
@@ -172,7 +184,23 @@ namespace TenentManagement.Controllers
                     {
                         TempData["Message"] = "Invoice created successfully!";
                         TempData["MessageType"] = "success";
-
+                    if (model.UtilityBills != null && model.UtilityBills.Any())
+                    {
+                        foreach (var utility in model.UtilityBills)
+                        {
+                            if (utility.Amount > 0)
+                            {
+                                var utilityBill = new UtilityBillInvoiceModel
+                                {
+                                    InvoiceId = row,
+                                    UtilityTypeId = utility.UtilityTypeId,
+                                    ConsumedUnit = utility.ConsumedUnit,
+                                    Amount = utility.Amount,
+                                };
+                                _utilityBillInvoiceService.CreateUtilityBillInvoice(utilityBill);
+                            }
+                        }
+                    }
                     if (model.PaymentMethodId == 1 && model.StatusId == 2)
                     {
                         var months = new List<DateTime>();
@@ -262,6 +290,7 @@ namespace TenentManagement.Controllers
             }
             try
             {
+                _utilityBillInvoiceService.DeleteUtilityBillInvoice(invoiceId: id);
                 int row = _paymentInvoiceService.DeletePaymentInvoice(id);
                 if (row > 0)
                 {
@@ -297,6 +326,7 @@ namespace TenentManagement.Controllers
             payInvoice.PaymentMethods = paymentMethods;
             payInvoice.PaymentStatuses = paymentStatuses;
             payInvoice.PaymentProof = _paymentProofService.GetPaymentProofImage(id);
+            payInvoice.UtilityBills = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(id);
             ViewData["All"] = all;
             return View(payInvoice);
         }
@@ -306,7 +336,51 @@ namespace TenentManagement.Controllers
         {
                 try
                 {
-                    int row = _paymentInvoiceService.UpdatePaymentInvoice(model);
+                    var existingUtilityBills = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(model.Id);
+                    if (model.UtilityBills != null && model.UtilityBills.Any())
+                    {
+                        foreach (var utilityBill in model.UtilityBills)
+                        {
+                            if (utilityBill.Amount <= 0) continue;
+
+                            utilityBill.InvoiceId = model.Id;
+
+                            var existingBill = existingUtilityBills.FirstOrDefault(ub =>
+                                ub.UtilityTypeId == utilityBill.UtilityTypeId &&
+                                ub.InvoiceId == model.Id);
+
+                            if (existingBill != null)
+                            {
+                                existingBill.Amount = utilityBill.Amount;
+                                existingBill.ConsumedUnit = utilityBill.ConsumedUnit;
+                                _utilityBillInvoiceService.UpdateUtilityBillInvoice(existingBill);
+                            }
+                            else
+                            {
+                                _utilityBillInvoiceService.CreateUtilityBillInvoice(utilityBill);
+                            }
+                        }
+
+                        foreach (var existingBill in existingUtilityBills)
+                        {
+                            if (!model.UtilityBills.Any(ub =>
+                                ub.UtilityTypeId == existingBill.UtilityTypeId &&
+                                ub.Amount > 0))
+                            {
+                                _utilityBillInvoiceService.DeleteUtilityBillInvoice(id: existingBill.Id);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (var existingBill in existingUtilityBills)
+                        {
+                            _utilityBillInvoiceService.DeleteUtilityBillInvoice(id: existingBill.Id);
+                        }
+                    }
+
+                int row = _paymentInvoiceService.UpdatePaymentInvoice(model);
+
                     if(row > 0)
                     {
                         if (model.StatusId == 2)
@@ -395,6 +469,7 @@ namespace TenentManagement.Controllers
             payInvoice.PaymentMethods = payMethods;
             payInvoice.PaymentQRImage = _paymentQRService.GetPaymentQRByOwnerIdAndPaymentId(payInvoice.OwnerId, payInvoice.PaymentMethodId);
             payInvoice.PaymentProof = _paymentProofService.GetPaymentProofImage(payInvoice.Id);
+            payInvoice.UtilityBills = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(id);
             ViewData["All"] = all;
             return View(payInvoice);
         }
@@ -422,6 +497,7 @@ namespace TenentManagement.Controllers
                         ViewData["Message"] = "Error while uploading payment proof";
                         ViewData["MessageType"] = "error";
                         ViewData["All"] = all;
+                        model.UtilityBills = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(model.Id);
                         return View(model);
                     }
                 }
@@ -430,6 +506,8 @@ namespace TenentManagement.Controllers
                     ViewData["Message"] = "Error while uploading payment proof";
                     ViewData["MessageType"] = "error";
                     ViewData["All"] = all;
+                    model.UtilityBills = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(model.Id);
+
                     return View(model);
                 }
             }
@@ -438,6 +516,7 @@ namespace TenentManagement.Controllers
                 ViewData["Message"] = "Please upload valid payment proof!";
                 ViewData["MessageType"] = "error";
                 ViewData["All"] = all;
+                model.UtilityBills = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(model.Id);
                 return View(model);
             }
                 try
@@ -462,14 +541,17 @@ namespace TenentManagement.Controllers
                     {
                         ViewData["Message"] = "An error occurred while updating the payment invoice.";
                         ViewData["MessageType"] = "error";
-                        return View(model);
+                    model.UtilityBills = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(model.Id);
+                    return View(model);
                     }
                 }
                 catch
                 {
                     ViewData["Message"] = "An error occurred while updating the payment invoice.";
                     ViewData["MessageType"] = "error";
-                    return View(model);
+                model.UtilityBills = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(model.Id);
+
+                return View(model);
                 }
         }
 
@@ -483,6 +565,7 @@ namespace TenentManagement.Controllers
             payInvoice.AmountPerMonth = unit?.RentAmount ?? 0;
             payInvoice.PaymentStatuses = paymentStatuses;
             payInvoice.PaymentProof = _paymentProofService.GetPaymentProofImage(id);
+            payInvoice.UtilityBills = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(id);
             ViewData["All"] = all;
             return View(payInvoice);
         }
@@ -520,6 +603,7 @@ namespace TenentManagement.Controllers
                     ViewData["Message"] = "Failed while updating payment invoice!";
                     ViewData["MessageType"] = "error";
                     payInvoice.PaymentStatuses = _paymentInvoiceService.GetAllPaymentStatus();
+                    payInvoice.UtilityBills = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(payInvoice.Id);
                     ViewData["All"] = all;
                     return View(payInvoice);
                 }
@@ -537,15 +621,19 @@ namespace TenentManagement.Controllers
         [HttpGet]
         public IActionResult Detail(int id, bool all = false)
         {
+            var utilityBillInvoice = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(id);
             var payInvoice = _paymentInvoiceService.GetPaymentInvoiceById(id);
             if (payInvoice == null) return NotFound();
             payInvoice.PaymentProof = _paymentProofService.GetPaymentProofImage(id);
+            payInvoice.UtilityBills = utilityBillInvoice;
             ViewData["All"] = all;
             return View(payInvoice);
         }
 
 
         public IActionResult AllInvoice(int id, int page = 1, string tab = "owned")
+
+
         {
             const int pageSize = 10;
             bool isOwner = false;
@@ -586,5 +674,6 @@ namespace TenentManagement.Controllers
             ViewBag.ActiveTab = tab;
             return View(model);
         }
+
     }
 }

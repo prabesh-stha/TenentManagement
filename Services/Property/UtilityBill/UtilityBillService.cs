@@ -121,16 +121,5 @@ namespace TenentManagement.Services.Property.UtilityBill
             return parameters.Get<int>("@STATUS");
             ;
         }
-
-        public List<UtilityLatestMonthModel> GetLatestMonth()
-        {
-            using var connection = _dbConnection.GetConnection();
-            var parameters = new DynamicParameters();
-            parameters.Add("@FLAG", 'L');
-            connection.Open();
-            var result = connection.Query<UtilityLatestMonthModel>("SP_UTILITYBILLS", parameters, commandType: System.Data.CommandType.StoredProcedure).ToList();
-            connection.Close();
-            return result;
-        }
     }
 }

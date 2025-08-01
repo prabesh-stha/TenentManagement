@@ -5,9 +5,9 @@
     var all = ViewData["All"] as bool? ?? false;
 }
 
-<div class="container py-5">
-    <div class="card shadow-lg mx-auto rounded-corner" style="max-width: 700px;">
-        <div class="card-header bg-primary text-white py-4 rounded-corner-top">
+<div class="container-fluid py-5">
+    <div class="card shadow-lg mx-auto" style="max-width: 900px;">
+        <div class="card-header bg-primary text-white py-4">
             <h1 class="h4 mb-0 text-center d-flex flex-column align-items-center">
                 <span class="d-inline-flex align-items-center justify-content-center bg-opacity-25 bg-info text-white rounded-circle mb-2" style="width: 50px; height: 50px;">
                     <i class="bi bi-receipt"></i>
@@ -20,74 +20,225 @@
         </div>
 
         <div class="card-body p-4">
+            <div class="row gx-5">
+                <!-- Left Column - Rent Information (60% width) -->
+                <div class="col-lg-7">
+                    <div class="border-end pe-4">
+                        <h5 class="text-uppercase text-muted mb-3 fw-bold border-bottom pb-2">
+                            <i class="bi bi-house me-2"></i>Rent Details
+                        </h5>
 
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label class="form-label small text-muted">From Month</label>
-                    <select class="form-control" disabled>
-                        <option value="@Model.FromMonth.ToString("yyyy-MM-01")" selected>@Model.FromMonth.ToString("yyyy MMMM")</option>
-                    </select>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label small text-muted">From Month</label>
+                                    <input type="text" class="form-control"
+                                           value="@Model.FromMonth.ToString("yyyy MMMM")" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label small text-muted">To Month</label>
+                                    <input type="text" class="form-control"
+                                           value="@Model.ToMonth.ToString("yyyy MMMM")" readonly />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label small text-muted">Due Date</label>
+                                    <input type="text" class="form-control"
+                                           value="@Model.DueDate.ToString("yyyy-MM-dd")" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label small text-muted">Monthly Amount</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rs</span>
+                                        <input type="text" class="form-control"
+                                               value="@Model.AmountPerMonth.ToString("0.00")" readonly />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 bg-light p-3 rounded">
+                            <label class="form-label small text-muted">Total Rent</label>
+                            <div class="input-group">
+                                <span class="input-group-text">Rs</span>
+                                <input type="text" class="form-control fw-bold fs-5"
+                                       value="@Model.AmountDue.ToString("0.00")" readonly />
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="col-md-6">
-                    <label class="form-label small text-muted">To Month</label>
-                    <select asp-for="ToMonth" id="ToMonth" class="form-control" disabled>
-                        <option value="@Model.ToMonth.ToString("yyyy-MM-01")" selected>@Model.ToMonth.ToString("yyyy MMMM")</option>
-                    </select>
+                <!-- Right Column - Utility Bills (40% width) -->
+                <div class="col-lg-5">
+                    @if (Model.UtilityBills != null && Model.UtilityBills.Any(ub => ub.Amount > 0))
+                    {
+                        <h5 class="text-uppercase text-muted mb-3 fw-bold border-bottom pb-2">
+                            <i class="bi bi-lightning-charge me-2"></i>Utility Bills
+                        </h5>
+
+                        @foreach (var utility in Model.UtilityBills.Where(ub => ub.Amount > 0))
+                        {
+                            var isInternet = utility.UtilityTypeName?.Contains("Internet", StringComparison.OrdinalIgnoreCase) ?? false;
+
+                            <div class="mb-3 utility-bill">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label class="form-label small text-muted fw-bold">
+                                        @utility.UtilityTypeName.ToTitleCase()
+                                    </label>
+                                </div>
+
+                                <div class="row g-2">
+                                    @if (!isInternet)
+                                    {
+                                        <div class="col-6">
+                                            <label class="form-label small text-muted">Consumed Units</label>
+                                            <input type="text" class="form-control"
+                                                   value="@utility.ConsumedUnit.ToString("0.00")" readonly />
+                                        </div>
+                                    }
+                                    <div class="@(isInternet ? "col-12" : "col-6")">
+                                        <label class="form-label small text-muted">Amount</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">Rs</span>
+                                            <input type="text" class="form-control"
+                                                   value="@utility.Amount.ToString("0.00")" readonly />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="mt-3 bg-light p-3 rounded">
+                            <label class="form-label small text-muted">Total Utilities</label>
+                            <div class="input-group">
+                                <span class="input-group-text">Rs</span>
+                                <input type="text" class="form-control"
+                                       value="@Model.UtilityBills.Sum(ub => ub.Amount).ToString("0.00")" readonly />
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info mt-3">
+                            <i class="bi bi-info-circle me-2"></i>No utility bills for this invoice
+                        </div>
+                    }
                 </div>
             </div>
 
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label asp-for="DueDate" class="form-label">Rent Due Date</label>
-                    <input asp-for="DueDate" type="date" class="form-control" disabled />
+            <!-- Grand Total Section -->
+            <div class="row mt-4 border-top pt-3">
+                <div class="col-md-12">
+                    <div class="d-flex justify-content-between align-items-center bg-primary bg-opacity-10 p-3 rounded">
+                        <h5 class="mb-0 text-primary">Grand Total</h5>
+                        <div class="input-group" style="max-width: 250px;">
+                            <span class="input-group-text bg-white">Rs</span>
+                            <input type="text" class="form-control fw-bold fs-4 text-end text-primary"
+                                   value="@((Model.AmountDue + (Model.UtilityBills?.Sum(ub => ub.Amount) ?? 0)).ToString("0.00"))" readonly />
+                        </div>
+                    </div>
                 </div>
-
+            </div>
+            <!-- Remarks Section -->
+            <div class="row mt-4 g-3">
                 <div class="col-md-6">
-                    <label class="form-label small text-muted">Total Amount</label>
-                    <div class="input-group">
-                        <span class="input-group-text">Rs</span>
-                        <input asp-for="AmountDue" type="text" class="form-control" id="TotalAmountDisplay" readonly />
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0"><i class="bi bi-chat-left-text me-2"></i>Renter Remarks</h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">@(string.IsNullOrEmpty(Model.RenterRemark) ? "No remarks" : Model.RenterRemark)</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0"><i class="bi bi-chat-left-text me-2"></i>Owner Remarks</h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">@(string.IsNullOrEmpty(Model.OwnerRemark) ? "No remarks" : Model.OwnerRemark)</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Payment Status Section -->
+            <div class="row mt-4 g-3">
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <h6 class="card-title text-muted">Payment Status</h6>
+                            <span class="badge @(Model.Status.ToLower() == "paid" ? "bg-success" : Model.Status.ToLower() == "unpaid" ? "bg-danger" : "bg-warning") p-3 fs-6 mt-2">
+                                <i class="bi @(Model.Status.ToLower() == "paid" ? "bi-check-circle" : Model.Status.ToLower() == "unpaid" ? "bi-x-circle" : "bi-question-circle") me-2"></i>
+                                @Model.Status.ToTitleCase()
+                            </span>
+                        </div>
+                    </div>
+                </div>
 
-            <div class="mb-3">
-                <label asp-for="RenterRemark" class="form-label small text-muted">Renter Remarks</label>
-                <textarea asp-for="RenterRemark" class="form-control" placeholder="-" rows="3" disabled></textarea>
-                <span asp-validation-for="RenterRemark" class="text-danger small"></span>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <h6 class="card-title text-muted">Payment Verified</h6>
+                            <span class="badge @(Model.IsVerified ? "bg-success" : "bg-danger") p-3 fs-6 mt-2">
+                                <i class="bi @(Model.IsVerified ? "bi-check-circle" : "bi-x-circle") me-2"></i>
+                                @(Model.IsVerified ? "Verified" : "Not Verified")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <h6 class="card-title text-muted">Payment Method</h6>
+                            <span class="badge bg-primary p-3 fs-6 mt-2">
+                                <i class="bi bi-credit-card me-2"></i>
+                                @Model.PaymentMethod.ToTitleCase()
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label asp-for="OwnerRemark" class="form-label small text-muted">Owner Remarks</label>
-                <textarea asp-for="OwnerRemark" class="form-control" placeholder="-" rows="3" disabled></textarea>
-                <span asp-validation-for="OwnerRemark" class="text-danger small"></span>
-            </div>
-
-
-            <div class="mb-4">
-                <label class="form-label small text-muted">@Model.PaymentMethod.ToTitleCase() Payment Proof</label>
-                <div class="border rounded p-3 bg-light">
+            <!-- Payment Proof Section -->
+            <div class="mt-4">
+                <h5 class="text-uppercase text-muted mb-3 fw-bold border-bottom pb-2">
+                    <i class="bi bi-credit-card me-2"></i>Payment Proof
+                </h5>
                     @if (Model.PaymentProof != null)
                     {
-                        <div class="text-center mb-3">
-                            <img src="@Model.PaymentProof.Base64Image"
-                            class="img-fluid rounded shadow-sm"
-                            style="max-height: 300px;"
-                            alt="@Model.PaymentMethod.ToTitleCase() Payment Proof" />
-                        </div>
-                        <div class="d-flex justify-content-center gap-2">
-                            <button type="button" class="btn btn-sm btn-outline-primary"
-                            data-bs-toggle="modal"
-                            data-bs-target="#proofModal">
-                                <i class="bi bi-zoom-in me-1"></i> View Larger
-                            </button>
-                            <a href="@Model.PaymentProof.Base64Image"
-                            download="payment-proof-@DateTime.UtcNow.ToString("yyyyMMdd")"
-                            class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-download me-1"></i> Download
-                            </a>
+                        <div class="mb-4">
+                            <label class="form-label small text-muted">@Model.PaymentMethod.ToTitleCase() Payment Proof</label>
+                            <div class="border rounded p-3 bg-light">
+                                <div class="text-center mb-3">
+                                    <img src="@Model.PaymentProof.Base64Image"
+                                         class="img-fluid rounded shadow-sm"
+                                         style="max-height: 300px;"
+                                         alt="@Model.PaymentMethod.ToTitleCase() Payment Proof" />
+                                </div>
+                                <div class="d-flex justify-content-center gap-2">
+                                    <button type="button" class="btn btn-sm btn-outline-primary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#proofModal">
+                                        <i class="bi bi-zoom-in me-1"></i> View Larger
+                                    </button>
+                                    <a href="@Model.PaymentProof.Base64Image"
+                                       download="payment-proof-@DateTime.UtcNow.ToString("yyyyMMdd")"
+                                       class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-download me-1"></i> Download
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     }
                     else
@@ -97,15 +248,15 @@
                             <p class="text-muted mt-2">No payment proof provided</p>
                         </div>
                     }
-                </div>
             </div>
 
+            
 
-
-            <div class="d-grid gap-2">
+            <!-- Back Button -->
+            <div class="d-grid gap-2 mt-4">
                 @if (all)
                 {
-                    <a asp-action="AllInvoice" asp-route-id="@Context.Session.GetInt32("UserId")" class="btn btn-outline-secondary py-2 rounded-corner">
+                    <a asp-action="AllInvoice" asp-route-id="@Context.Session.GetInt32("UserId")" class="btn btn-outline-secondary py-2">
                         <i class="bi bi-arrow-left me-2"></i>Back to Invoices
                     </a>
                 }
@@ -114,13 +265,13 @@
                     if (Context.Session.GetInt32("UserId") != null && Context.Session.GetInt32("UserId") == Model.OwnerId)
                     {
                         <a asp-action="UnitInvoices" asp-controller="PaymentInvoice" asp-route-id="@Model.UnitId"
-                           class="btn btn-outline-secondary py-2 rounded-corner">
+                           class="btn btn-outline-secondary py-2">
                             <i class="bi bi-arrow-left me-2"></i>Back to Invoices
                         </a>
                     }
                     else
                     {
-                        <a asp-action="RenterInvoices" asp-controller="PaymentInvoice" asp-route-unitId="@Model.UnitId" asp-route-renterId="@Model.RenterId" class="btn  btn-outline-secondary py-2 rounded-corner">
+                        <a asp-action="RenterInvoices" asp-controller="PaymentInvoice" asp-route-unitId="@Model.UnitId" asp-route-renterId="@Model.RenterId" class="btn btn-outline-secondary py-2">
                             <i class="bi bi-arrow-left me-2"></i>Back to Invoices
                         </a>
                     }
@@ -131,32 +282,53 @@
 </div>
 
 <!-- Payment Proof Modal -->
-<div class="modal fade" id="proofModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">
-                    <i class="bi bi-receipt me-2"></i> Payment Proof
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-center p-4">
-                <div class="d-flex justify-content-center">
-                    <img src="@Model.PaymentProof?.Base64Image"
-                         class="img-fluid rounded"
-                         style="max-height: 70vh;"
-                         alt="Payment Proof" />
+@if (Model.PaymentProof != null)
+{
+    <div class="modal fade" id="proofModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-receipt me-2"></i> Payment Proof
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <a href="@Model.PaymentProof?.Base64Image"
-                   download="payment-proof-@DateTime.UtcNow.ToString("yyyyMMdd")"
-                   class="btn btn-primary">
-                    <i class="bi bi-download me-1"></i> Download
-                </a>
+                <div class="modal-body text-center p-4">
+                    <div class="d-flex justify-content-center">
+                        <img src="@Model.PaymentProof.Base64Image"
+                             class="img-fluid rounded"
+                             style="max-height: 70vh;"
+                             alt="Payment Proof" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <a href="@Model.PaymentProof.Base64Image"
+                       download="payment-proof-@DateTime.UtcNow.ToString("yyyyMMdd")"
+                       class="btn btn-primary">
+                        <i class="bi bi-download me-1"></i> Download
+                    </a>
+                </div>
             </div>
         </div>
     </div>
-</div>
+}
 
+<style>
+    .utility-bill {
+        padding: 0.75rem;
+        background-color: #f8f9fa;
+        border-radius: 0.5rem;
+        margin-bottom: 0.75rem;
+        border: 1px solid #dee2e6;
+    }
+
+    .form-control[readonly] {
+        background-color: white;
+        border-color: #dee2e6;
+    }
+
+    .card {
+        border-radius: 0.5rem;
+    }
+</style>

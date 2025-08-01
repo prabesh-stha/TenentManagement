@@ -1,0 +1,109 @@
+﻿@model TenentManagement.ViewModel.PropertySelectionViewModel
+@{
+    ViewData["Title"] = "Property Selection";
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h3>Select Property and Unit</h3>
+        </div>
+        <div class="card-body">
+            <div class="form-group mb-4">
+                <label class="form-label">Property</label>
+                <select id="propertyDropdown" class="form-select">
+                    <option value="">-- Select Property --</option>
+                    @foreach (var property in Model.PropertyList)
+                    {
+                        <option value="@property.Id">@property.PropertyName</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group mb-4" id="unitSection" style="display: none;">
+                <label class="form-label">Unit</label>
+                <select id="unitDropdown" class="form-select">
+                    <option value="">-- Select Unit --</option>
+                </select>
+            </div>
+
+            <div class="mt-4 d-flex justify-content-between">
+                <a asp-action="AllInvoice"
+                asp-controller="PaymentInvoice"
+                class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to invoice
+            </a>
+                <a id="nextPageBtn"
+                   class="btn btn-primary disabled"
+                   onclick="return validateSelection()">
+                    Next <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            let selectedPropertyId = null;
+            let selectedUnitId = null;
+
+            $('#propertyDropdown').change(function() {
+                const propertyId = $(this).val();
+                selectedPropertyId = propertyId;
+                $('#unitSection').hide();
+                $('#unitDropdown').html('<option value="">-- Select Unit --</option>');
+                updateNextButton();
+
+                if (propertyId) {
+                    $.get('/Unit/UnitSelection', { propertyId: propertyId }, function(data) {
+                        if (data && data.length > 0) {
+                            $.each(data, function(index, unit) {
+                                $('#unitDropdown').append($('<option>', {
+                                    value: unit.id,
+                                    text: unit.unitName
+                                }));
+                            });
+                            $('#unitSection').show();
+                        } else {
+                            showSweetAlert("No units", "No units are found for this property.", "warning")
+                        }
+                    }).fail(function() {
+                        showSweetAlert("Error", "Error loading units for this property", "error")
+                    });
+                }
+            });
+
+            $('#unitDropdown').change(function() {
+                selectedUnitId = $(this).val();
+                updateNextButton();
+            });
+
+            function updateNextButton() {
+                const nextBtn = $('#nextPageBtn');
+                if (selectedPropertyId && selectedUnitId) {
+                    nextBtn.attr('href', `/PaymentInvoice/CreateInvoice?unitId=${selectedUnitId}&userId=${@Context.Session.GetInt32("UserId")}`);
+                    nextBtn.removeClass('disabled');
+                } else {
+                    nextBtn.attr('href', '#');
+                    nextBtn.addClass('disabled');
+                }
+            }
+
+        function showSweetAlert(title, text, icon) {
+            Swal.fire({
+                title: title,
+                text: text,
+                icon: icon,
+                confirmButtonColor: '#0d6efd',
+                confirmButtonText: 'OK'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    location.reload();
+                }
+            });
+        }
+        });
+    </script>
+}

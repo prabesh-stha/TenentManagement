@@ -1,7 +1,8 @@
-﻿using System.Reflection;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using SkiaSharp;
+using System.Reflection;
 using TenentManagement.Models.Property;
 using TenentManagement.Services.Property;
 using TenentManagement.Services.Property.Unit;
@@ -233,5 +234,23 @@ namespace TenentManagement.Controllers
                 return RedirectToAction("Index", "Home");
             }
         }
+
+        public IActionResult PropertySelection()
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId.HasValue)
+            {
+                var property = _propertyService.GetPropertiesOfUser(userId.Value);
+                var model = new PropertySelectionViewModel
+                {
+                    PropertyList = property
+                };
+                return View(model);
+            }
+            TempData["Message"] = "No property of the user";
+            TempData["MessageType"] = "error";
+            return RedirectToAction("AllInvoice", "PaymentInvoice");
+        }
+
     }
 }

@@ -6,7 +6,7 @@
 }
 
 <div class="container py-5">
-    <div class="card shadow-lg mx-auto rounded-corner" style="max-width: 700px;">
+    <div class="card shadow-lg mx-auto rounded-corner" style="max-width: 900px;">
         <div class="card-header bg-primary text-white py-4 rounded-corner-top">
             <h1 class="h4 mb-0 text-center d-flex flex-column align-items-center">
                 <span class="d-inline-flex align-items-center justify-content-center bg-opacity-25 bg-info text-white rounded-circle mb-2" style="width: 50px; height: 50px;">
@@ -30,55 +30,163 @@
                 <input type="hidden" asp-for="DueDate">
                 <input type="hidden" name="all" value="@all.ToString()" />
 
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label small text-muted">From Month *</label>
-                        <select class="form-control" disabled>
-                            <option value="@Model.FromMonth.ToString("yyyy-MM-01")" selected>@Model.FromMonth.ToString("yyyy MMMM")</option>
-                        </select>
-                    </div>
+                <div class="row gx-5">
+                    <!-- Left Column - Rent Information -->
+                    <div class="col-lg-7">
+                        <div class="border-end pe-4">
+                            <h5 class="text-uppercase text-muted mb-3 fw-bold border-bottom pb-2">
+                                <i class="bi bi-house me-2"></i>Rent Details
+                            </h5>
 
-                    <div class="col-md-6">
-                        <label class="form-label small text-muted">To Month *</label>
-                        <select asp-for="ToMonth" id="ToMonth" class="form-control" disabled>
-                            <option value="@Model.ToMonth.ToString("yyyy-MM-01")" selected>@Model.ToMonth.ToString("yyyy MMMM")</option>
-                        </select>
-                    </div>
-                </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label small text-muted">From Month</label>
+                                        <input type="text" class="form-control"
+                                               value="@Model.FromMonth.ToString("yyyy MMMM")" readonly />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label small text-muted">To Month</label>
+                                        <input type="text" class="form-control"
+                                               value="@Model.ToMonth.ToString("yyyy MMMM")" readonly />
+                                    </div>
+                                </div>
+                            </div>
 
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label small text-muted">Amount Per Month *</label>
-                        <div class="input-group">
-                            <span class="input-group-text">Rs.</span>
-                            <input asp-for="AmountPerMonth" class="form-control" id="AmountPerMonth" placeholder="e.g. 10000" readonly />
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="DueDate" class="form-label">Due Date *</label>
+                                        <input asp-for="DueDate" type="date" class="form-control" id="DueDate" />
+                                        <span asp-validation-for="DueDate" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label small text-muted">Monthly Amount</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">Rs</span>
+                                            <input asp-for="AmountPerMonth" class="form-control" id="AmountPerMonth" readonly />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3 bg-light p-3 rounded">
+                                <label class="form-label small text-muted">Total Rent</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">Rs</span>
+                                    <input asp-for="AmountDue" type="text" class="form-control fw-bold fs-5" id="TotalAmountDisplay" readonly />
+                                </div>
+                            </div>
+
                         </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label small text-muted">Total Amount</label>
-                        <div class="input-group">
-                            <span class="input-group-text">Rs</span>
-                            <input asp-for="AmountDue" type="text" class="form-control" id="TotalAmountDisplay" readonly />
+                    <div class="col-lg-5">
+                        @if (Model.UtilityBills != null && Model.UtilityBills.Any(ub => ub.Amount > 0))
+                        {
+                            <h5 class="text-uppercase text-muted mb-3 fw-bold border-bottom pb-2">
+                                <i class="bi bi-lightning-charge me-2"></i>Utility Bills
+                            </h5>
+
+                            @foreach (var utility in Model.UtilityBills.Where(ub => ub.Amount > 0))
+                            {
+                                var isInternet = utility.UtilityTypeName?.Contains("Internet", StringComparison.OrdinalIgnoreCase) ?? false;
+
+                                <div class="mb-3 utility-bill">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label small text-muted fw-bold">
+                                            @utility.UtilityTypeName.ToTitleCase()
+                                        </label>
+                                    </div>
+
+                                    <div class="row g-2">
+                                        @if (!isInternet)
+                                        {
+                                            <div class="col-6">
+                                                <label class="form-label small text-muted">Consumed Units</label>
+                                                <input type="text" class="form-control"
+                                                       value="@utility.ConsumedUnit.ToString("0.00")" readonly />
+                                            </div>
+                                        }
+                                        <div class="@(isInternet ? "col-12" : "col-6")">
+                                            <label class="form-label small text-muted">Amount</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">Rs</span>
+                                                <input type="text" class="form-control"
+                                                       value="@utility.Amount.ToString("0.00")" readonly />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="mt-3 bg-light p-3 rounded">
+                                <label class="form-label small text-muted">Total Utilities</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">Rs</span>
+                                    <input type="text" class="form-control"
+                                           value="@Model.UtilityBills.Sum(ub => ub.Amount).ToString("0.00")" readonly />
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info mt-3">
+                                <i class="bi bi-info-circle me-2"></i>No utility bills for this invoice
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="row mt-4 border-top mb-3 pt-3">
+                    <div class="col-md-12">
+                        <div class="d-flex justify-content-between align-items-center bg-primary bg-opacity-10 p-3 rounded">
+                            <h5 class="mb-0 text-primary">Grand Total</h5>
+                            <div class="input-group" style="max-width: 250px;">
+                                <span class="input-group-text bg-white">Rs</span>
+                                <input type="text" class="form-control fw-bold fs-4 text-end text-primary" id="GrandTotalDisplay"
+                                       value="@((Model.AmountDue + (Model.UtilityBills?.Sum(ub => ub.Amount) ?? 0)).ToString("0.00"))" readonly />
+                            </div>
                         </div>
                     </div>
                 </div>
+                <div class="row mb-3">
+                    <!-- Owner Remarks -->
+                    <div class="col-md-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-header bg-light d-flex align-items-center">
+                                <i class="bi bi-chat-left-text-fill text-primary me-2"></i>
+                                <h6 class="mb-0 fw-semibold">Owner Remarks</h6>
+                            </div>
+                            <div class="card-body p-0">
+                                <textarea asp-for="OwnerRemark"
+                                          rows="4"
+                                          class="form-control border-0 p-3"
+                                          style="min-height: 120px; resize: none;"
+                                          placeholder="Enter any additional notes or comments..."></textarea>
+                            </div>
+                        </div>
+                    </div>
 
-                <div class="mb-3">
-                    <label asp-for="DueDate" class="form-label">Rent Due Date *</label>
-                    <input asp-for="DueDate" type="date" class="form-control" disabled />
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="RenterRemark" class="form-label small text-muted">Renter Remarks</label>
-                    <textarea asp-for="RenterRemark" class="form-control" placeholder="-" rows="3" disabled></textarea>
-                    <span asp-validation-for="RenterRemark" class="text-danger small"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="OwnerRemark" class="form-label small text-muted">Owner Remarks</label>
-                    <textarea asp-for="OwnerRemark" class="form-control" placeholder="Anything to add?" rows="3"></textarea>
-                    <span asp-validation-for="OwnerRemark" class="text-danger small"></span>
+                    <!-- Renter Remarks -->
+                    <div class="col-md-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-header bg-light d-flex align-items-center">
+                                <i class="bi bi-chat-left-text-fill text-primary me-2"></i>
+                                <h6 class="mb-0 fw-semibold">Renter Remarks</h6>
+                            </div>
+                            <div class="card-body p-0">
+                                <textarea asp-for="RenterRemark"
+                                          rows="4"
+                                          class="form-control border-0 p-3"
+                                          style="min-height: 120px; resize: none;"
+                                          placeholder="No comment" disabled></textarea>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="mb-3">

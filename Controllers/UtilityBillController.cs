@@ -42,7 +42,6 @@ namespace TenentManagement.Controllers
             if(!userId.HasValue) return NotFound();
             utilityBillModel.OwnerPropertyName = _propertyService.GetPropertiesOfUser(userId.Value);
             utilityBillModel.UtilityTypes = utilityTypes;
-            utilityBillModel.LatestMonth = _utilityBillService.GetLatestMonth();
             utilityBillModel.UserId = userId.Value;
             return View(utilityBillModel);
         }
@@ -85,12 +84,10 @@ namespace TenentManagement.Controllers
                     ViewData["MessageType"] = "error";
                     utilityBillModel.UtilityTypes = _utilityBillService.GetUtilityBills();
                     utilityBillModel.OwnerPropertyName = _propertyService.GetPropertiesOfUser(utilityBillModel.UserId);
-                    utilityBillModel.LatestMonth = _utilityBillService.GetLatestMonth();
                     return View(utilityBillModel);
                 }
             }
             utilityBillModel.UtilityTypes = _utilityBillService.GetUtilityBills();
-            utilityBillModel.LatestMonth = _utilityBillService.GetLatestMonth();
             utilityBillModel.OwnerPropertyName = _propertyService.GetPropertiesOfUser(utilityBillModel.UserId);
             return View(utilityBillModel);
         }

@@ -42,6 +42,8 @@ builder.Services.AddScoped<TenentManagement.Services.Property.UtilityBill.Utilit
 
 builder.Services.AddScoped<TenentManagement.Services.Property.UtilityBill.UtilityBillImageService>();
 
+builder.Services.AddScoped<TenentManagement.Services.Property.UtilityBill.UtilityBillInvoiceService>();
+
 //BCrypt service for password hashing
 builder.Services.AddScoped<BCryptService>();
 

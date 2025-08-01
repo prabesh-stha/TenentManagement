@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using TenentManagement.Models.Property.Utility;
 
 namespace TenentManagement.Models.Payment
 {
@@ -41,6 +42,8 @@ namespace TenentManagement.Models.Payment
         public IEnumerable<PaymentStatusModel> PaymentStatuses { get; set; } = new List<PaymentStatusModel>();
         public PaymentQRImageModel? PaymentQRImage { get; set; }
         public PaymentProofModel? PaymentProof { get; set; }
+
+        public IEnumerable<UtilityBillInvoiceModel> UtilityBills { get; set; } = new List<UtilityBillInvoiceModel>();
 
     }
 }

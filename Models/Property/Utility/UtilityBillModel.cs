@@ -25,9 +25,6 @@ namespace TenentManagement.Models.Property.Utility
         public bool IsPaid { get; set; } = false;
         public IEnumerable<UtilityTypeModel> UtilityTypes { get; set; } = new List<UtilityTypeModel>();
         public UtilityBillImageModel? UtilityBillImage { get; set; } = null;
-
-        public IEnumerable<UtilityLatestMonthModel> LatestMonth { get; set; } = new List<UtilityLatestMonthModel>();
-
         public IEnumerable<OwnerPropertiesNameModel> OwnerPropertyName { get; set; } = new List<OwnerPropertiesNameModel>();
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
