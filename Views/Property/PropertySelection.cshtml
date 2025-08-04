@@ -48,6 +48,7 @@
         $(document).ready(function() {
             let selectedPropertyId = null;
             let selectedUnitId = null;
+            let unitData = [];
 
             $('#propertyDropdown').change(function() {
                 const propertyId = $(this).val();
@@ -59,6 +60,7 @@
                 if (propertyId) {
                     $.get('/Unit/UnitSelection', { propertyId: propertyId }, function(data) {
                         if (data && data.length > 0) {
+                            unitData = data;
                             $.each(data, function(index, unit) {
                                 $('#unitDropdown').append($('<option>', {
                                     value: unit.id,
@@ -77,6 +79,14 @@
 
             $('#unitDropdown').change(function() {
                 selectedUnitId = $(this).val();
+                if (selectedUnitId) {
+                    const selectedUnit = unitData.find(u => u.id == selectedUnitId);
+                    if (selectedUnit) {
+                        if (selectedUnit.renterId === null) {
+                            showSweetAlert("No tentent assign to this unit","Assign tentent to the unit before creating invoice.","warning");
+                        }
+                    }
+                }
                 updateNextButton();
             });
 

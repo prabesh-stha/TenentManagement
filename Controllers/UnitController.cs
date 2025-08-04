@@ -244,7 +244,8 @@ namespace TenentManagement.Controllers
             var units = _unitService.GetAllUnits(propertyId)
                 .Select(u => new {
                     id = u.Id,
-                    unitName = u.Name
+                    unitName = u.Name,
+                    renterId = u.RenterId
                 }).ToList();
 
             return Json(units);

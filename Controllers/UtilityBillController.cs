@@ -26,12 +26,20 @@ namespace TenentManagement.Controllers
 
 
         [HttpGet]
-        public IActionResult UtilityBills()
+        public IActionResult UtilityBills(bool isOwner = true)
         {
             var userId = HttpContext.Session.GetInt32("UserId");
             if (!userId.HasValue) return RedirectToAction("Login", "Authentication");
-            var utilityBills = _utilityBillService.GetAllUtilityBill(userId.Value);
-            return View(utilityBills);
+            List<UtilityBillModel> utilityBills = new List<UtilityBillModel>();
+            if (isOwner)
+            {
+                 utilityBills = _utilityBillService.GetAllUtilityBill(userId.Value);
+            }
+            else
+            {
+                utilityBills = _utilityBillService.GetAllRentedUtilityBill(userId.Value);
+            }
+                return View(utilityBills);
         }
         [HttpGet]
         public IActionResult UploadBill()

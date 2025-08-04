@@ -40,6 +40,7 @@ namespace TenentManagement.Services.Property.UtilityBill
             parameters.Add("@CONSUMEDUNIT", model.ConsumedUnit);
             parameters.Add("@AMOUNT", model.Amount);
             parameters.Add("@ISPAID", model.IsPaid);
+            parameters.Add("@ALLOWTENENTACCESS", model.AllowTenentAccess);
             if (model.UtilityBillImage != null)
             {
                 parameters.Add("@IMAGEDATA", model.UtilityBillImage.ImageData);
@@ -64,6 +65,7 @@ namespace TenentManagement.Services.Property.UtilityBill
             parameters.Add("@CONSUMEDUNIT", model.ConsumedUnit);
             parameters.Add("@AMOUNT", model.Amount);
             parameters.Add("@ISPAID", model.IsPaid);
+            parameters.Add("@ALLOWTENENTACCESS", model.AllowTenentAccess);
             if (model.UtilityBillImage != null)
             {
                 parameters.Add("@IMAGEDATA", model.UtilityBillImage.ImageData);
@@ -81,6 +83,26 @@ namespace TenentManagement.Services.Property.UtilityBill
             using var connection = _dbConnection.GetConnection();
             var parameters = new DynamicParameters();
             parameters.Add("@FLAG", 'A');
+            parameters.Add("@USERID", userId);
+            connection.Open();
+            var result = connection.Query<UtilityBillModel>("SP_UTILITYBILLS", parameters, commandType: System.Data.CommandType.StoredProcedure).ToList();
+            if (result.Count() != 0)
+            {
+                foreach (var bill in result)
+                {
+                    var images = _utilityBillImageService.GetUtilityBillImageById(0, bill.Id);
+                    bill.UtilityBillImage = images;
+                }
+            }
+            connection.Close();
+            return result;
+        }
+
+        public List<UtilityBillModel> GetAllRentedUtilityBill(int userId)
+        {
+            using var connection = _dbConnection.GetConnection();
+            var parameters = new DynamicParameters();
+            parameters.Add("@FLAG", 'R');
             parameters.Add("@USERID", userId);
             connection.Open();
             var result = connection.Query<UtilityBillModel>("SP_UTILITYBILLS", parameters, commandType: System.Data.CommandType.StoredProcedure).ToList();

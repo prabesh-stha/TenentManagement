@@ -73,13 +73,6 @@
                                        class="btn btn-sm @(alert.IsExpired ? "btn-danger" : "btn-primary")">
                                         <i class="bi bi-credit-card"></i> Pay Now
                                     </a>
-                                    <a asp-controller="PaymentInvoice"
-                                       asp-action="RenterInvoices"
-                                       asp-route-unitId="@alert.UnitId"
-                                       asp-route-renterId="@alert.RenterId"
-                                       class="btn btn-sm btn-outline-secondary">
-                                        <i class="bi bi-receipt"></i> View Invoices
-                                    </a>
                                 </div>
                             </div>
                         </div>

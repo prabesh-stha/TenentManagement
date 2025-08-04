@@ -43,7 +43,7 @@ namespace TenentManagement.Controllers
         public IActionResult CreateInvoice(int unitId, int userId)
         {
             var unit = _unitService.GetUnitById(unitId);
-            var paymentMethods = _paymentInvoiceService.GetAllPaymentMethod();
+            var paymentMethods = _paymentInvoiceService.GetAllPaymentMethod(userId);
             var paymentStatuses = _paymentInvoiceService.GetAllPaymentStatus();
             if (unit == null)
             {
@@ -115,7 +115,6 @@ namespace TenentManagement.Controllers
             model.FromMonth = new DateTime(model.FromMonth.Year, model.FromMonth.Month, 1);
             model.ToMonth = new DateTime(model.ToMonth.Year, model.ToMonth.Month, 1);
 
-            // Get rent range
             var unit = _unitService.GetUnitById(model.UnitId);
             if (unit == null)
             {
@@ -145,7 +144,7 @@ namespace TenentManagement.Controllers
                     ViewData["Message"] = $"You must select months between {startLimit:yyyy-MM} and {endLimit:yyyy-MM}.";
                     ViewData["MessageType"] = "error";
                 model.PaymentStatuses = _paymentInvoiceService.GetAllPaymentStatus();
-                model.PaymentMethods = _paymentInvoiceService.GetAllPaymentMethod();
+                model.PaymentMethods = _paymentInvoiceService.GetAllPaymentMethod(model.OwnerId);
                 return View(model);
                 }
 
@@ -228,7 +227,7 @@ namespace TenentManagement.Controllers
                         ViewData["Message"] = "An error occurred while creating the invoice.";
                         ViewData["MessageType"] = "error";
                     model.PaymentStatuses = _paymentInvoiceService.GetAllPaymentStatus();
-                    model.PaymentMethods = _paymentInvoiceService.GetAllPaymentMethod();
+                    model.PaymentMethods = _paymentInvoiceService.GetAllPaymentMethod(model.OwnerId);
                     return View(model);
                     }
                 }
@@ -237,7 +236,7 @@ namespace TenentManagement.Controllers
                     ViewData["Message"] = $"An error occurred while creating the invoice: {ex.Message}";
                     ViewData["MessageType"] = "error";
                 model.PaymentStatuses = _paymentInvoiceService.GetAllPaymentStatus();
-                model.PaymentMethods = _paymentInvoiceService.GetAllPaymentMethod();
+                model.PaymentMethods = _paymentInvoiceService.GetAllPaymentMethod(model.OwnerId);
                 return View(model);
                 }
         }
@@ -320,7 +319,7 @@ namespace TenentManagement.Controllers
             var payInvoice = _paymentInvoiceService.GetPaymentInvoiceById(id);
             if (payInvoice == null) return NotFound();
             var unit = _unitService.GetUnitById(payInvoice.UnitId);
-            var paymentMethods = _paymentInvoiceService.GetAllPaymentMethod();
+            var paymentMethods = _paymentInvoiceService.GetAllPaymentMethod(payInvoice.OwnerId);
             var paymentStatuses = _paymentInvoiceService.GetAllPaymentStatus();    
             payInvoice.AmountPerMonth = unit?.RentAmount ?? 0;
             payInvoice.PaymentMethods = paymentMethods;
@@ -419,7 +418,7 @@ namespace TenentManagement.Controllers
                         ViewData["Message"] = "An error occurred while updating the payment invoice.";
                         ViewData["MessageType"] = "error";
                         model.PaymentStatuses = _paymentInvoiceService.GetAllPaymentStatus();
-                        model.PaymentMethods = _paymentInvoiceService.GetAllPaymentMethod();
+                        model.PaymentMethods = _paymentInvoiceService.GetAllPaymentMethod(model.OwnerId);
                         ViewData["All"] = all;
                         return View(model);
                     }
@@ -429,7 +428,7 @@ namespace TenentManagement.Controllers
                     ViewData["Message"] = "An error occurred while updating the payment invoice.";
                     ViewData["MessageType"] = "error";
                 model.PaymentStatuses = _paymentInvoiceService.GetAllPaymentStatus();
-                model.PaymentMethods = _paymentInvoiceService.GetAllPaymentMethod();
+                model.PaymentMethods = _paymentInvoiceService.GetAllPaymentMethod(model.OwnerId);
                 ViewData["All"] = all;
                 return View(model);
                 }
@@ -464,7 +463,7 @@ namespace TenentManagement.Controllers
             var payInvoice = _paymentInvoiceService.GetPaymentInvoiceById(id);
             if (payInvoice == null) return NotFound();
             var unit = _unitService.GetUnitById(payInvoice.UnitId);
-            var payMethods = _paymentInvoiceService.GetAllPaymentMethod();
+            var payMethods = _paymentInvoiceService.GetAllPaymentMethod(payInvoice.OwnerId);
             payInvoice.AmountPerMonth = unit?.RentAmount ?? 0;
             payInvoice.PaymentMethods = payMethods;
             payInvoice.PaymentQRImage = _paymentQRService.GetPaymentQRByOwnerIdAndPaymentId(payInvoice.OwnerId, payInvoice.PaymentMethodId);
@@ -630,45 +629,75 @@ namespace TenentManagement.Controllers
             return View(payInvoice);
         }
 
-
-        public IActionResult AllInvoice(int id, int page = 1, string tab = "owned")
-
-
+        [HttpGet]
+        public IActionResult AllInvoice(
+            int id,
+            int page = 1,
+            string tab = "owned",
+            string? fromMonth = null,
+            string? toMonth = null,
+            string dueDate = "all",
+            string status = "all",
+            string verified = "all",
+            string paymentMethod = "all")
         {
-            const int pageSize = 10;
-            bool isOwner = false;
-
-            List<PaymentInvoiceModel> invoiceQuery;
-
-            switch (tab.ToLowerInvariant())
+            const int PageSize = 10;
+            // Base query
+            IQueryable<PaymentInvoiceModel> invoiceQuery = tab.ToLower() switch
             {
-                case "owned":
-                    invoiceQuery = _paymentInvoiceService.GetAllOwnedPropertyInvoice(id);
-                    isOwner = true;
-                    break;
+                "owned" => _paymentInvoiceService.GetAllOwnedPropertyInvoice(id).AsQueryable(),
+                "rented" => _paymentInvoiceService.GetAllRentedPropertyInvoice(id).AsQueryable(),
+                _ => throw new ArgumentException("Invalid tab value")
+            };
 
-                case "rented":
-                    invoiceQuery = _paymentInvoiceService.GetAllRentedPropertyInvoice(id);
-                    isOwner = false;
-                    break;
-
-                default:
-                    invoiceQuery = new List<PaymentInvoiceModel>();
-                    break;
+            // Apply filters
+            if (!string.IsNullOrEmpty(fromMonth))
+            {
+                var fromDate = DateTime.Parse(fromMonth);
+                invoiceQuery = invoiceQuery.Where(i => i.FromMonth >= fromDate);
             }
 
-            var totalInvoices = invoiceQuery.Count();
+            if (!string.IsNullOrEmpty(toMonth))
+            {
+                var toDate = DateTime.Parse(toMonth);
+                invoiceQuery = invoiceQuery.Where(i => i.ToMonth <= toDate);
+            }
+
+            if (dueDate != "all")
+            {
+                var today = DateTime.Today;
+                invoiceQuery = dueDate switch
+                {
+                    "overdue" => invoiceQuery.Where(i => i.DueDate < today),
+                    "upcoming" => invoiceQuery.Where(i => i.DueDate > today),
+                    "today" => invoiceQuery.Where(i => i.DueDate.Date == today),
+                    _ => invoiceQuery
+                };
+            }
+
+            if (status != "all")
+                invoiceQuery = invoiceQuery.Where(i => i.Status == status);
+
+            if (verified != "all")
+                invoiceQuery = invoiceQuery.Where(i => i.IsVerified == (verified == "true"));
+
+            if (paymentMethod != "all")
+                invoiceQuery = invoiceQuery.Where(i => i.PaymentMethod == paymentMethod);
+
+            // Pagination
+            var totalItems = invoiceQuery.Count();
             var invoices = invoiceQuery
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
+                .OrderByDescending(i => i.CreatedAt)
+                .Skip((page - 1) * PageSize)
+                .Take(PageSize)
                 .ToList();
 
             var model = new PaymentInvoiceListViewModel
             {
                 PaymentInvoices = invoices,
                 CurrentPage = page,
-                TotalPages = (int)Math.Ceiling(totalInvoices / (double)pageSize),
-                IsOwner = isOwner
+                TotalPages = (int)Math.Ceiling(totalItems / (double)PageSize),
+                IsOwner = tab == "owned"
             };
 
             ViewBag.ActiveTab = tab;

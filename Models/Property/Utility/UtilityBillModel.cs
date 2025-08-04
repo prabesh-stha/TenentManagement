@@ -23,6 +23,8 @@ namespace TenentManagement.Models.Property.Utility
         [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0")]
         public float? Amount { get; set; }
         public bool IsPaid { get; set; } = false;
+
+        public bool AllowTenentAccess { get; set; } = false;
         public IEnumerable<UtilityTypeModel> UtilityTypes { get; set; } = new List<UtilityTypeModel>();
         public UtilityBillImageModel? UtilityBillImage { get; set; } = null;
         public IEnumerable<OwnerPropertiesNameModel> OwnerPropertyName { get; set; } = new List<OwnerPropertiesNameModel>();

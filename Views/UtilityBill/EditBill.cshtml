@@ -28,86 +28,104 @@
                 <input type="hidden" asp-for="UtilityTypeId" />
 
 
-                <div class="mb-3">
-                    <label asp-for="UtilityTypeId" class="form-label small text-muted">Utility Type *</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-tools"></i></span>
-                        <select asp-for="UtilityTypeId" class="form-select" disabled>
-                            @{
-                                <option value="@Model.UtilityTypeId" selected=>@Model.UtilityType.ToTitleCase()</option>
-                            }
-                        </select>
+               <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="UtilityTypeId" class="form-label small text-muted">Utility Type *</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-tools"></i></span>
+                            <select asp-for="UtilityTypeId" class="form-select" disabled>
+                                @{
+                                    <option value="@Model.UtilityTypeId" selected=>@Model.UtilityType.ToTitleCase()</option>
+                                }
+                            </select>
+                        </div>
+                        <span asp-validation-for="UtilityTypeId" class="text-danger small"></span>
                     </div>
-                    <span asp-validation-for="UtilityTypeId" class="text-danger small"></span>
+
+                    <div class="col-md-6">
+                        <label asp-for="PropertyId" class="form-label small text-muted">Property *</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-building"></i></span>
+                            <select asp-for="PropertyId" class="form-select" id="propertySelect" disabled>
+                                @{
+                                    <option value="@Model.PropertyId" selected>@Model.PropertyName.ToTitleCase()</option>
+                                }
+                            </select>
+                        </div>
+                        <span asp-validation-for="PropertyId" class="text-danger small"></span>
+                    </div>
+               </div>
+               <div class="row mb-3">
+                    <div class="col-md-6 total-unit-group">
+                        <label asp-for="TotalUnit" class="form-label small text-muted">Total Units<span class="text-muted small"> (Optional)</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-speedometer2"></i></span>
+                            <input asp-for="TotalUnit" type="number" class="form-control" placeholder="Enter total units" min="0" oninput="this.value = Math.max(this.value, 0)" />
+                            <span class="input-group-text unit-type-display">units</span>
+                        </div>
+                        <span asp-validation-for="TotalUnit" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6 consumed-unit-group">
+                        <label asp-for="ConsumedUnit" class="form-label small text-muted">Consumed Units *</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-speedometer2"></i></span>
+                            <input asp-for="ConsumedUnit" type="number" class="form-control" placeholder="Enter consumed units" />
+                            <span class="input-group-text unit-type-display">units</span>
+                        </div>
+                        <span asp-validation-for="ConsumedUnit" class="text-danger small"></span>
+                    </div>
+               </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label small text-muted">Month *</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                            <input asp-for="Month" type="month" class="form-control" required
+                                   id="monthInput"
+                                   value="@Model.Month.ToString("yyyy-MM")" disabled />
+                        </div>
+                        <span asp-validation-for="Month" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Amount" class="form-label small text-muted">Amount *</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
+                            <input asp-for="Amount" type="number" step="1000" class="form-control" placeholder="Amount" />
+                        </div>
+                        <span asp-validation-for="Amount" class="text-danger small"></span>
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <label asp-for="PropertyId" class="form-label small text-muted">Property *</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-building"></i></span>
-                        <select asp-for="PropertyId" class="form-select" id="propertySelect" disabled>
-                            @{
-                                <option value="@Model.PropertyId" selected>@Model.PropertyName.ToTitleCase()</option>
-                            }
-                        </select>
-                    </div>
-                    <span asp-validation-for="PropertyId" class="text-danger small"></span>
-                </div>
 
-                <div class="mb-3">
-                    <label class="form-label small text-muted">Month *</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-calendar"></i></span>
-                        <input asp-for="Month" type="month" class="form-control" required
-                               id="monthInput"
-                               value="@Model.Month.ToString("yyyy-MM")" disabled/>
-                    </div>
-                    <span asp-validation-for="Month" class="text-danger small"></span>
-                </div>
-
-                <div class="mb-3 total-unit-group">
-                    <label asp-for="TotalUnit" class="form-label small text-muted">Total Units<span class="text-muted small"> (Optional)</span></label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-speedometer2"></i></span>
-                        <input asp-for="TotalUnit" type="number" class="form-control" placeholder="Enter total units" min="0" oninput="this.value = Math.max(this.value, 0)" />
-                        <span class="input-group-text unit-type-display">units</span>
-                    </div>
-                    <span asp-validation-for="TotalUnit" class="text-danger small"></span>
-                </div>
-
-                <div class="mb-3 consumed-unit-group">
-                    <label asp-for="ConsumedUnit" class="form-label small text-muted">Consumed Units *</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-speedometer2"></i></span>
-                        <input asp-for="ConsumedUnit" type="number" class="form-control" placeholder="Enter consumed units" />
-                        <span class="input-group-text unit-type-display">units</span>
-                    </div>
-                    <span asp-validation-for="ConsumedUnit" class="text-danger small"></span>
-                </div>
 
                 <div class="row mb-3">
-                <div class="col-md-6">
-                    <label asp-for="Amount" class="form-label small text-muted">Amount *</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
-                        <input asp-for="Amount" type="number" step="1000" class="form-control" placeholder="Amount" />
-                    </div>
-                    <span asp-validation-for="Amount" class="text-danger small"></span>
-                </div>
-
-                <div class="form-group col-md-6">
-                    <label class="form-label small text-muted" asp-for="IsPaid">Bill Paid?</label>
-                    <div class="mt-2">
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" asp-for="IsPaid" value="true" id="paid" />
-                            <label class="form-check-label" for="paid">Yes</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" asp-for="IsPaid" value="false" id="unpadi" checked />
-                            <label class="form-check-label" for="unpaid">No</label>
+                    <div class="form-group col-md-6">
+                        <label class="form-label small text-muted" asp-for="IsPaid">Bill Paid?</label>
+                        <div class="mt-2">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" asp-for="IsPaid" value="true" id="paid" />
+                                <label class="form-check-label" for="paid">Yes</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" asp-for="IsPaid" value="false" id="unpaid" checked />
+                                <label class="form-check-label" for="unpaid">No</label>
+                            </div>
                         </div>
                     </div>
-                </div>
+                    <div class="form-group col-md-6">
+                        <label class="form-label small text-muted" asp-for="AllowTenentAccess">Give access to Tenent?</label>
+                        <div class="mt-2">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" asp-for="AllowTenentAccess" value="true" id="allowed" />
+                                <label class="form-check-label" for="allowed">Yes</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" asp-for="AllowTenentAccess" value="false" id="disallow" checked />
+                                <label class="form-check-label" for="disallow">No</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="mb-4">

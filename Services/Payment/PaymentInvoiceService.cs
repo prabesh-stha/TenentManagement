@@ -83,11 +83,12 @@ namespace TenentManagement.Services.Payment
             return result;
         }
 
-        public List<PaymentMethodModel> GetAllPaymentMethod()
+        public List<PaymentMethodModel> GetAllPaymentMethod(int ownerId)
         {
             var connection = _dbConnection.GetConnection();
             var parameters = new DynamicParameters();
             parameters.Add("@FLAG", 'R');
+            parameters.Add("@OWNERID", ownerId);
             connection.Open();
             var result = connection.Query<PaymentMethodModel>("SP_PAYMENTMETHOD", parameters, commandType: System.Data.CommandType.StoredProcedure);
             connection.Close();
