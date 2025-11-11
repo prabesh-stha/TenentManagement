@@ -1,0 +1,297 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|c:\\users\\admin\\desktop\\dotnet\\mvc\\project\\tenentmanagement\\services\\utilities\\calenderutility.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|solutionrelative:services\\utilities\\calenderutility.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|c:\\users\\admin\\desktop\\dotnet\\mvc\\project\\tenentmanagement\\controllers\\utilitybillcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|solutionrelative:controllers\\utilitybillcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|c:\\users\\admin\\desktop\\dotnet\\mvc\\project\\tenentmanagement\\views\\utilitybill\\utilitybills.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|solutionrelative:views\\utilitybill\\utilitybills.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|c:\\users\\admin\\desktop\\dotnet\\mvc\\project\\tenentmanagement\\controllers\\paymentinvoicecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|solutionrelative:controllers\\paymentinvoicecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|c:\\users\\admin\\desktop\\dotnet\\mvc\\project\\tenentmanagement\\services\\payment\\paymentinvoiceservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|solutionrelative:services\\payment\\paymentinvoiceservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|c:\\users\\admin\\desktop\\dotnet\\mvc\\project\\tenentmanagement\\models\\payment\\paymentinvoicemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|solutionrelative:models\\payment\\paymentinvoicemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|c:\\users\\admin\\desktop\\dotnet\\mvc\\project\\tenentmanagement\\views\\paymentinvoice\\validatepayment.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|solutionrelative:views\\paymentinvoice\\validatepayment.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|c:\\users\\admin\\desktop\\dotnet\\mvc\\project\\tenentmanagement\\views\\paymentinvoice\\renterinvoicepayment.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|solutionrelative:views\\paymentinvoice\\renterinvoicepayment.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|c:\\users\\admin\\desktop\\dotnet\\mvc\\project\\tenentmanagement\\views\\paymentinvoice\\unitinvoices.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|solutionrelative:views\\paymentinvoice\\unitinvoices.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|c:\\users\\admin\\desktop\\dotnet\\mvc\\project\\tenentmanagement\\views\\paymentinvoice\\createinvoice.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|solutionrelative:views\\paymentinvoice\\createinvoice.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|c:\\users\\admin\\desktop\\dotnet\\mvc\\project\\tenentmanagement\\views\\utilitybill\\editbill.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|solutionrelative:views\\utilitybill\\editbill.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|c:\\users\\admin\\desktop\\dotnet\\mvc\\project\\tenentmanagement\\services\\property\\utilitybill\\utilitybillservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|solutionrelative:services\\property\\utilitybill\\utilitybillservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|c:\\users\\admin\\desktop\\dotnet\\mvc\\project\\tenentmanagement\\services\\property\\utilitybill\\utilitybillinvoiceservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|solutionrelative:services\\property\\utilitybill\\utilitybillinvoiceservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|c:\\users\\admin\\desktop\\dotnet\\mvc\\project\\tenentmanagement\\models\\property\\utility\\utilitybillinvoicemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|solutionrelative:models\\property\\utility\\utilitybillinvoicemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|c:\\users\\admin\\desktop\\dotnet\\mvc\\project\\tenentmanagement\\controllers\\propertycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|solutionrelative:controllers\\propertycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|c:\\users\\admin\\desktop\\dotnet\\mvc\\project\\tenentmanagement\\wwwroot\\css\\site.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|solutionrelative:wwwroot\\css\\site.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|c:\\users\\admin\\desktop\\dotnet\\mvc\\project\\tenentmanagement\\wwwroot\\js\\site.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{6034CCC0-DD10-450C-AA93-5007B03EC50A}|TenentManagement.csproj|solutionrelative:wwwroot\\js\\site.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 366,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "CalenderUtility.cs",
+              "DocumentMoniker": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Services\\Utilities\\CalenderUtility.cs",
+              "RelativeDocumentMoniker": "Services\\Utilities\\CalenderUtility.cs",
+              "ToolTip": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Services\\Utilities\\CalenderUtility.cs",
+              "RelativeToolTip": "Services\\Utilities\\CalenderUtility.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-11T17:41:16.004Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "PaymentInvoiceController.cs",
+              "DocumentMoniker": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Controllers\\PaymentInvoiceController.cs",
+              "RelativeDocumentMoniker": "Controllers\\PaymentInvoiceController.cs",
+              "ToolTip": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Controllers\\PaymentInvoiceController.cs",
+              "RelativeToolTip": "Controllers\\PaymentInvoiceController.cs",
+              "ViewState": "AgIAANABAAAAAAAAAAAhwHQCAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-07T17:52:32.638Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "UtilityBills.cshtml",
+              "DocumentMoniker": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Views\\UtilityBill\\UtilityBills.cshtml",
+              "RelativeDocumentMoniker": "Views\\UtilityBill\\UtilityBills.cshtml",
+              "ToolTip": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Views\\UtilityBill\\UtilityBills.cshtml",
+              "RelativeToolTip": "Views\\UtilityBill\\UtilityBills.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAIMAAABKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-09T15:35:39.368Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "PaymentInvoiceService.cs",
+              "DocumentMoniker": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Services\\Payment\\PaymentInvoiceService.cs",
+              "RelativeDocumentMoniker": "Services\\Payment\\PaymentInvoiceService.cs",
+              "ToolTip": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Services\\Payment\\PaymentInvoiceService.cs",
+              "RelativeToolTip": "Services\\Payment\\PaymentInvoiceService.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAewCwAAABLAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-10T15:36:41.132Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "PaymentInvoiceModel.cs",
+              "DocumentMoniker": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Models\\Payment\\PaymentInvoiceModel.cs",
+              "RelativeDocumentMoniker": "Models\\Payment\\PaymentInvoiceModel.cs",
+              "ToolTip": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Models\\Payment\\PaymentInvoiceModel.cs",
+              "RelativeToolTip": "Models\\Payment\\PaymentInvoiceModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAUAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-07T17:01:13.711Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "UtilityBillController.cs",
+              "DocumentMoniker": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Controllers\\UtilityBillController.cs",
+              "RelativeDocumentMoniker": "Controllers\\UtilityBillController.cs",
+              "ToolTip": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Controllers\\UtilityBillController.cs",
+              "RelativeToolTip": "Controllers\\UtilityBillController.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAqwCcAAABZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-11T06:13:55.661Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "ValidatePayment.cshtml",
+              "DocumentMoniker": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Views\\PaymentInvoice\\ValidatePayment.cshtml",
+              "RelativeDocumentMoniker": "Views\\PaymentInvoice\\ValidatePayment.cshtml",
+              "ToolTip": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Views\\PaymentInvoice\\ValidatePayment.cshtml",
+              "RelativeToolTip": "Views\\PaymentInvoice\\ValidatePayment.cshtml",
+              "ViewState": "AgIAAGwBAAAAAAAAAAAswKMBAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-11T17:05:04.756Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "RenterInvoicePayment.cshtml",
+              "DocumentMoniker": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Views\\PaymentInvoice\\RenterInvoicePayment.cshtml",
+              "RelativeDocumentMoniker": "Views\\PaymentInvoice\\RenterInvoicePayment.cshtml",
+              "ToolTip": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Views\\PaymentInvoice\\RenterInvoicePayment.cshtml",
+              "RelativeToolTip": "Views\\PaymentInvoice\\RenterInvoicePayment.cshtml",
+              "ViewState": "AgIAAEkBAAAAAAAAAAAswIABAAADAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-11T17:22:09.528Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "CreateInvoice.cshtml",
+              "DocumentMoniker": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Views\\PaymentInvoice\\CreateInvoice.cshtml",
+              "RelativeDocumentMoniker": "Views\\PaymentInvoice\\CreateInvoice.cshtml",
+              "ToolTip": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Views\\PaymentInvoice\\CreateInvoice.cshtml",
+              "RelativeToolTip": "Views\\PaymentInvoice\\CreateInvoice.cshtml",
+              "ViewState": "AgIAAPsAAAAAAAAAAAAAABABAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-06T14:21:28.075Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "EditBill.cshtml",
+              "DocumentMoniker": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Views\\UtilityBill\\EditBill.cshtml",
+              "RelativeDocumentMoniker": "Views\\UtilityBill\\EditBill.cshtml",
+              "ToolTip": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Views\\UtilityBill\\EditBill.cshtml",
+              "RelativeToolTip": "Views\\UtilityBill\\EditBill.cshtml",
+              "ViewState": "AgIAALQAAAAAAAAAAAAowMgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-11T15:06:28.41Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "UtilityBillInvoiceService.cs",
+              "DocumentMoniker": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Services\\Property\\UtilityBill\\UtilityBillInvoiceService.cs",
+              "RelativeDocumentMoniker": "Services\\Property\\UtilityBill\\UtilityBillInvoiceService.cs",
+              "ToolTip": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Services\\Property\\UtilityBill\\UtilityBillInvoiceService.cs",
+              "RelativeToolTip": "Services\\Property\\UtilityBill\\UtilityBillInvoiceService.cs",
+              "ViewState": "AgIAABIAAAAAAAAAAAAewCwAAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-07T17:50:47.669Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "UnitInvoices.cshtml",
+              "DocumentMoniker": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Views\\PaymentInvoice\\UnitInvoices.cshtml",
+              "RelativeDocumentMoniker": "Views\\PaymentInvoice\\UnitInvoices.cshtml",
+              "ToolTip": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Views\\PaymentInvoice\\UnitInvoices.cshtml",
+              "RelativeToolTip": "Views\\PaymentInvoice\\UnitInvoices.cshtml",
+              "ViewState": "AgIAAAUBAAAAAAAAAAAAAGYAAABMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-10T16:58:29.002Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "UtilityBillService.cs",
+              "DocumentMoniker": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Services\\Property\\UtilityBill\\UtilityBillService.cs",
+              "RelativeDocumentMoniker": "Services\\Property\\UtilityBill\\UtilityBillService.cs",
+              "ToolTip": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Services\\Property\\UtilityBill\\UtilityBillService.cs",
+              "RelativeToolTip": "Services\\Property\\UtilityBill\\UtilityBillService.cs",
+              "ViewState": "AgIAAF4AAAAAAAAAAAAewHgAAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-06T16:43:35.347Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "UtilityBillInvoiceModel.cs",
+              "DocumentMoniker": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Models\\Property\\Utility\\UtilityBillInvoiceModel.cs",
+              "RelativeDocumentMoniker": "Models\\Property\\Utility\\UtilityBillInvoiceModel.cs",
+              "ToolTip": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Models\\Property\\Utility\\UtilityBillInvoiceModel.cs",
+              "RelativeToolTip": "Models\\Property\\Utility\\UtilityBillInvoiceModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAIAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-07T17:02:50.88Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "PropertyController.cs",
+              "DocumentMoniker": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Controllers\\PropertyController.cs",
+              "RelativeDocumentMoniker": "Controllers\\PropertyController.cs",
+              "ToolTip": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\Controllers\\PropertyController.cs",
+              "RelativeToolTip": "Controllers\\PropertyController.cs",
+              "ViewState": "AgIAAJwAAAAAAAAAAAAmwLUAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-10T05:34:47.102Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "site.css",
+              "DocumentMoniker": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\wwwroot\\css\\site.css",
+              "RelativeDocumentMoniker": "wwwroot\\css\\site.css",
+              "ToolTip": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\wwwroot\\css\\site.css",
+              "RelativeToolTip": "wwwroot\\css\\site.css",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-08-26T06:58:59.29Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "site.js",
+              "DocumentMoniker": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\wwwroot\\js\\site.js",
+              "RelativeDocumentMoniker": "wwwroot\\js\\site.js",
+              "ToolTip": "C:\\Users\\Admin\\Desktop\\Dotnet\\MVC\\project\\TenentManagement\\wwwroot\\js\\site.js",
+              "RelativeToolTip": "wwwroot\\js\\site.js",
+              "ViewState": "AgIAABcBAAAAAAAAAAAYwAEBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-08-22T03:54:10.841Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
