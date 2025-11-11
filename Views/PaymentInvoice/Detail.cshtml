@@ -78,13 +78,13 @@
 
                 <!-- Right Column - Utility Bills (40% width) -->
                 <div class="col-lg-5">
-                    @if (Model.UtilityBills != null && Model.UtilityBills.Any(ub => ub.Amount > 0))
+                    @if (Model.UtilityBillInvoices != null && Model.UtilityBillInvoices.Any(ub => ub.Amount > 0))
                     {
                         <h5 class="text-uppercase text-muted mb-3 fw-bold border-bottom pb-2">
                             <i class="bi bi-lightning-charge me-2"></i>Utility Bills
                         </h5>
 
-                        @foreach (var utility in Model.UtilityBills.Where(ub => ub.Amount > 0))
+                        @foreach (var utility in Model.UtilityBillInvoices.Where(ub => ub.Amount > 0))
                         {
                             var isInternet = utility.UtilityTypeName?.Contains("Internet", StringComparison.OrdinalIgnoreCase) ?? false;
 
@@ -98,10 +98,17 @@
                                 <div class="row g-2">
                                     @if (!isInternet)
                                     {
+                                        <div class="col-12">
+                                            <label class="form-label small text-muted">Total Units</label>
+                                            <input type="number" step="1" min="0"
+                                                   class="form-control utility-total"
+                                                   data-utility-type="@utility.Id"
+                                                   value="@utility?.TotalUnit" readonly />
+                                        </div>
                                         <div class="col-6">
                                             <label class="form-label small text-muted">Consumed Units</label>
                                             <input type="text" class="form-control"
-                                                   value="@utility.ConsumedUnit.ToString("0.00")" readonly />
+                                                   value="@utility?.ConsumedUnit.ToString("0.00")" readonly />
                                         </div>
                                     }
                                     <div class="@(isInternet ? "col-12" : "col-6")">
@@ -109,9 +116,12 @@
                                         <div class="input-group">
                                             <span class="input-group-text">Rs</span>
                                             <input type="text" class="form-control"
-                                                   value="@utility.Amount.ToString("0.00")" readonly />
+                                                   value="@utility?.Amount.ToString("0.00")" readonly />
                                         </div>
                                     </div>
+                                    <input type="hidden" value="@utility?.UtilityId" id="uid" />
+                                    <a class="btn btn-sm text-primary @(utility?.UtilityId == null ? "d-none" : "d-inline-block") preview-image-btn"
+                                       data-utility-id="@utility?.UtilityId">Preview Image</a>
                                 </div>
                             </div>
                         }
@@ -121,7 +131,7 @@
                             <div class="input-group">
                                 <span class="input-group-text">Rs</span>
                                 <input type="text" class="form-control"
-                                       value="@Model.UtilityBills.Sum(ub => ub.Amount).ToString("0.00")" readonly />
+                                       value="@Model.UtilityBillInvoices.Sum(ub => ub.Amount).ToString("0.00")" readonly />
                             </div>
                         </div>
                     }
@@ -142,7 +152,7 @@
                         <div class="input-group" style="max-width: 250px;">
                             <span class="input-group-text bg-white">Rs</span>
                             <input type="text" class="form-control fw-bold fs-4 text-end text-primary"
-                                   value="@((Model.AmountDue + (Model.UtilityBills?.Sum(ub => ub.Amount) ?? 0)).ToString("0.00"))" readonly />
+                                   value="@((Model.AmountDue + (Model.UtilityBillInvoices?.Sum(ub => ub.Amount) ?? 0)).ToString("0.00"))" readonly />
                         </div>
                     </div>
                 </div>
@@ -281,6 +291,25 @@
     </div>
 </div>
 
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bill Image Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="previewImage" class="rounded shadow img-fluid" style="max-height: 70vh;" alt="Bill Image">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a id="downloadReceipt" href="#" class="btn btn-primary" download="bill.png">
+                    <i class="bi bi-download"></i> Download
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- Payment Proof Modal -->
 @if (Model.PaymentProof != null)
 {
@@ -332,3 +361,52 @@
         border-radius: 0.5rem;
     }
 </style>
+
+<script>
+        document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('preview-image-btn')) {
+            const button = e.target;
+            const utilityId = button.getAttribute('data-utility-id');
+
+            if (!utilityId) return;
+
+            previewUtilityImage(button, utilityId);
+        }
+    });
+
+    async function previewUtilityImage(button, utilityId) {
+        button.innerHTML = `<i class="bi bi-hourglass-split"></i> Loading...`;
+        button.disabled = true;
+        const currentDate = new Date().toISOString().split('T')[0];
+
+        try {
+            const response = await fetch(`/UtilityBill/GetUtilityBillImage?utilityId=${utilityId}`);
+            if (!response.ok) throw new Error('Failed to fetch image');
+
+            const imageData = await response.json();
+
+            // Set the image source
+            document.getElementById('previewImage').src = imageData.base64Image;
+
+            // Set up download link
+            const downloadLink = document.getElementById('downloadReceipt');
+            downloadLink.href = imageData.base64Image;
+
+            // Get utility type name for filename
+            const utilityTypeName = button.closest('.utility-bill').querySelector('.form-label').textContent.trim();
+            const fileName = `${utilityTypeName.toLowerCase().replace(/\s+/g, '-')}-bill-${currentDate}.png`;
+            downloadLink.download = fileName;
+
+            // Show the modal
+            const previewModal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+            previewModal.show();
+
+        } catch (error) {
+            console.error('Error fetching bill image:', error);
+            alert('Failed to load bill image');
+        } finally {
+            button.innerHTML = `Preview Image`;
+            button.disabled = false;
+        }
+    }
+</script>

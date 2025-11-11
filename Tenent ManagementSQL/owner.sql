@@ -1,6 +1,6 @@
 --USE TenentManagement;
 
---(V.0) Owners table --> Creation
+--(V.0) User table --> Creation
 --CREATE TABLE TBL_OWNER(
 --ID INT PRIMARY KEY IDENTITY,
 --FIRST_NAME VARCHAR(50),
@@ -12,4 +12,7 @@
 
 
 -- (V.0.1) Added CREATED_AT for Owners Table
-ALTER TABLE TBL_OWNER ADD CREATED_AT DATETIME DEFAULT GETDATE();
+--ALTER TABLE TBL_OWNER ADD CREATED_AT DATETIME DEFAULT GETDATE();
+
+-- (V.1.0) Rename table from TBL_OWNER to TBL_USERS
+--EXEC sp_rename 'TBL_OWNER', 'TBL_USERS';

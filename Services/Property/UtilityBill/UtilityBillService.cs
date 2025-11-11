@@ -143,5 +143,29 @@ namespace TenentManagement.Services.Property.UtilityBill
             return parameters.Get<int>("@STATUS");
             ;
         }
+
+        public List<UtilityBillModel> GetUtilityBillToLink(int type, int unitId)
+        {
+            using var connection = _dbConnection.GetConnection();
+            var parameters = new DynamicParameters();
+            parameters.Add("@FLAG", 'L');
+            parameters.Add("@UTILITYTYPE", type);
+            parameters.Add("@UNITID", unitId);
+            connection.Open();
+            var result = connection.Query<UtilityBillModel, UtilityBillImageModel, UtilityBillModel>(
+                "SP_UTILITYBILLS"
+                ,(bill,image) =>
+                {
+                    bill.UtilityBillImage = image;
+                    return bill;
+                }
+                ,param: parameters
+                ,splitOn: "IMAGEDATA"
+                ,commandType: System.Data.CommandType.StoredProcedure).ToList();
+            connection.Close();
+            return result;
+        }
+
+
     }
 }

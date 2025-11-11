@@ -13,7 +13,7 @@ using TenentManagement.ViewModel;
 
 namespace TenentManagement.Controllers
 {
-    [BlockDirectAccess]
+    //[BlockDirectAccess]
     [Authorize]
     public class PaymentInvoiceController : Controller
     {
@@ -74,7 +74,7 @@ namespace TenentManagement.Controllers
             {
                 var latestInvoiceMonth = new DateTime(invoice.ToMonth.Year, invoice.ToMonth.Month, 1);
 
-                for (var dt = rentStart; dt <= latestInvoiceMonth; dt = dt.AddMonths(1))
+                for (var dt = rentStart; dt < latestInvoiceMonth; dt = dt.AddMonths(1))
                 {
                     excludedMonths.Add(dt);
                 }
@@ -183,9 +183,9 @@ namespace TenentManagement.Controllers
                     {
                         TempData["Message"] = "Invoice created successfully!";
                         TempData["MessageType"] = "success";
-                    if (model.UtilityBills != null && model.UtilityBills.Any())
+                    if (model.UtilityBillInvoices != null && model.UtilityBillInvoices.Any())
                     {
-                        foreach (var utility in model.UtilityBills)
+                        foreach (var utility in model.UtilityBillInvoices)
                         {
                             if (utility.Amount > 0)
                             {
@@ -195,6 +195,8 @@ namespace TenentManagement.Controllers
                                     UtilityTypeId = utility.UtilityTypeId,
                                     ConsumedUnit = utility.ConsumedUnit,
                                     Amount = utility.Amount,
+                                    TotalUnit = utility.TotalUnit,
+                                    UtilityId = utility.UtilityId
                                 };
                                 _utilityBillInvoiceService.CreateUtilityBillInvoice(utilityBill);
                             }
@@ -251,6 +253,7 @@ namespace TenentManagement.Controllers
             var totalInvoices = allInvoices.Count;
             var unitName = _unitService.GetUnitName(id);
             var invoices = allInvoices
+                .OrderByDescending(i => i.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
@@ -325,7 +328,7 @@ namespace TenentManagement.Controllers
             payInvoice.PaymentMethods = paymentMethods;
             payInvoice.PaymentStatuses = paymentStatuses;
             payInvoice.PaymentProof = _paymentProofService.GetPaymentProofImage(id);
-            payInvoice.UtilityBills = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(id);
+            payInvoice.UtilityBillInvoices = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(id);
             ViewData["All"] = all;
             return View(payInvoice);
         }
@@ -336,9 +339,9 @@ namespace TenentManagement.Controllers
                 try
                 {
                     var existingUtilityBills = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(model.Id);
-                    if (model.UtilityBills != null && model.UtilityBills.Any())
+                    if (model.UtilityBillInvoices != null && model.UtilityBillInvoices.Any())
                     {
-                        foreach (var utilityBill in model.UtilityBills)
+                        foreach (var utilityBill in model.UtilityBillInvoices)
                         {
                             if (utilityBill.Amount <= 0) continue;
 
@@ -352,6 +355,9 @@ namespace TenentManagement.Controllers
                             {
                                 existingBill.Amount = utilityBill.Amount;
                                 existingBill.ConsumedUnit = utilityBill.ConsumedUnit;
+                                existingBill.TotalUnit = utilityBill.TotalUnit;
+                                existingBill.UtilityId = utilityBill.UtilityId;
+
                                 _utilityBillInvoiceService.UpdateUtilityBillInvoice(existingBill);
                             }
                             else
@@ -362,7 +368,7 @@ namespace TenentManagement.Controllers
 
                         foreach (var existingBill in existingUtilityBills)
                         {
-                            if (!model.UtilityBills.Any(ub =>
+                            if (!model.UtilityBillInvoices.Any(ub =>
                                 ub.UtilityTypeId == existingBill.UtilityTypeId &&
                                 ub.Amount > 0))
                             {
@@ -468,7 +474,7 @@ namespace TenentManagement.Controllers
             payInvoice.PaymentMethods = payMethods;
             payInvoice.PaymentQRImage = _paymentQRService.GetPaymentQRByOwnerIdAndPaymentId(payInvoice.OwnerId, payInvoice.PaymentMethodId);
             payInvoice.PaymentProof = _paymentProofService.GetPaymentProofImage(payInvoice.Id);
-            payInvoice.UtilityBills = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(id);
+            payInvoice.UtilityBillInvoices = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(id);
             ViewData["All"] = all;
             return View(payInvoice);
         }
@@ -496,7 +502,7 @@ namespace TenentManagement.Controllers
                         ViewData["Message"] = "Error while uploading payment proof";
                         ViewData["MessageType"] = "error";
                         ViewData["All"] = all;
-                        model.UtilityBills = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(model.Id);
+                        model.UtilityBillInvoices = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(model.Id);
                         return View(model);
                     }
                 }
@@ -505,7 +511,7 @@ namespace TenentManagement.Controllers
                     ViewData["Message"] = "Error while uploading payment proof";
                     ViewData["MessageType"] = "error";
                     ViewData["All"] = all;
-                    model.UtilityBills = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(model.Id);
+                    model.UtilityBillInvoices = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(model.Id);
 
                     return View(model);
                 }
@@ -515,7 +521,7 @@ namespace TenentManagement.Controllers
                 ViewData["Message"] = "Please upload valid payment proof!";
                 ViewData["MessageType"] = "error";
                 ViewData["All"] = all;
-                model.UtilityBills = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(model.Id);
+                model.UtilityBillInvoices = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(model.Id);
                 return View(model);
             }
                 try
@@ -540,7 +546,7 @@ namespace TenentManagement.Controllers
                     {
                         ViewData["Message"] = "An error occurred while updating the payment invoice.";
                         ViewData["MessageType"] = "error";
-                    model.UtilityBills = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(model.Id);
+                    model.UtilityBillInvoices = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(model.Id);
                     return View(model);
                     }
                 }
@@ -548,7 +554,7 @@ namespace TenentManagement.Controllers
                 {
                     ViewData["Message"] = "An error occurred while updating the payment invoice.";
                     ViewData["MessageType"] = "error";
-                model.UtilityBills = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(model.Id);
+                model.UtilityBillInvoices = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(model.Id);
 
                 return View(model);
                 }
@@ -564,7 +570,7 @@ namespace TenentManagement.Controllers
             payInvoice.AmountPerMonth = unit?.RentAmount ?? 0;
             payInvoice.PaymentStatuses = paymentStatuses;
             payInvoice.PaymentProof = _paymentProofService.GetPaymentProofImage(id);
-            payInvoice.UtilityBills = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(id);
+            payInvoice.UtilityBillInvoices = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(id);
             ViewData["All"] = all;
             return View(payInvoice);
         }
@@ -602,7 +608,7 @@ namespace TenentManagement.Controllers
                     ViewData["Message"] = "Failed while updating payment invoice!";
                     ViewData["MessageType"] = "error";
                     payInvoice.PaymentStatuses = _paymentInvoiceService.GetAllPaymentStatus();
-                    payInvoice.UtilityBills = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(payInvoice.Id);
+                    payInvoice.UtilityBillInvoices = _utilityBillInvoiceService.GetUtilityBillInvoiceByInoviceId(payInvoice.Id);
                     ViewData["All"] = all;
                     return View(payInvoice);
                 }
@@ -624,7 +630,7 @@ namespace TenentManagement.Controllers
             var payInvoice = _paymentInvoiceService.GetPaymentInvoiceById(id);
             if (payInvoice == null) return NotFound();
             payInvoice.PaymentProof = _paymentProofService.GetPaymentProofImage(id);
-            payInvoice.UtilityBills = utilityBillInvoice;
+            payInvoice.UtilityBillInvoices = utilityBillInvoice;
             ViewData["All"] = all;
             return View(payInvoice);
         }
@@ -703,6 +709,34 @@ namespace TenentManagement.Controllers
             ViewBag.ActiveTab = tab;
             return View(model);
         }
+
+        [HttpGet]
+        public JsonResult GetTotalUnit(int unitId, int typeId, int invoiceId)
+        {
+            var totalunit = _utilityBillInvoiceService.GetTotalUnit(unitId, typeId, invoiceId);
+            return Json(totalunit);
+        }
+
+        [HttpGet]
+        public bool IsLatestMonth(int unitId, DateTime paymentDate)
+        {
+            var result = _paymentInvoiceService.GetLatestMonth(unitId);
+            if (result == null) return false;
+            else
+            {
+                if(result.FromMonth == paymentDate)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+
+
 
     }
 }

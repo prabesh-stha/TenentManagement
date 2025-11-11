@@ -11,7 +11,7 @@ namespace TenentManagement.Controllers
 {
 
     [Authorize]
-    [BlockDirectAccess]
+    //[BlockDirectAccess]
     public class UtilityBillController : Controller
     {
         private readonly UtilityBillService _utilityBillService;
@@ -39,6 +39,7 @@ namespace TenentManagement.Controllers
             {
                 utilityBills = _utilityBillService.GetAllRentedUtilityBill(userId.Value);
             }
+            utilityBills = utilityBills.OrderByDescending(i => i.Month).ToList();
                 return View(utilityBills);
         }
         [HttpGet]
@@ -182,6 +183,21 @@ namespace TenentManagement.Controllers
                 return View(utilityBill);
             }
         }
+
+        [HttpGet]
+        public JsonResult GetUtilityBillsByType(int type, int unitId)
+        {
+            var bills = _utilityBillService.GetUtilityBillToLink(type, unitId);
+            return Json(bills);
+        }
+
+        [HttpGet]
+        public JsonResult GetUtilityBillImage(int utilityId)
+        {
+            UtilityBillImageModel? image = _utilityBillImageService.GetUtilityBillImageById(utilityBillId: utilityId);
+            return Json(image);
+        }
+
 
 
     }

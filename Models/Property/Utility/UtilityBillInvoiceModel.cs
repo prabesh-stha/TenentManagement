@@ -8,6 +8,8 @@
         public int InvoiceId { get; set; }
         public int ConsumedUnit { get; set; }
         public float Amount { get; set; }
+        public int? UtilityId { get; set; } = null;
+        public int? TotalUnit { get; set; } = null;
 
     }
 }

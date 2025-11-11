@@ -96,19 +96,14 @@
                     <thead class="table-light">
                         <tr>
                             <th class="align-middle" rowspan="2">SN</th>
-                            <th class="align-middle" rowspan="2">Invoice #</th>
                             <th class="align-middle" rowspan="2">Tenant</th>
                             <th colspan="2" class="text-center">Period</th>
                             <th class="align-middle text-end" rowspan="2">Amount</th>
                             <th class="align-middle" rowspan="2">Status</th>
                             <th class="align-middle" rowspan="2">Method</th>
-                            <th class="align-middle" rowspan="2">Created</th>
                             <th class="align-middle" rowspan="2">Due Date</th>
                             <th class="align-middle text-center" rowspan="2">Verified</th>
                             <th class="align-middle" rowspan="2">Verified At</th>
-                            <th class="align-middle" rowspan="2">Updated At</th>
-                            <th class="align-middle" rowspan="2">Owner Remark</th>
-                            <th class="align-middle" rowspan="2">Renter Remark</th>
                             <th class="align-middle text-end" rowspan="2">Actions</th>
                         </tr>
                         <tr>
@@ -128,8 +123,7 @@
                                 data-isverified="@invoice.IsVerified.ToString().ToLower()"
                                 data-paymentmethod="@invoice.PaymentMethod">
                                     <td class="text-center">@(serialNumber++)</td>
-                                    <td class="fw-semibold">@invoice.Id</td>
-                                    <td class="text-nowrap">@invoice.RenterName</td>
+                                    <td class="text-nowrap">@invoice.RenterName.ToTitleCase()</td>
                                     <td class="text-nowrap">@invoice.FromMonth.ToString("MMM yyyy")</td>
                                     <td class="text-nowrap">@invoice.ToMonth.ToString("MMM yyyy")</td>
                                     <td class="text-end">@invoice.AmountDue.ToString("N2")</td>
@@ -146,7 +140,6 @@
                                         <span class="badge @badgeClass">@invoice.Status</span>
                                     </td>
                                     <td>@invoice.PaymentMethod</td>
-                                    <td class="text-nowrap">@invoice.CreatedAt.ToString("d MMM yyyy")</td>
                                     <td class="text-nowrap @(DateTime.UtcNow > invoice.DueDate ? "text-danger" : "")">
                                         @invoice.DueDate.ToString("d MMM yyyy")
                                     </td>
@@ -162,15 +155,6 @@
                                     </td>
                                     <td class="text-nowrap">
                                         @(invoice.VerifiedAt?.ToString("d MMM yyyy") ?? "-")
-                                    </td>
-                                    <td class="text-nowrap">
-                                        @(invoice.UpdatedAt?.ToString("d MMM yyyy") ?? "-")
-                                    </td>
-                                    <td class="text-truncate" style="max-width: 150px;" title="@invoice.OwnerRemark">
-                                        @invoice.OwnerRemark
-                                    </td>
-                                    <td class="text-truncate" style="max-width: 150px;" title="@invoice.RenterRemark">
-                                        @invoice.RenterRemark
                                     </td>
                                     <td class="text-end text-nowrap">
                                         @if (invoice.Status == "PENDING")

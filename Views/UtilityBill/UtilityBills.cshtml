@@ -76,14 +76,17 @@
                                     <tr>
                                         <th>Property</th>
                                         <th>Month</th>
+                                        @if (!string.IsNullOrEmpty(type.Unit))
+                                        {
+                                                <th>Consumption (@type.Unit)</th>
+                                                <th>Amount</th>
+                                        }
                                         @if (isOwner)
                                         {
                                             @if (!string.IsNullOrEmpty(type.Unit))
                                             {
-                                                <th>Consumption (@type.Unit)</th>
                                                 <th>Total (@type.Unit)</th>
                                             }
-                                            <th>Amount</th>
                                             <th>Paid?</th>
                                         }
                                         <th>@type.Name Bill</th>
@@ -99,14 +102,17 @@
                                             <tr>
                                                 <td>@bill.PropertyName</td>
                                                 <td>@bill.Month.ToString("MMMM yyyy")</td>
+                                            @if (!string.IsNullOrEmpty(type.Unit))
+                                            {
+                                                    <td>@bill.ConsumedUnit</td>
+                                                    <td>@bill.Amount</td>
+                                            }
                                             @if (isOwner)
                                             {
                                                 @if (!string.IsNullOrEmpty(type.Unit))
                                                 {
-                                                    <td>@bill.ConsumedUnit</td>
                                                     <td>@bill.TotalUnit</td>
                                                 }
-                                                <td>@bill.Amount</td>
                                                 <td>
                                                     @if (bill.IsPaid)
                                                     {
@@ -170,7 +176,8 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center">
-                <img id="modalReceiptImage" src="" class="img-fluid" alt="Bill Image">
+                <img id="modalReceiptImage" src="" class="rounded shadow img-fluid" style="max-height: 70vh;" alt="Bill Image">
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

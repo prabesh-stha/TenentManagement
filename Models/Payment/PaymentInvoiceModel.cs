@@ -43,7 +43,7 @@ namespace TenentManagement.Models.Payment
         public PaymentQRImageModel? PaymentQRImage { get; set; }
         public PaymentProofModel? PaymentProof { get; set; }
 
-        public IEnumerable<UtilityBillInvoiceModel> UtilityBills { get; set; } = new List<UtilityBillInvoiceModel>();
+        public IEnumerable<UtilityBillInvoiceModel> UtilityBillInvoices { get; set; } = new List<UtilityBillInvoiceModel>();
 
     }
 }

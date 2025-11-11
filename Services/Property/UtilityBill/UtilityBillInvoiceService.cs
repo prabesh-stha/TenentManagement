@@ -19,8 +19,10 @@ namespace TenentManagement.Services.Property.UtilityBill
             parameters.Add("@FLAG", 'I');
             parameters.Add("@INVOICEID", utilityBillInvoiceModel.InvoiceId);
             parameters.Add("@UTILITYTYPEID", utilityBillInvoiceModel.UtilityTypeId);
+            parameters.Add("@TOTALUNIT", utilityBillInvoiceModel.TotalUnit);
             parameters.Add("@CONSUMEDUNIT", utilityBillInvoiceModel.ConsumedUnit);
             parameters.Add("@AMOUNT", utilityBillInvoiceModel.Amount);
+            parameters.Add("@UTILITYID", utilityBillInvoiceModel.UtilityId);
             connection.Open();
             int row = connection.Execute("SP_UTILITYBILLINVOICE", parameters, commandType: System.Data.CommandType.StoredProcedure);
             connection.Close();
@@ -47,7 +49,9 @@ namespace TenentManagement.Services.Property.UtilityBill
             parameters.Add("@FLAG", "U");
             parameters.Add("@ID", utilityBillInvoiceModel.Id);
             parameters.Add("@CONSUMEDUNIT", utilityBillInvoiceModel.ConsumedUnit);
+            parameters.Add("@TOTALUNIT", utilityBillInvoiceModel.TotalUnit);
             parameters.Add("@AMOUNT", utilityBillInvoiceModel.Amount);
+            parameters.Add("@UTILITYID", utilityBillInvoiceModel.UtilityId);
             connection.Open();
             int row = connection.Execute("SP_UTILITYBILLINVOICE", parameters, commandType: System.Data.CommandType.StoredProcedure);
             connection.Close();
@@ -62,6 +66,19 @@ namespace TenentManagement.Services.Property.UtilityBill
             parameters.Add("@INVOICEID", invoiceId);
             connection.Open();
             var result = connection.Query<UtilityBillInvoiceModel>("SP_UTILITYBILLINVOICE", parameters, commandType:System.Data.CommandType.StoredProcedure).ToList();
+            connection.Close();
+            return result;
+        }
+
+        public int? GetTotalUnit(int unitId, int typeId, int invoiceId)
+        {
+            using var connection = _dbConnection.GetConnection();
+            var parameters = new DynamicParameters();
+            parameters.Add("@FLAG", 'C');
+            parameters.Add("@UNITID", unitId);
+            parameters.Add("@UTILITYTYPEID", typeId);
+            parameters.Add("@INVOICEID", invoiceId);
+            var result = connection.QueryFirstOrDefault<int?>("SP_UTILITYBILLINVOICE", parameters, commandType: System.Data.CommandType.StoredProcedure);
             connection.Close();
             return result;
         }

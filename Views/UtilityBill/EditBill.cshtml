@@ -104,11 +104,11 @@
                         <label class="form-label small text-muted" asp-for="IsPaid">Bill Paid?</label>
                         <div class="mt-2">
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" asp-for="IsPaid" value="true" id="paid" />
+                                <input class="form-check-input" type="radio" asp-for="IsPaid" value="true" id="paid" checked="@(Model.IsPaid == true)" />
                                 <label class="form-check-label" for="paid">Yes</label>
                             </div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" asp-for="IsPaid" value="false" id="unpaid" checked />
+                                <input class="form-check-input" type="radio" asp-for="IsPaid" value="false" id="unpaid" checked="@(Model.IsPaid == false)" />
                                 <label class="form-check-label" for="unpaid">No</label>
                             </div>
                         </div>
@@ -117,11 +117,11 @@
                         <label class="form-label small text-muted" asp-for="AllowTenentAccess">Give access to Tenent?</label>
                         <div class="mt-2">
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" asp-for="AllowTenentAccess" value="true" id="allowed" />
+                                <input class="form-check-input" type="radio" asp-for="AllowTenentAccess" value="true" id="allowed" checked="@(Model.AllowTenentAccess == true)" />
                                 <label class="form-check-label" for="allowed">Yes</label>
                             </div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" asp-for="AllowTenentAccess" value="false" id="disallow" checked />
+                                <input class="form-check-input" type="radio" asp-for="AllowTenentAccess" value="false" id="disallow" checked="@(Model.AllowTenentAccess == false)"  />
                                 <label class="form-check-label" for="disallow">No</label>
                             </div>
                         </div>
@@ -153,6 +153,7 @@
                                 <i class="bi bi-x-lg"></i>
                             </button>
                         </div>
+                        <a class="btn btn-sm text-primary" id="imagePreviewBtn">Preview Image</a>
 
                         <input type="file" name="billImage" id="billImage" class="d-none" accept="image/*" />
                     </div>
@@ -172,6 +173,20 @@
     </div>
 </div>
 
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bill Image Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="previewImage" class="rounded shadow img-fluid" style="max-height: 70vh;" alt="Bill Image">
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -183,6 +198,16 @@
             const currentBillContainer = document.getElementById('currentBillContainer');
             const removeBillBtn = document.getElementById('removeBillBtn');
             const billFileError = document.getElementById('billFileError');
+            document.getElementById("imagePreviewBtn").addEventListener('click', function(){
+                if(billPreviewContainer.classList.contains("d-none"))
+                    document.getElementById('previewImage').src = document.getElementById("currentBill").src;
+                else
+                    document.getElementById('previewImage').src = billPreview.src;
+
+            const previewModal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+            previewModal.show();
+
+            });
              function initializeUtilityTypeDisplay() {
                 const utilityTypeSelect = document.getElementById('UtilityTypeId');
                 if (utilityTypeSelect) {

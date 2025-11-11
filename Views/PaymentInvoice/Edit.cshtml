@@ -3,8 +3,6 @@
 @{
     ViewData["Title"] = "Edit Invoice";
     bool all = ViewData["All"] as bool? ?? false;
-}
-@{
     var utilityTypes = new[]
     {
         new { Id = 1, Name = "Electricity", Unit = "kWh" },
@@ -28,6 +26,7 @@
 
         <div class="card-body p-4">
             <form method="post" asp-action="Edit" asp-controller="PaymentInvoice" class="needs-validation" novalidate>
+                <input type="hidden" asp-for="Id" />
                 <input type="hidden" asp-for="UnitId" />
                 <input type="hidden" asp-for="RenterId" />
                 <input type="hidden" asp-for="OwnerId" />
@@ -98,7 +97,7 @@
                         @for (int i = 0; i < utilityTypes.Length; i++)
                         {
                             var utility = utilityTypes[i];
-                            var utilityBill = Model.UtilityBills?.FirstOrDefault(ub => ub.UtilityTypeId == utility.Id);
+                            var utilityBill = Model.UtilityBillInvoices?.FirstOrDefault(ub => ub.UtilityTypeId == utility.Id);
                             var isInternet = utility.Id == 3;
 
                             <div class="mb-3 utility-bill" data-utility-type="@utility.Id">
@@ -117,14 +116,22 @@
                                 <div class="row g-2">
                                     @if (!isInternet)
                                     {
+                                        <div class="col-12">
+                                            <label class="form-label small text-muted">Total Units</label>
+                                            <input type="number" step="1" min="0"
+                                                   class="form-control utility-total"
+                                                   data-utility-type="@utility.Id"
+                                                   name="UtilityBillInvoices[@i].TotalUnit"
+                                                   value="@utilityBill?.TotalUnit"
+                                                   />
+                                        </div>
                                         <div class="col-6">
                                             <label class="form-label small text-muted">Consumed Units</label>
-                                            <input type="number" step="0.01" min="0"
+                                            <input type="number" step="1" min="0"
                                                    class="form-control utility-consumed"
                                                    data-utility-type="@utility.Id"
-                                                   name="UtilityBills[@i].ConsumedUnit"
-                                                   value="@utilityBill?.ConsumedUnit"
-                                                   @(utilityBill == null ? "disabled" : "") />
+                                                   name="UtilityBillInvoices[@i].ConsumedUnit"
+                                                   value="@utilityBill?.ConsumedUnit"/>
                                         </div>
                                     }
                                     <div class="@(isInternet ? "col-12" : "col-6")">
@@ -134,15 +141,22 @@
                                             <input type="number" step="0.01" min="0"
                                                    class="form-control utility-amount"
                                                    data-utility-type="@utility.Id"
-                                                   name="UtilityBills[@i].Amount"
-                                                   value="@utilityBill?.Amount"
-                                                   @(utilityBill == null ? "disabled" : "") />
+                                                   name="UtilityBillInvoices[@i].Amount"
+                                                   value="@utilityBill?.Amount"/>
                                         </div>
                                     </div>
                                 </div>
                                     <input type="hidden"
-                                           name="UtilityBills[@i].UtilityTypeId"
+                                       name="UtilityBillInvoices[@i].UtilityTypeId"
                                            value="@utility.Id" />
+                                    <input type="hidden"
+                                       name="UtilityBillInvoices[@i].UtilityId"
+                                       value="@utilityBill?.UtilityId"
+                                       id="utility-id"
+                                       />
+
+                                <button type="button" class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#utilityBillLinkModal" data-utility-type="@utility.Id">Select Bill Image</button>
+
                             </div>
                         }
 
@@ -151,7 +165,7 @@
                             <div class="input-group">
                                 <span class="input-group-text">Rs</span>
                                 <input type="text" class="form-control" id="TotalUtilitiesDisplay"
-                                       value="@Model.UtilityBills?.Sum(ub => ub.Amount).ToString("0.00")" readonly />
+                                       value="@Model.UtilityBillInvoices?.Sum(ub => ub.Amount).ToString("0.00")" readonly />
                             </div>
                         </div>
                     </div>
@@ -163,7 +177,7 @@
                         <div class="input-group" style="max-width: 250px;">
                             <span class="input-group-text bg-white">Rs</span>
                                 <input type="text" class="form-control fw-bold fs-4 text-end text-primary" id="GrandTotalDisplay"
-                                   value="@((Model.AmountDue + (Model.UtilityBills?.Sum(ub => ub.Amount) ?? 0)).ToString("0.00"))" readonly />
+                                   value="@((Model.AmountDue + (Model.UtilityBillInvoices?.Sum(ub => ub.Amount) ?? 0)).ToString("0.00"))" readonly />
                         </div>
                     </div>
                 </div>
@@ -337,7 +351,7 @@
 <div class="modal fade" id="proofModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header">
                 <h5 class="modal-title">
                     <i class="bi bi-receipt me-2"></i> Payment Proof
                 </h5>
@@ -363,8 +377,125 @@
     </div>
 </div>
 
+<div class="modal fade" id="utilityBillLinkModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Utility Bills</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+
+
+                <div id="utilityBillList" class="row g-3">
+                    <!-- Data loads here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" >Bill Image Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="previewImage" class="rounded shadow img-fluid" style="max-height: 70vh;" alt="Bill Image">
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
 	<script>
+        const previousValues = {};
+        function preseveOriginal(){
+             document.querySelectorAll('.utility-bill').forEach(billSection => {
+                const inputs = billSection.querySelectorAll('input:not([type="hidden"])');
+                inputs.forEach(input => {
+                        previousValues[input.name] = input.value;
+                });
+             });
+        }
+        function calculateUnit() {
+            function debounce(func, delay = 400) {
+                let timeoutId;
+                return (...args) => {
+                    clearTimeout(timeoutId);
+                    timeoutId = setTimeout(() => func(...args), delay);
+                };
+            }
+
+            document.querySelectorAll('.utility-bill').forEach(billSection => {
+                const toggle = billSection.querySelector('.utility-toggle');
+                if (!toggle.checked) {
+                    const consumedInput = billSection.querySelector('.utility-consumed');
+                    const totalInput = billSection.querySelector('.utility-total');
+                    const amountInput = billSection.querySelector('.utility-amount');
+                    const selectBtn = billSection.querySelector('button[data-bs-toggle="modal"]');
+
+                    if (consumedInput) consumedInput.setAttribute("readonly",true);
+                    if (totalInput) totalInput.setAttribute("readonly",true);
+                    if (amountInput) amountInput.setAttribute("readonly",true);
+                    selectBtn.disabled = true;
+                    return;
+                }
+                const unitIdElement = document.getElementById("UnitId");
+                const invoiceIdElement = document.getElementById("Id");
+                if (!unitIdElement) return;
+
+                const unitId = unitIdElement.value;
+                const invoiceId = invoiceIdElement.value;
+                const typeId = billSection.dataset.utilityType;
+                const totalUnitInput = billSection.querySelector('.utility-total');
+                const consumedUnitInput = billSection.querySelector('.utility-consumed');
+
+
+                if (!totalUnitInput || !consumedUnitInput) return;
+                // Debounced handler
+                const handleInput = debounce(async () => {
+                    const totalUnit = parseFloat(totalUnitInput.value) || 0;
+                    if(totalUnit === 0){
+                        consumedUnitInput.value = '';
+                        consumedUnitInput.removeAttribute("readOnly");
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`/PaymentInvoice/GetTotalUnit?unitId=${unitId}&typeId=${typeId}&invoiceId=${invoiceId}`);
+                        if (!response.ok) throw new Error("Network response was not ok");
+
+                        const data = await response.json();
+                        const previousTotal = parseFloat(data) || 0;
+
+                        if(previousTotal === 0){
+                            consumedUnitInput.removeAttribute("readonly");
+                            consumedUnitInput.value = previousValues[consumedUnitInput.name];
+                            return;
+                        }
+                        if(totalUnit <= previousTotal){
+                        consumedUnitInput.value = previousValues[consumedUnitInput.name];
+                        consumedUnitInput.removeAttribute("readonly");
+                        }
+
+                        else if (previousTotal !== 0) {
+                            consumedUnitInput.setAttribute("readonly", true);
+                            consumedUnitInput.value = totalUnit - previousTotal;
+                        }
+                    } catch (error) {
+                        console.error("Error fetching total unit:", error);
+                    }
+                }, 400); // Adjust delay as needed (ms)
+
+                totalUnitInput.addEventListener("input", handleInput);
+                handleInput();
+            });
+        }
+
 		// Calculate rent total
 		function calculateRentTotal() {
 			const from = new Date(document.getElementById("FromMonth").value);
@@ -377,38 +508,257 @@
 			}
 			calculateGrandTotal();
 		}
+        async function isRecent() {
+            const paymentDate = document.getElementById("FromMonth").value;
+            const unitId = document.getElementById("UnitId").value;
 
-		function setupUtilityToggles() {
-			document.querySelectorAll('.utility-toggle').forEach(toggle => {
-				const billSection = toggle.closest('.utility-bill');
+            try {
+                const response = await fetch(`/PaymentInvoice/IsLatestMonth?unitId=${unitId}&paymentDate=${paymentDate}`);
+                if (!response.ok) throw new Error("Network response was not ok");
+                const data = await response.json();
+                return data === true; // returns true or false
+            } catch (error) {
+                console.error("Error fetching recent month:", error);
+                return false;
+            }
+        }
+
+        async function setupUtilityToggles() {
+            const isTrue = await isRecent();
+
+            document.querySelectorAll('.utility-toggle').forEach(toggle => {
+                const billSection = toggle.closest('.utility-bill');
                 const inputs = billSection.querySelectorAll('input:not(.utility-toggle):not([type="hidden"])');
+                const selectBillButton = billSection.querySelector('button[data-bs-toggle="modal"]');
 
-				// Initialize based on current checked state
-				const isChecked = toggle.checked;
-				inputs.forEach(input => {
-					input.disabled = !isChecked;
-				});
+                if (!isTrue) {
+                    toggle.disabled = true;
+                    inputs.forEach(input => (input.setAttribute("readonly", true)));
+                    return; // stop further setup for this toggle
+                }
 
-				toggle.addEventListener('change', function() {
-					inputs.forEach(input => {
-						input.disabled = !this.checked;
-						if (!this.checked && (input.classList.contains('utility-amount') ||
-											 input.classList.contains('utility-consumed'))) {
-							input.value = '';
-						}
-					});
-					calculateUtilitiesTotal();
-				});
+                inputs.forEach(input => {
+                    if(!toggle.checked){
+                        input.setAttribute("readonly",true);
+                    }else{
+                        input.removeAttribute("readonly");
+                    }
+                });
 
-				// Also add event listeners to amount inputs
-				billSection.querySelectorAll('.utility-amount').forEach(input => {
-					input.addEventListener('input', calculateUtilitiesTotal);
-				});
-			});
+                toggle.addEventListener('change', function() {
+                    const enabled = this.checked;
+                    inputs.forEach(input => {
+                        if(!enabled){
+                            input.setAttribute("readonly",true);
+                        }else{
+                            input.removeAttribute("readonly");
+                        }
 
-			// Calculate initial total
-			calculateUtilitiesTotal();
-		}
+                        if (!enabled && (input.classList.contains('utility-amount') ||
+                                              input.classList.contains('utility-consumed') ||
+                                              input.classList.contains('utility-total')
+                        )) {
+                            input.value = '';
+                        } else if (enabled ) {
+                            input.value = previousValues[input.name] || '';
+                            calculateUnit();
+                        }
+                    });
+
+                   if (selectBillButton) {
+                        selectBillButton.disabled = !enabled;
+                    }
+
+                    calculateUtilitiesTotal();
+                });
+
+                billSection.querySelectorAll('.utility-amount').forEach(input => {
+                    input.addEventListener('input', calculateUtilitiesTotal);
+                });
+            });
+
+            calculateUtilitiesTotal();
+        }
+
+        function checkUtilityImage(){
+            document.querySelectorAll('.utility-bill').forEach(billSection => {
+            let hiddenInput = billSection.querySelector('input[name*="UtilityId"]');
+            if (!hiddenInput || !hiddenInput.value) return;
+            const existingPreviewBtn = billSection.querySelector('.selected-preview-btn');
+            if (existingPreviewBtn) existingPreviewBtn.remove();
+
+            const previewBtn = document.createElement('button');
+            previewBtn.type = 'button';
+            previewBtn.className = 'btn btn-sm selected-preview-btn mt-2 text-success fw-bold';
+            previewBtn.innerHTML = `Preview Image`;
+                    previewBtn.onclick = async function() {
+            // Show loading state
+            previewBtn.innerHTML = `<i class="bi bi-hourglass-split"></i> Loading...`;
+            previewBtn.disabled = true;
+
+            try {
+
+                const response = await fetch(`/UtilityBill/GetUtilityBillImage?utilityId=${hiddenInput.value}`);
+                if (!response.ok) throw new Error('Failed to fetch image');
+
+                const imageData = await response.json();
+                previewBill(imageData.base64Image);
+
+            } catch (error) {
+                console.error('Error fetching bill image:', error);
+                alert('Failed to load bill image');
+            } finally {
+                previewBtn.innerHTML = `Preview Image`;
+                previewBtn.disabled = false;
+            }
+        };
+
+            const selectBtn = billSection.querySelector('button[data-bs-toggle="modal"]');
+            if (!selectBtn) return;
+
+            let removeBtn = billSection.querySelector('.remove-bill-btn');
+            if (!removeBtn) {
+                removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'btn btn-danger ms-2 mt-2 remove-bill-btn';
+                removeBtn.innerHTML = '<i class="bi bi-x-circle"></i> Remove Image';
+                selectBtn.insertAdjacentElement('afterend', removeBtn);
+            }
+
+            removeBtn.style.display = 'inline-block';
+            selectBtn.classList.remove('btn-primary');
+            selectBtn.classList.add('btn-success');
+            selectBtn.innerHTML = '<i class="bi bi-check-circle"></i> Image Selected';
+
+            removeBtn.onclick = function () {
+            resetBillImage();
+            };
+
+           function resetBillImage() {
+            hiddenInput.value = '';
+            let removeBtn = billSection.querySelector('.remove-bill-btn');
+            if(removeBtn.style.display == 'none'){
+                return;
+            }
+            removeBtn.style.display = 'none';
+
+            selectBtn.classList.remove('btn-success');
+            selectBtn.classList.add('btn-primary');
+            selectBtn.innerHTML = 'Select Bill Image';
+
+            if (previewBtn && previewBtn.parentNode) {
+                previewBtn.remove();
+            }
+
+            const resetNotice = document.createElement('div');
+            resetNotice.className = 'text-muted small';
+            resetNotice.textContent = '🗑️ Bill image removed';
+            billSection.appendChild(resetNotice);
+
+            setTimeout(() => resetNotice.remove(), 2000);
+        }
+
+            billSection.appendChild(previewBtn);
+            });
+        }
+
+        function previewBill(imageSrc) {
+            document.getElementById('previewImage').src = imageSrc;
+
+            const previewModal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+            previewModal.show();
+        }
+        function selectUtilityBill(utilityTypeId, billId, month) {
+            const billSection = document.querySelector(`.utility-bill[data-utility-type="${utilityTypeId}"]`);
+            if (!billSection) return;
+            let hiddenInput = billSection.querySelector(`input[name*="UtilityId"]`);
+            if (!hiddenInput) {
+                const index = Array.from(document.querySelectorAll('.utility-bill')).indexOf(billSection);
+                hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = `UtilityBillInvoices[${index}].UtilityId`;
+                billSection.appendChild(hiddenInput);
+            }
+            hiddenInput.value = billId;
+
+            const existingBtn = billSection.querySelector('.selected-preview-btn');
+            if (existingBtn) existingBtn.remove();
+            const previewBtn = document.createElement('button');
+            previewBtn.className = 'btn btn-sm selected-preview-btn mt-2 text-success fw-bold';
+            previewBtn.innerHTML = `Preview Image`;
+            previewBtn.onclick = async function() {
+
+            previewBtn.innerHTML = `<i class="bi bi-hourglass-split"></i> Loading...`;
+            previewBtn.disabled = true;
+
+            try {
+                const response = await fetch(`/UtilityBill/GetUtilityBillImage?utilityId=${hiddenInput.value}`);
+                if (!response.ok) throw new Error('Failed to fetch image');
+
+                const imageData = await response.json();
+
+                previewBill(imageData.base64Image);
+
+            } catch (error) {
+                console.error('Error fetching bill image:', error);
+                alert('Failed to load bill image');
+            } finally {
+                previewBtn.innerHTML = `Preview Image`;
+                previewBtn.disabled = false;
+            }
+        };
+
+            const selectBtn = billSection.querySelector('button[data-bs-toggle="modal"]');
+            if (!selectBtn) return;
+
+            let removeBtn = billSection.querySelector('.remove-bill-btn');
+            if (!removeBtn) {
+                removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'btn btn-danger ms-2 mt-2 remove-bill-btn';
+                removeBtn.innerHTML = '<i class="bi bi-x-circle"></i> Remove Image';
+                selectBtn.insertAdjacentElement('afterend', removeBtn);
+            }
+
+            removeBtn.style.display = 'inline-block';
+            selectBtn.classList.remove('btn-primary');
+            selectBtn.classList.add('btn-success');
+            selectBtn.innerHTML = '<i class="bi bi-check-circle"></i> Image Selected';
+
+            removeBtn.onclick = function () {
+            resetBillImage();
+            };
+
+           function resetBillImage() {
+
+            hiddenInput.value = '';
+            let removeBtn = billSection.querySelector('.remove-bill-btn');
+            if(removeBtn.style.display == 'none'){
+                return;
+            }
+            removeBtn.style.display = 'none';
+
+            selectBtn.classList.remove('btn-success');
+            selectBtn.classList.add('btn-primary');
+            selectBtn.innerHTML = 'Select Bill Image';
+
+            if (previewBtn && previewBtn.parentNode) {
+                previewBtn.remove();
+            }
+
+            const resetNotice = document.createElement('div');
+            resetNotice.className = 'text-muted small';
+            resetNotice.textContent = '🗑️ Bill image removed';
+            billSection.appendChild(resetNotice);
+
+            setTimeout(() => resetNotice.remove(), 2000);
+        }
+
+            billSection.appendChild(previewBtn);
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById('utilityBillLinkModal'));
+            modal.hide();
+        }
 
 		// Calculate utilities total
 		function calculateUtilitiesTotal() {
@@ -500,6 +850,62 @@
 		}
 
 		document.addEventListener("DOMContentLoaded", function() {
+            preseveOriginal();
+            checkUtilityImage();
+            calculateUnit();
+               const mainModal = document.getElementById('utilityBillLinkModal');
+        const listContainer = document.getElementById('utilityBillList');
+
+        const unitId = document.getElementById('UnitId').value;
+
+
+        mainModal.addEventListener('shown.bs.modal', function (event) {
+            // Clear list
+            var button = $(event.relatedTarget);
+            var utilityTypeId = button.data('utility-type');
+            listContainer.innerHTML = '<div class="text-center">Loading...</div>';
+
+            fetch(`/UtilityBill/GetUtilityBillsByType?type=${utilityTypeId}&unitId=${unitId}`)
+                .then(response => response.json())
+                .then(data => {
+                    listContainer.innerHTML = '';
+
+                    if (data.length === 0) {
+                        listContainer.innerHTML = '<div class="text-center text-muted">No bills found.</div>';
+                        return;
+                    }
+
+                    data.forEach((bill) => {
+                        const billId = bill.id;
+                        const imageSrc = bill.utilityBillImage?.base64Image ?? '';
+                        const month = new Date(bill.month).toLocaleDateString();
+
+                        const item = `
+                            <div class="col-md-4">
+                                <div class="card shadow-sm h-100">
+                                    <img src="${imageSrc}" class="card-img-top" style="height:180px; object-fit:cover;" alt="${month}">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title mb-2">${month}</h6>
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <button class="btn btn-outline-primary btn-sm" onclick="previewBill('${imageSrc}')">
+                                                Preview
+                                            </button>
+                                            <button class="btn btn-success btn-sm" onclick="selectUtilityBill(${utilityTypeId}, ${billId}, '${month}')">
+                                                Select
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        listContainer.innerHTML += item;
+                    });
+                })
+                .catch(err => {
+                    listContainer.innerHTML = `<div class="text-danger text-center">Error loading bills</div>`;
+                    console.error(err);
+                });
+        });
 			setupUtilityToggles();
 
 			if (document.getElementById("DueDate").value) {
